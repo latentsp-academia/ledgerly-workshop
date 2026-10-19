@@ -16,7 +16,7 @@ resolve_drill() {
     printf '%s\n' "$hits" | sed "s|$ROOT/||; s|/checks.json||; s|^|  |" >&2
     return 1
   fi
-  echo "no drill matching '$arg' (try: led-105, led-112, led-103, led-120, trigger-implicit, trigger-quiet, led-132, led-141, led-150, led-151, led-118)" >&2
+  echo "no drill matching '$arg' (try: led-100, led-105, led-112, led-103, led-120, trigger-implicit, trigger-quiet, led-132, led-141, led-150, led-151, led-118)" >&2
   return 1
 }
 

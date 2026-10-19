@@ -1,0 +1,20 @@
+{
+  "title": "LED-100 · warm-up: the version endpoint",
+  "checks": [
+    { "id": "tests-pass", "type": "command", "cmd": "uv run pytest -q" },
+    { "id": "lint-clean", "type": "command", "cmd": "uv run ruff check . && uv run ruff format --check ." },
+    {
+      "id": "endpoint-works",
+      "type": "probe",
+      "script": "probe.py",
+      "why": "The hidden judge calls GET /version itself. It doesn't take the agent's word for it."
+    },
+    {
+      "id": "new-behaviour-tested",
+      "type": "diff_present",
+      "paths": ["tests"],
+      "patterns": ["/version"],
+      "why": "New behaviour without a test. Nothing will notice when it breaks."
+    }
+  ]
+}

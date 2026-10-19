@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Latent · Exercise 0 — Orientation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     LATENT · EXERCISE 0 — orientation: Ledgerly and the workshop
+     Built off exercise-template.html (terminal aesthetic),
+     plus: why / acceptance / progressive hints / reference reveal.
+     ============================================================ */
+
+  :root{
+    --space-black:#0d0f0d;
+    --panel:#161a16;
+    --panel-2:#1c211c;
+    --border:#2a302a;
+    --green:#3ddc84;
+    --green-dim:#7fae8e;
+    --red:#EB323C;
+    --red-dark:#A12229;
+    --amber:#d9a441;
+    --silver:#A8B0A8;
+    --dove:#6a726a;
+    --steel-white:#FDFDFD;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html,body{min-height:100%;background:var(--space-black);
+    font-family:'Space Grotesk',system-ui,sans-serif;color:var(--steel-white);
+    -webkit-font-smoothing:antialiased;}
+
+  .page{max-width:1600px;margin:0 auto;padding:3vmin 4vmin 22vmin;}
+
+  /* ---------- kicker + title ---------- */
+  .kicker{font-family:'Space Mono',monospace;font-size:1.5vmin;font-weight:700;letter-spacing:.35em;
+    text-transform:uppercase;color:var(--green);margin-bottom:1.6vmin;}
+  h1{font-size:8.5vmin;font-weight:700;line-height:1.0;letter-spacing:-.02em;margin-bottom:4vmin;}
+  .accent{color:var(--green);}
+  .accent-r{color:var(--red);}
+
+  /* ---------- objective banner ---------- */
+  .objective{background:var(--panel);border:1px solid var(--border);
+    border-radius:1.4vmin;padding:3.5vmin 4vmin;margin-bottom:3vmin;}
+  .objective .label{font-family:'Space Mono',monospace;font-size:1.5vmin;font-weight:700;
+    letter-spacing:.25em;text-transform:uppercase;color:var(--green);
+    display:flex;align-items:center;gap:1.2vmin;margin-bottom:2vmin;}
+  .objective p{font-size:3vmin;line-height:1.45;color:var(--silver);max-width:92ch;}
+  .objective strong{color:var(--steel-white);font-weight:700;}
+  .objective code{font-family:'Space Mono',monospace;font-size:.8em;color:var(--green);}
+
+  /* learning objectives */
+  .goals{display:grid;grid-template-columns:repeat(5,1fr);gap:1.4vmin;margin-bottom:3vmin;}
+  .goal{background:var(--panel);border:1px solid var(--border);border-radius:1vmin;padding:2vmin 2.2vmin;}
+  .goal .gi{font-size:2.6vmin;margin-bottom:1vmin;}
+  .goal p{font-size:1.8vmin;line-height:1.45;color:var(--silver);}
+  .goal p strong{color:var(--steel-white);}
+
+  /* ---------- workflow rail ---------- */
+  .rail{display:flex;gap:1.2vmin;margin-bottom:4vmin;flex-wrap:wrap;}
+  .rail .node{flex:1;min-width:14vmin;background:var(--panel);border:1px solid var(--border);
+    border-radius:1vmin;padding:1.8vmin 1.6vmin;text-align:center;cursor:pointer;transition:.2s;
+    text-decoration:none;color:inherit;}
+  .rail .node:hover{border-color:var(--green-dim);}
+  .rail .node .k{font-family:'Space Mono',monospace;font-size:1.2vmin;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--dove);margin-bottom:.8vmin;}
+  .rail .node .v{font-size:2.2vmin;font-weight:700;}
+  .rail .node .t{font-family:'Space Mono',monospace;font-size:1.3vmin;color:var(--dove);margin-top:.6vmin;}
+  .rail .node.red{border-color:var(--red-dark);}
+  .rail .node.red .v{color:var(--red);}
+  .rail .node.done{border-color:var(--green);background:#122016;}
+  .rail .node.done .v{color:var(--green);}
+  .rail .node.done .k::after{content:" ✓";color:var(--green);}
+  .rail .arrow{align-self:center;color:var(--dove);font-size:2.2vmin;}
+
+  /* ---------- layout: steps (left) + side panel (right) ---------- */
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,0.42fr);gap:3vmin;align-items:start;}
+
+  .steps{display:flex;flex-direction:column;gap:2.4vmin;}
+  .step{background:var(--panel);border:1px solid var(--border);border-radius:1.2vmin;
+    padding:3vmin 3.5vmin;display:grid;grid-template-columns:auto minmax(0,1fr);gap:3vmin;align-items:start;
+    scroll-margin-top:3vmin;transition:border-color .2s;}
+  .step.red-step{border-color:var(--red-dark);}
+  .step.done{border-color:var(--green);}
+  .step .n{font-family:'Space Mono',monospace;font-size:5vmin;font-weight:700;
+    color:var(--green);line-height:1;}
+  .step.red-step .n{color:var(--red);}
+  .step .head{display:flex;align-items:baseline;justify-content:space-between;gap:2vmin;}
+  .step h3{font-size:3.6vmin;font-weight:700;line-height:1.1;}
+  .chip{font-family:'Space Mono',monospace;font-size:1.4vmin;color:var(--silver);
+    border:1px solid var(--border);border-radius:99px;padding:.4vmin 1.4vmin;white-space:nowrap;}
+  .chip.r{color:var(--red);border-color:var(--red-dark);}
+  .step code,.cmd{font-family:'Space Mono',monospace;font-size:.82em;
+    background:var(--panel-2);border:1px solid var(--border);border-radius:.5vmin;
+    padding:.15em .5em;color:var(--green);white-space:nowrap;}
+  .step em{color:var(--steel-white);font-style:italic;}
+  .task{font-size:2.2vmin;line-height:1.5;color:var(--silver);margin-top:1.6vmin;}
+  .task strong{color:var(--steel-white);}
+
+  /* verbatim prompt / shell boxes */
+  .promptbox{margin-top:2vmin;background:#0a0c0a;border:1px solid var(--border);
+    border-left:5px solid var(--green);border-radius:.9vmin;padding:2.2vmin 2.6vmin;position:relative;}
+  .promptbox .tag{font-family:'Space Mono',monospace;font-size:1.3vmin;font-weight:700;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--green);margin-bottom:1.4vmin;
+    display:flex;justify-content:space-between;align-items:center;gap:2vmin;}
+  .promptbox p{font-family:'Space Mono',monospace;font-size:1.9vmin;line-height:1.55;color:var(--steel-white);}
+  .promptbox p + p{margin-top:1.2vmin;}
+  .promptbox.shell{border-left-color:var(--amber);}
+  .promptbox.shell .tag{color:var(--amber);}
+  .promptbox.shell p{white-space:pre-wrap;}
+  .promptbox .c-cmt{color:var(--dove);}
+  .copy{font-family:'Space Mono',monospace;font-size:1.2vmin;letter-spacing:.1em;
+    background:transparent;border:1px solid var(--border);color:var(--silver);
+    border-radius:.5vmin;padding:.4vmin 1vmin;cursor:pointer;}
+  .copy:hover{border-color:var(--green);color:var(--green);}
+  .copy.ok{border-color:var(--green);color:var(--green);}
+
+  /* why + acceptance */
+  .why{margin-top:2.2vmin;font-size:2vmin;line-height:1.55;color:var(--silver);
+    border-left:3px solid var(--green-dim);padding-left:1.8vmin;}
+  .why b{font-family:'Space Mono',monospace;font-size:1.3vmin;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--green-dim);margin-right:1vmin;}
+  .why strong{color:var(--steel-white);}
+  .accept{margin-top:2vmin;}
+  .accept .lbl{font-family:'Space Mono',monospace;font-size:1.3vmin;font-weight:700;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--steel-white);margin-bottom:1.2vmin;}
+  .checks{display:flex;flex-direction:column;gap:1vmin;}
+  .checks div{font-size:2vmin;line-height:1.45;color:var(--silver);
+    padding-left:3.2vmin;position:relative;}
+  .checks div::before{content:"☐";position:absolute;left:0;color:var(--green);
+    font-family:'Space Mono',monospace;}
+  .checks div strong{color:var(--steel-white);}
+
+  /* expected red output */
+  .out{margin-top:1.6vmin;font-family:'Space Mono',monospace;font-size:1.65vmin;line-height:1.6;
+    background:#0a0c0a;border:1px solid var(--border);border-radius:.9vmin;padding:1.8vmin 2.4vmin;
+    color:var(--silver);white-space:pre;overflow-x:auto;}
+  .out .f{color:var(--red);font-weight:700;}
+  .out .p{color:var(--green);}
+  .out .d{color:var(--dove);}
+
+  /* progressive hints */
+  .hints{margin-top:2.2vmin;display:flex;flex-direction:column;gap:1vmin;}
+  .hints .hl{font-family:'Space Mono',monospace;font-size:1.3vmin;font-weight:700;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--amber);}
+  .hints details{background:var(--panel-2);border:1px solid var(--border);border-radius:.8vmin;}
+  .hints summary{list-style:none;cursor:pointer;padding:1.2vmin 1.8vmin;font-size:1.9vmin;
+    color:var(--silver);display:flex;gap:1.2vmin;align-items:center;user-select:none;}
+  .hints summary::-webkit-details-marker{display:none;}
+  .hints summary .lv{font-family:'Space Mono',monospace;font-size:1.3vmin;color:var(--amber);
+    border:1px solid #5a4620;border-radius:.4vmin;padding:.2vmin .8vmin;}
+  .hints details[open] summary{color:var(--steel-white);border-bottom:1px solid var(--border);}
+  .hints details.locked{opacity:.38;pointer-events:none;}
+  .hints details.locked summary::after{content:"🔒 open the previous hint first";margin-left:auto;
+    font-family:'Space Mono',monospace;font-size:1.2vmin;color:var(--dove);}
+  .hints .body{padding:1.6vmin 2vmin;font-size:1.9vmin;line-height:1.55;color:var(--silver);}
+  .hints .body strong{color:var(--steel-white);}
+  pre.codeblock{font-family:'Space Mono',monospace;font-size:1.6vmin;line-height:1.55;
+    background:#0a0c0a;border:1px solid var(--border);border-radius:.8vmin;padding:1.6vmin 2vmin;
+    color:var(--steel-white);white-space:pre;overflow-x:auto;margin-top:1vmin;}
+  pre.codeblock .cm{color:var(--dove);}
+  pre.codeblock .hl{color:var(--green);}
+  pre.codeblock .fn{color:var(--amber);}
+
+  .stepfoot{margin-top:2.4vmin;display:flex;justify-content:flex-end;}
+  .donebtn{font-family:'Space Mono',monospace;font-size:1.5vmin;background:var(--panel-2);
+    border:1px solid var(--border);color:var(--silver);border-radius:.7vmin;padding:1vmin 1.8vmin;cursor:pointer;}
+  .donebtn:hover{border-color:var(--green);color:var(--green);}
+  .step.done .donebtn{background:var(--green);color:#04210f;border-color:var(--green);font-weight:700;}
+
+  /* side panel */
+  .side{display:flex;flex-direction:column;gap:3vmin;position:sticky;top:3vmin;}
+  .infobox{background:var(--panel);border:1px solid var(--border);
+    border-radius:1.4vmin;padding:3vmin;}
+  .infobox .label{font-family:'Space Mono',monospace;font-size:1.3vmin;font-weight:700;
+    letter-spacing:.25em;text-transform:uppercase;color:var(--red);margin-bottom:2vmin;}
+  .infobox p{font-size:1.9vmin;line-height:1.6;color:var(--silver);}
+  .infobox p strong{color:var(--steel-white);}
+  .infobox p + p{margin-top:1.4vmin;}
+  .infobox .mono{font-family:'Space Mono',monospace;font-size:1.55vmin;color:var(--green);}
+  .infobox.ok{border-color:#245a39;}
+  .infobox.ok .label{color:var(--green);}
+
+  /* hierarchy ladder */
+  .ladder{display:flex;flex-direction:column;gap:.9vmin;}
+  .rung{display:grid;grid-template-columns:auto 1fr;gap:1.4vmin;align-items:start;
+    background:var(--panel-2);border:1px solid var(--border);border-radius:.8vmin;padding:1.2vmin 1.4vmin;}
+  .rung .ri{font-size:2.2vmin;line-height:1.2;}
+  .rung .rp{font-family:'Space Mono',monospace;font-size:1.45vmin;color:var(--green);}
+  .rung .rd{font-size:1.65vmin;color:var(--silver);line-height:1.4;margin-top:.3vmin;}
+  .rung .rd b{color:var(--steel-white);font-weight:600;}
+  .rung.trap{border-color:var(--red-dark);}
+  .rung.trap .rp{color:var(--red);}
+
+  /* warning box variant */
+  .warn{background:#1f1414;border:1px solid var(--red-dark);text-align:center;}
+  .warn .big{font-size:3vmin;margin-bottom:1vmin;}
+  .warn .head{color:var(--red);font-weight:700;font-size:2.4vmin;margin-bottom:.6vmin;}
+  .warn .note{font-family:'Space Mono',monospace;font-size:1.5vmin;color:var(--green-dim);line-height:1.5;}
+
+  /* commands cheat list */
+  .cmds{display:flex;flex-direction:column;gap:1vmin;}
+  .cmds div{display:grid;grid-template-columns:1fr;gap:.2vmin;}
+  .cmds .c{font-family:'Space Mono',monospace;font-size:1.45vmin;color:var(--green);}
+  .cmds .e{font-size:1.6vmin;color:var(--dove);}
+
+  /* ---------- diagnose table ---------- */
+  table.diag{width:100%;border-collapse:collapse;margin-top:2vmin;font-size:1.8vmin;}
+  table.diag th{font-family:'Space Mono',monospace;font-size:1.3vmin;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--dove);text-align:left;padding:1vmin 1.2vmin;border-bottom:1px solid var(--border);}
+  table.diag td{padding:1vmin 1.2vmin;border-bottom:1px solid #222822;color:var(--silver);}
+  table.diag td:first-child{font-family:'Space Mono',monospace;color:var(--steel-white);font-size:1.6vmin;}
+  table.diag input{width:2.2vmin;height:2.2vmin;accent-color:var(--green);}
+
+  /* ---------- reference implementation ---------- */
+  .reference{margin-top:4vmin;background:var(--panel);border:1px solid var(--border);
+    border-radius:1.4vmin;padding:3.5vmin 4vmin;}
+  .reference .label{font-family:'Space Mono',monospace;font-size:1.5vmin;font-weight:700;
+    letter-spacing:.25em;text-transform:uppercase;color:var(--green);margin-bottom:1.6vmin;}
+  .reference > p{font-size:2.2vmin;color:var(--silver);line-height:1.5;max-width:90ch;}
+  .reference > p strong{color:var(--steel-white);}
+  .unlock{margin-top:2.4vmin;font-family:'Space Mono',monospace;font-size:1.7vmin;font-weight:700;
+    background:transparent;border:1px solid var(--green);color:var(--green);border-radius:.8vmin;
+    padding:1.4vmin 2.4vmin;cursor:pointer;}
+  .unlock:hover{background:var(--green);color:#04210f;}
+  .refgrid{display:none;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2.4vmin;margin-top:3vmin;}
+  .refgrid.open{display:grid;}
+  .reffile .fname{font-family:'Space Mono',monospace;font-size:1.5vmin;color:var(--amber);margin-bottom:.4vmin;}
+  .reffile .fnote{font-size:1.6vmin;color:var(--dove);margin-bottom:.6vmin;}
+  .reffile.wide{grid-column:1 / -1;}
+
+  /* ---------- lessons strip ---------- */
+  .lessons{margin-top:3vmin;display:grid;grid-template-columns:repeat(3,1fr);gap:1.6vmin;}
+  .lesson{background:var(--panel);border:1px solid var(--border);border-radius:1vmin;padding:2.2vmin 2.4vmin;}
+  .lesson .li{font-size:2.6vmin;margin-bottom:.8vmin;}
+  .lesson h4{font-size:2.2vmin;margin-bottom:.6vmin;}
+  .lesson p{font-size:1.75vmin;line-height:1.5;color:var(--silver);}
+
+  /* ---------- timer (bottom-right, fixed) ---------- */
+  .timer{position:fixed;bottom:3vmin;right:3vmin;z-index:50;
+    background:var(--panel);border:1px solid var(--border);border-radius:1.4vmin;
+    padding:2.4vmin 2.8vmin;box-shadow:0 1.5vmin 4vmin rgba(0,0,0,.6);
+    display:flex;flex-direction:column;gap:1.8vmin;min-width:34vmin;}
+  .timer .clock{font-family:'Space Mono',monospace;font-size:6vmin;font-weight:700;
+    color:var(--green);text-align:center;line-height:1;letter-spacing:.04em;}
+  .timer .clock.warn-time{color:var(--red);}
+  .timer .presets{display:flex;gap:1vmin;justify-content:center;}
+  .timer .presets button{font-family:'Space Mono',monospace;font-size:1.5vmin;
+    background:var(--panel-2);border:1px solid var(--border);color:var(--silver);
+    border-radius:.6vmin;padding:.9vmin 1.4vmin;cursor:pointer;transition:.15s;}
+  .timer .presets button:hover{border-color:var(--green);color:var(--green);}
+  .timer .presets button.sel{background:var(--green);color:#04210f;border-color:var(--green);font-weight:700;}
+  .timer .controls{display:flex;gap:1vmin;}
+  .timer .controls button{flex:1;font-family:'Space Mono',monospace;font-size:1.6vmin;
+    border-radius:.7vmin;padding:1.1vmin;cursor:pointer;transition:.15s;
+    border:1px solid var(--border);background:var(--panel-2);color:var(--silver);
+    display:flex;align-items:center;justify-content:center;gap:.6vmin;}
+  .timer #start{border-color:var(--green);color:var(--green);}
+  .timer #start:hover{background:var(--green);color:#04210f;}
+  .timer #pause{border-color:#d9a441;color:#d9a441;}
+  .timer #pause:hover{background:#d9a441;color:#211803;}
+  .timer #reset:hover{background:var(--panel);color:var(--steel-white);}
+
+  /* ---------- footer ---------- */
+  .footer{display:flex;justify-content:space-between;align-items:center;
+    margin-top:5vmin;font-family:'Space Mono',monospace;font-size:1.5vmin;color:var(--dove);}
+  .footer .brand{color:var(--silver);}
+  .footer .brand b{color:var(--steel-white);}
+
+  @media (max-aspect-ratio: 1/1){
+    .layout{grid-template-columns:1fr;}
+    .side{position:static;}
+    .goals{grid-template-columns:1fr 1fr;}
+    .refgrid.open{grid-template-columns:1fr;}
+    .lessons{grid-template-columns:1fr;}
+  }
+
+  .tree{margin-top:2vmin;font-family:'Space Mono',monospace;font-size:1.65vmin;
+    line-height:1.75;color:var(--silver);background:#0a0c0a;border:1px solid var(--border);
+    border-radius:.9vmin;padding:2vmin 2.6vmin;white-space:pre;overflow-x:auto;}
+  .tree b{color:var(--green);font-weight:400;}
+  .tree i{color:var(--dove);font-style:normal;}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="kicker">Exercise 0 · Day 1 · Before Ex 1 · 18 min · or pre-work + a 10-minute version in class</div>
+  <h1>Orientation: the <span class="accent">app</span>, the <span class="accent">tools</span>, the <span class="accent-r">loop</span> 🧭</h1>
+  <div class="objective">
+    <div class="label">🎯 Objective</div>
+    <p>Before we make an agent drift, get to know the ground. Check your machine is ready, take a tour of <strong>Ledgerly</strong> (the sample app every exercise runs on), find the landmines planted in it, learn how every exercise folder is built (drills, hidden judges, references, LESSONS), and run one ticket through the loop every exercise uses: <strong>start → agent → check → reset</strong>.</p>
+  </div>
+  <div class="goals">
+    <div class="goal"><div class="gi">🩺</div><p>Get every gate <strong>green</strong> before the agent starts.</p></div>
+    <div class="goal"><div class="gi">🗺️</div><p>Know Ledgerly's <strong>layers</strong>, ADRs and where the truth lives.</p></div>
+    <div class="goal"><div class="gi">💣</div><p>Spot the <strong>landmines</strong>: a stale README, legacy code, protected files.</p></div>
+    <div class="goal"><div class="gi">📁</div><p>Know an exercise's <strong>anatomy</strong>: drills, checks, judges, reference, LESSONS.</p></div>
+    <div class="goal"><div class="gi">🔁</div><p>Run the <strong>drill loop</strong> once with the tools and read a check report.</p></div>
+  </div>
+  <div class="rail" id="rail">
+    <a class="node" href="#s0" data-step="0"><div class="k">Step 0</div><div class="v">🩺 Doctor</div><div class="t">2 min</div></a>
+    <div class="arrow">→</div>
+    <a class="node" href="#s1" data-step="1"><div class="k">Step 1</div><div class="v">🗺️ Ledgerly</div><div class="t">4 min</div></a>
+    <div class="arrow">→</div>
+    <a class="node" href="#s2" data-step="2"><div class="k">Step 2</div><div class="v">💣 Landmines</div><div class="t">3 min</div></a>
+    <div class="arrow">→</div>
+    <a class="node" href="#s3" data-step="3"><div class="k">Step 3</div><div class="v">📁 Anatomy</div><div class="t">4 min</div></a>
+    <div class="arrow">→</div>
+    <a class="node" href="#s4" data-step="4"><div class="k">Step 4</div><div class="v">🔁 The loop</div><div class="t">5 min</div></a>
+  </div>
+  <div class="layout">
+    <div class="steps">
+
+      <div class="step" id="s0" data-step="0">
+        <div class="n">0</div>
+        <div>
+          <div class="head"><h3>🩺 Is your machine ready?</h3><span class="chip">2 min</span></div>
+          <p class="task">Run the doctor from the workshop root. It changes nothing except creating <code>ledgerly/.venv</code>.</p>
+          <div class="promptbox shell">
+            <div class="tag">▶ Run in your terminal (workshop root) <button class="copy">⧉ copy</button></div>
+            <p>cd ledgerly-workshop
+tools/doctor.sh</p>
+          </div>
+          <div class="out">   <span class="p">PASS</span>  claude                     2.x (Claude Code)
+   <span class="p">PASS</span>  uv · git · python3
+   <span class="p">PASS</span>  baseline-tag               tools/reset.sh returns here
+   <span class="p">PASS</span>  pytest                     21 passed, 1 deselected
+   <span class="p">PASS</span>  ruff · import-linter       lint clean · 2 contracts kept
+   => <span class="f">READY</span></div>
+          <p class="why"><b>Why</b>Everything later compares the agent against these gates: tests, lint and the architecture contracts. If they aren't green <strong>before</strong> the agent starts, every result after that is noise. The <code>1 deselected</code> is a flaky test parked on purpose for Ex 5.</p>
+          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
+            <div class="checks">
+              <div><code>tools/doctor.sh</code> ends with <strong>READY</strong>.</div>
+            </div>
+          </div>
+          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
+            <details><summary><span class="lv">1 · nudge</span>uv sync fails</summary>
+              <div class="body">Run <code>uv --directory ledgerly sync</code> to see the error. Behind a company proxy, try <code>UV_SYSTEM_CERTS=1</code>. Never run <code>uv sync</code> in the workshop root: the Python project lives in <code>ledgerly/</code>.</div></details>
+            <details class="locked"><summary><span class="lv">2 · specific</span>WARN user-claude-md</summary>
+              <div class="body">You have a <code>~/.claude/CLAUDE.md</code>. It loads into every session, so your agent won't behave like everyone else's. Rename it for the workshop (Ex 1 shows why).</div></details>
+            <details class="locked"><summary><span class="lv">3 · near-complete</span>Not on macOS/Linux?</summary>
+              <div class="body">Use WSL on Windows. The tools are bash scripts (macOS's bash 3.2 is fine).</div></details>
+          </div>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+      <div class="step" id="s1" data-step="1">
+        <div class="n">1</div>
+        <div>
+          <div class="head"><h3>🗺️ Meet Ledgerly</h3><span class="chip">4 min</span></div>
+          <p class="task">Ledgerly is an invoicing and refunds API: FastAPI, SQLite, money as integer cents, three layers. Read the map, then use it once: create an invoice, capture (pay) it, refund it.</p>
+          <div class="tree"><b>ledgerly-workshop/</b>                 <i>← run tools/ from here</i>
+├── <b>ledgerly/</b>                       <i>← the sample app · its own git repo · open Claude Code HERE</i>
+│   ├── src/ledgerly/
+│   │   ├── api/        <i>HTTP: routes, schemas  (may import services, never repo)</i>
+│   │   ├── services/   <i>business rules: invoices, refunds, tax, reports</i>
+│   │   ├── repo/       <i>SQLite, only services may touch it</i>
+│   │   ├── payments/   <i>Money (integer cents) · fx · legacy_fx (floats!)</i>
+│   │   └── generated/  <i>"DO NOT EDIT" client</i>
+│   ├── tests/  migrations/  docs/decisions/ <i>(ADR-0001…0004)</i>
+│   └── README.md       <i>← written in 2021. Don't trust it</i>
+├── <b>exercises/</b>                      <i>← the agent never sees this folder</i>
+│   └── ex0N-…/  exercise.html · README · LESSONS · drills/ · reference/
+├── <b>tools/</b>                          <i>← start · check · reset · run_drill · doctor …</i>
+└── runs/                           <i>← transcripts + results (git-ignored)</i></div>
+          <div class="promptbox shell">
+            <div class="tag">▶ Start it (a second terminal), then open http://127.0.0.1:8000/docs <button class="copy">⧉ copy</button></div>
+            <p>uv --directory ledgerly run uvicorn ledgerly.api.app:app</p>
+          </div>
+          <div class="promptbox">
+            <div class="tag">▶ POST /invoices · request body <button class="copy">⧉ copy</button></div>
+            <p style="white-space:pre-wrap">{"customer": "Acme", "currency": "EUR",
+ "lines": [{"description": "Consulting", "quantity": 2, "unit_cents": 5000}]}</p>
+          </div>
+          <p class="why"><b>Why</b>You'll spend two days judging an agent's changes to this code, so know it first. Note what the response says: <code>net_cents</code> 10000, <code>vat_cents</code> 1700 (17% VAT, ADR-0004), <code>status</code> open. Capture turns it <code>paid</code>; refund turns it <code>refunded</code>. The database is in memory, so a restart wipes it.</p>
+          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
+            <div class="checks">
+              <div>You've seen an invoice go open → paid → refunded.</div>
+              <div>You can name the three layers and which may import which.</div>
+            </div>
+          </div>
+          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
+            <details><summary><span class="lv">1 · nudge</span>Where are the rules written down?</summary>
+              <div class="body"><code>ledgerly/docs/decisions/</code>: ADR-0001 money as integer cents, ADR-0002 the layers, ADR-0003 refund rules, ADR-0004 VAT rounding.</div></details>
+            <details class="locked"><summary><span class="lv">2 · specific</span>How are the layers enforced?</summary>
+              <div class="body"><code>ledgerly/.importlinter</code>: <code>api → services → repo</code>, and nothing new may import <code>legacy_fx</code>. <code>uv --directory ledgerly run lint-imports</code> checks it. Notice the two <code>ignore_imports</code> lines: legacy that's allowed, for now.</div></details>
+            <details class="locked"><summary><span class="lv">3 · near-complete</span>Refund says 409</summary>
+              <div class="body">Only <code>paid</code> invoices can be refunded (ADR-0003). Capture first.</div></details>
+          </div>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+      <div class="step" id="s2" data-step="2">
+        <div class="n">2</div>
+        <div>
+          <div class="head"><h3>💣 Spot the landmines</h3><span class="chip">3 min</span></div>
+          <p class="task">Ledgerly works and its tests pass. It also lies, like real repos do. For each README claim, find where the truth lives.</p>
+          <table class="diag">
+            <tr><th>the README says</th><th>the truth is in…</th><th>what an agent that trusts it does</th></tr>
+            <tr><td><code>pip install</code> · <code>make test</code></td><td>____</td><td>runs commands that don't exist</td></tr>
+            <tr><td>Flask 1.1 · Postgres</td><td>____</td><td>writes code for the wrong framework</td></tr>
+            <tr><td>amounts in decimal dollars</td><td>____</td><td>uses floats for money</td></tr>
+            <tr><td>refunds can be partial</td><td>____</td><td>builds on a feature that isn't there</td></tr>
+          </table>
+          <p class="why"><b>Why</b>Agents read whatever they find, and the first thing they find is usually the README. Every exercise opens with a drift like this one. The README's own warning banner is there for you; in a real repo there isn't one.</p>
+          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
+            <div class="checks">
+              <div>Your table has a source of truth in every row.</div>
+            </div>
+          </div>
+          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
+            <details><summary><span class="lv">1 · nudge</span>Where do I look?</summary>
+              <div class="body"><code>pyproject.toml</code>, <code>uv.lock</code>, <code>docs/decisions/</code>, and the code itself.</div></details>
+            <details class="locked"><summary><span class="lv">2 · specific</span>More landmines</summary>
+              <div class="body"><code>payments/legacy_fx.py</code> (floats), <code>api/routes_refunds.py</code> (skips the service layer), <code>.env</code> (fake secrets), <code>generated/</code> (do not edit), <code>migrations/003_…</code> (applied and destructive), a flaky test. Later exercises use each one.</div></details>
+            <details class="locked"><summary><span class="lv">3 · near-complete</span>The answers</summary>
+              <div class="body">Open the reference at the bottom of the page.</div></details>
+          </div>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+      <div class="step" id="s3" data-step="3">
+        <div class="n">3</div>
+        <div>
+          <div class="head"><h3>📁 Anatomy of an exercise</h3><span class="chip">4 min</span></div>
+          <p class="task">Every exercise folder has the same shape. Open this one (Ex 0) and look at each part, then peek at Ex 1's names only: no reading the answers yet.</p>
+          <div class="promptbox shell">
+            <div class="tag">▶ Run in your terminal (workshop root) <button class="copy">⧉ copy</button></div>
+            <p>find exercises/ex00-orientation -type f | sort
+ls -R exercises/ex01-claude-md/drills exercises/ex01-claude-md/reference | head -30</p>
+          </div>
+          <table class="diag">
+            <tr><th>part</th><th>what it is</th><th>who uses it, and when</th></tr>
+            <tr><td><code>exercise.html</code></td><td>this page: steps, tickets, hints, timer, locked reference</td><td>you, during the exercise</td></tr>
+            <tr><td><code>drills/&lt;ticket&gt;/prompt.md</code></td><td>the ticket you paste into the agent, word for word</td><td>you · <code>run_drill.sh</code> (headless)</td></tr>
+            <tr><td><code>drills/&lt;ticket&gt;/checks.json</code></td><td>the list of checks, each with a <code>why</code> printed on failure</td><td><code>check.sh</code> · <code>run_drill.sh</code></td></tr>
+            <tr><td><code>drills/&lt;ticket&gt;/probe_*.py</code></td><td>hidden judges: call the API, plant bugs, read the diff</td><td>the checker, never the agent</td></tr>
+            <tr><td><code>drills/&lt;ticket&gt;/setup.sh</code></td><td>optional start state (e.g. a feature already built)</td><td><code>start.sh</code> runs it for you</td></tr>
+            <tr><td><code>drills/&lt;ticket&gt;/reference/</code></td><td><code>red.patch</code> / <code>green.patch</code>: typical bad and good outcomes, hand-written</td><td><code>demo_reference.sh</code> when a live run won't cooperate</td></tr>
+            <tr><td><code>reference/</code></td><td>the mechanism that turns red green (CLAUDE.md, rules, skills, hooks…), mirroring <code>ledgerly/</code></td><td>after you've tried: <code>apply_variant.sh</code></td></tr>
+            <tr><td><code>README.md</code></td><td>facilitator notes: timings, fallbacks, what each judge checks</td><td>the trainer · you, afterwards</td></tr>
+            <tr><td><code>LESSONS.md</code></td><td>the takeaways + a table for <strong>your own numbers</strong></td><td>you, at the end of each exercise</td></tr>
+          </table>
+          <p class="why"><b>Why</b>Drills, judges and answers live in <code>exercises/</code>, <strong>outside</strong> <code>ledgerly/</code>. The agent works inside <code>ledgerly/</code> and reads whatever it finds there, so an answer key next to the code would leak into its context. Keeping the judge where the doer can't see it is a lesson in itself (you'll meet it again in Ex 3 and Ex 6).</p>
+          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
+            <div class="checks">
+              <div>For LED-100, you can say what <code>prompt.md</code>, <code>checks.json</code> and <code>probe.py</code> each do.</div>
+              <div>You know where a mechanism's reference lives and how it gets into <code>ledgerly/</code>.</div>
+            </div>
+          </div>
+          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
+            <details><summary><span class="lv">1 · nudge</span>Read one check</summary>
+              <div class="body">Open <code>drills/led-100-version/checks.json</code>. <code>type: command</code> runs a gate, <code>probe</code> runs a hidden script, <code>diff_present</code> looks at what changed since <code>baseline</code>. Later exercises add <code>transcript_*</code> checks: which commands the agent ran.</div></details>
+            <details class="locked"><summary><span class="lv">2 · specific</span>What does a patch look like?</summary>
+              <div class="body"><code>git apply --stat exercises/ex00-orientation/drills/led-100-version/reference/green.patch</code> (run inside <code>ledgerly/</code>) lists the files it touches without applying it.</div></details>
+            <details class="locked"><summary><span class="lv">3 · near-complete</span>Why not just read the reference?</summary>
+              <div class="body">Because you'd skip the red. Each exercise is built so you <strong>see</strong> the drift before you fix it. The page keeps the reference locked until you say you've finished.</div></details>
+          </div>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+      <div class="step" id="s4" data-step="4">
+        <div class="n">4</div>
+        <div>
+          <div class="head"><h3>🔁 One drill, start to finish</h3><span class="chip">5 min</span></div>
+          <p class="task">Every exercise runs the same loop: <strong>start</strong> a drill, give the agent its ticket, <strong>check</strong> what it did and left behind, <strong>reset</strong>. Learn the tools, then try it on a warm-up ticket.</p>
+          <div class="promptbox shell">
+            <div class="tag">▶ Run in your terminal (workshop root) <button class="copy">⧉ copy</button></div>
+            <p>tools/start.sh led-100 &amp;&amp; cd ledgerly &amp;&amp; claude</p>
+          </div>
+          <div class="promptbox">
+            <div class="tag">▶ Paste into your agent · LED-100 <button class="copy">⧉ copy</button></div>
+            <p>LED-100 — Version endpoint</p>
+            <p>Ops wants to see which build is running. Add `GET /version` returning
+`{"name": "ledgerly", "version": "&lt;the version in pyproject.toml&gt;"}`.</p>
+          </div>
+          <div class="promptbox shell">
+            <div class="tag">▶ /exit, then <button class="copy">⧉ copy</button></div>
+            <p>cd .. &amp;&amp; tools/check.sh led-100
+tools/reset.sh<span class="c-cmt">                 # back to baseline for Ex 1</span></p>
+          </div>
+          <div class="out">   <span class="p">PASS</span>  tests-pass
+   <span class="p">PASS</span>  lint-clean
+   <span class="p">PASS</span>  endpoint-works          GET /version -&gt; 200, version 0.4.2
+   <span class="f">FAIL</span>  new-behaviour-tested    expected change not found
+   => <span class="f">RED (1 failing)</span>
+   <span class="d">← one possible result; yours may be green</span></div>
+          <table class="diag">
+            <tr><th>tool (workshop root)</th><th>what it does</th></tr>
+            <tr><td><code>tools/start.sh &lt;drill&gt;</code></td><td>ready <code>ledgerly/</code> for a ticket: baseline code, your memory files kept, the drill's <code>setup.sh</code> applied</td></tr>
+            <tr><td><code>tools/check.sh &lt;drill&gt;</code></td><td>grade the repo + your newest Claude Code session (read-only; results go to <code>runs/</code>)</td></tr>
+            <tr><td><code>tools/reset.sh [--keep-memory]</code></td><td>back to the <code>baseline</code> tag. <strong>Deletes untracked files</strong> unless <code>--keep-memory</code></td></tr>
+            <tr><td><code>tools/demo_reference.sh &lt;drill&gt; red|green</code></td><td>apply a drill's hand-written example and check it, no agent needed</td></tr>
+            <tr><td><code>tools/apply_variant.sh &lt;folder&gt;</code></td><td>copy a <code>reference/</code> (or a saved variant) into <code>ledgerly/</code></td></tr>
+            <tr><td><code>tools/snapshot.sh &lt;name&gt;</code></td><td>save your memory files to <code>my-variants/&lt;name&gt;</code></td></tr>
+            <tr><td><code>tools/run_drill.sh &lt;drill&gt; &lt;variant&gt; N</code></td><td>N headless runs (<code>none</code>, <code>current</code> or a folder) → a pass-rate table</td></tr>
+          </table>
+          <p class="why"><b>Why</b>The checker doesn't read the agent's summary. It grades the <strong>repo</strong> (tests, lint, a probe that calls the endpoint itself) and, in later exercises, the <strong>transcript</strong>. Red here usually means "no test for the new endpoint", which nobody asked for. Is that the agent's fault? Ex 1 answers that. Write your result in <code>exercises/ex00-orientation/LESSONS.md</code>: from now on, every exercise ends with your own numbers.</p>
+          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
+            <div class="checks">
+              <div>You've read a <code>tools/check.sh</code> report and can say what each check looked at.</div>
+              <div>Your LED-100 result is in <code>LESSONS.md</code>.</div>
+              <div><code>tools/reset.sh</code> put <code>ledgerly/</code> back to baseline.</div>
+            </div>
+          </div>
+          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
+            <details><summary><span class="lv">1 · nudge</span>No session found?</summary>
+              <div class="body"><code>check.sh</code> grades your newest Claude Code session for this folder. Start <code>claude</code> inside <code>ledgerly/</code>, not the workshop root.</div></details>
+            <details class="locked"><summary><span class="lv">2 · specific</span>Compare with the examples</summary>
+              <div class="body"><code>tools/demo_reference.sh led-100 red</code>, then <code>… green</code>, then <code>git -C ledgerly diff baseline</code> to see what changed. Finish with <code>tools/reset.sh</code>.</div></details>
+            <details class="locked"><summary><span class="lv">3 · near-complete</span>One run proves little</summary>
+              <div class="body">Agents are non-deterministic. <code>tools/run_drill.sh led-100 none 3</code> runs it 3 times headless and gives a pass rate; <code>python3 tools/drift_check.py --summary runs/led-100-version</code> summarises. Every exercise reports rates.</div></details>
+          </div>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SIDE PANEL -->
+    <div class="side">
+
+      <div class="infobox ok">
+        <div class="label">🧭 The two days</div>
+        <div class="ladder">
+          <div class="rung"><div class="ri">0</div><div><div class="rp">Ex 0 · Orientation</div><div class="rd">the app, the tools, the loop</div></div></div>
+          <div class="rung"><div class="ri">1</div><div><div class="rp">Ex 1 · CLAUDE.md + rules</div><div class="rd">advisory: the agent reads them, mostly</div></div></div>
+          <div class="rung"><div class="ri">2</div><div><div class="rp">Ex 2 · Skills</div><div class="rd">procedures that load on demand</div></div></div>
+          <div class="rung"><div class="ri">3</div><div><div class="rp">Ex 3 · Hooks</div><div class="rd">deterministic: code that always runs</div></div></div>
+          <div class="rung"><div class="ri">4</div><div><div class="rp">Ex 4 · MCP + Context7</div><div class="rd">current docs, then a gate</div></div></div>
+          <div class="rung"><div class="ri">5</div><div><div class="rp">Ex 5 · Tests</div><div class="rd">green is not correct</div></div></div>
+          <div class="rung"><div class="ri">6–8</div><div><div class="rp">Day 2</div><div class="rd">subagents · worktrees · Spec Kit</div></div></div>
+        </div>
+      </div>
+
+      <div class="infobox ">
+        <div class="label">🔴🟢 The method</div>
+        <p><strong>Red:</strong> run a ticket without the mechanism and watch the check fail.</p>
+        <p><strong>Green:</strong> add exactly one mechanism, same ticket, check passes.</p>
+        <p>Each exercise's leftover red opens the next one.</p>
+      </div>
+
+      <div class="infobox warn">
+        <div class="big">⚠️</div>
+        <div class="head">reset deletes untracked files</div>
+        <div class="note"><code>tools/reset.sh</code> wipes everything you added in <code>ledgerly/</code>, your CLAUDE.md too. Use <code>--keep-memory</code>, or save first: <code>tools/snapshot.sh &lt;name&gt;</code>.</div>
+      </div>
+
+      <div class="infobox ok">
+        <div class="label">🧰 The four you'll use most</div>
+        <div class="cmds">
+          <div><span class="c">tools/start.sh &lt;drill&gt;</span><span class="e">set up a ticket, keep your memory files</span></div>
+          <div><span class="c">tools/check.sh &lt;drill&gt;</span><span class="e">grade the repo + your last session</span></div>
+          <div><span class="c">tools/reset.sh [--keep-memory]</span><span class="e">back to baseline</span></div>
+          <div><span class="c">tools/demo_reference.sh &lt;drill&gt; red|green</span><span class="e">the hand-written example, no agent</span></div>
+        </div>
+      </div>
+
+      <div class="infobox ">
+        <div class="label">🧪 Exercise-specific tools</div>
+        <div class="cmds">
+          <div><span class="c">tools/observe.sh · memory_size.py</span><span class="e">Ex 1: what loaded, what it costs</span></div>
+          <div><span class="c">skill_lint.py · skill_eval.py</span><span class="e">Ex 2: lint and evaluate a skill</span></div>
+          <div><span class="c">hook_test.py</span><span class="e">Ex 3: test hooks before wiring them</span></div>
+          <div><span class="c">tools/doctor.sh</span><span class="e">Ex 0: machine ready?</span></div>
+        </div>
+      </div>
+
+      <div class="infobox ">
+        <div class="label">🖱️ Cursor sidebar</div>
+        <p>Everything here works with Cursor's agent too: open <code>ledgerly/</code> in Cursor, paste the ticket, run <code>tools/check.sh</code>. Only transcript checks need a Claude Code session.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="reference" id="reference">
+    <div class="label">🔓 Reference implementation</div>
+    <p>Finished? Here are the landmine answers and the anatomy of every exercise folder. See the LED-100 examples with <code>tools/demo_reference.sh led-100 red</code> and <code>… green</code>.</p>
+    <button class="unlock" id="unlock">I've finished, show me the reference</button>
+    <div class="refgrid" id="refgrid">
+      <div class="reffile wide">
+        <div class="fname">Step 2 · landmine answer key</div>
+        <div class="fnote">Where the truth lives</div>
+<pre class="codeblock">the README says              the truth is in
+pip install · make test      pyproject.toml + uv.lock → uv run pytest -q
+Flask 1.1 · Postgres         src/ledgerly/api/app.py (FastAPI) · repo/db.py (SQLite)
+decimal dollars              ADR-0001 + payments/money.py: integer cents, never floats
+refunds can be partial       services/refunds.py: refund_full only (partials = LED-101)</pre>
+      </div>
+      <div class="reffile">
+        <div class="fname">Every exercise folder</div>
+        <div class="fnote">Same shape from Ex 1 to Ex 8</div>
+<pre class="codeblock">exercises/ex0N-name/
+├── exercise.html      the student page (this kind of page)
+├── README.md          facilitator notes, timings, fallbacks
+├── LESSONS.md         takeaways + a table for your own numbers
+├── drills/&lt;ticket&gt;/
+│   ├── prompt.md      the ticket you paste
+│   ├── checks.json    what the checker grades, and why
+│   ├── probe_*.py     hidden judges (run against the app)
+│   ├── setup.sh       optional start state (tools/start.sh runs it)
+│   └── reference/     red.patch · green.patch · synthetic transcripts
+└── reference/         the mechanism, as files mirroring ledgerly/
+                       tools/apply_variant.sh exercises/ex0N-…/reference</pre>
+      </div>
+      <div class="reffile">
+        <div class="fname">LED-100 · green (diff)</div>
+        <div class="fnote">The endpoint plus a test for it</div>
+<pre class="codeblock">diff --git a/src/ledgerly/api/app.py b/src/ledgerly/api/app.py
+index f67727e..9c4d6f6 100644
+--- a/src/ledgerly/api/app.py
++++ b/src/ledgerly/api/app.py
+@@ -18,6 +18,10 @@ def create_app(conn: sqlite3.Connection | None = None) -&gt; FastAPI:
+     def health() -&gt; dict[str, str]:
+         return {"status": "ok"}
+ 
++    @app.get("/version")
++    def version() -&gt; dict[str, str]:
++        return {"name": "ledgerly", "version": app.version}
++
+     return app
+ 
+ 
+diff --git a/tests/test_api.py b/tests/test_api.py
+index 3a99850..5bbde7f 100644
+--- a/tests/test_api.py
++++ b/tests/test_api.py
+@@ -36,3 +36,9 @@ def test_full_refund(client: TestClient, paid_invoice: dict) -&gt; None:  # type: i
+ def test_refund_twice_conflicts(client: TestClient, paid_invoice: dict) -&gt; None:  # type: ignore[type-arg]
+     client.post(f"/invoices/{paid_invoice['id']}/refund")
+     assert client.post(f"/invoices/{paid_invoice['id']}/refund").status_code == 409
++
++
++def test_version_reports_the_package_version(client: TestClient) -&gt; None:
++    resp = client.get("/version")
++    assert resp.status_code == 200
++    assert resp.json() == {"name": "ledgerly", "version": "0.4.2"}</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="lessons">
+    <div class="lesson"><div class="li">💣</div><h4>The repo is built to drift</h4><p>A stale README, legacy code, protected files: every landmine is a real-repo habit, and every exercise uses one.</p></div>
+    <div class="lesson"><div class="li">⚖️</div><h4>The judge lives outside the app</h4><p>Checks, probes and answer keys sit in exercises/, where the agent can't read them.</p></div>
+    <div class="lesson"><div class="li">🔁</div><h4>Same loop, every time</h4><p>start → agent → check → reset. Read the report, not the agent's summary.</p></div>
+  </div>
+
+  <div class="footer">
+    <div>⏱ <span id="dur-label">18 minutes</span> · Ledgerly · ex00-orientation</div>
+    <div class="brand"><b>LATENT</b> · AI Coding Agents Workshop</div>
+  </div>
+
+</div>
+
+<!-- ============ TIMER (fixed bottom-right) ============ -->
+<div class="timer">
+  <div class="clock" id="clock">18:00</div>
+  <div class="presets" id="presets">
+    <button data-min="10">10</button>
+    <button data-min="18" class="sel">18</button>
+    <button data-min="25">25</button>
+  </div>
+  <div class="controls">
+    <button id="start" onclick="startTimer()">▶ Start</button>
+    <button id="pause" onclick="pauseTimer()">❚❚ Pause</button>
+    <button id="reset" onclick="resetTimer()">↺ Reset</button>
+  </div>
+</div>
+
+<script>
+  /* ---------- timer (same as exercise-template) ---------- */
+  let total = 18 * 60, remaining = total, tick = null;
+  const clock = document.getElementById('clock');
+  const durLabel = document.getElementById('dur-label');
+  const presets = document.getElementById('presets');
+  function fmt(s){ const m = Math.floor(s/60), sec = s%60;
+    return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0'); }
+  function render(){ clock.textContent = fmt(remaining); clock.classList.toggle('warn-time', remaining <= 60); }
+  function setMinutes(min){ total = min*60; remaining = total; durLabel.textContent = min + ' minutes';
+    [...presets.children].forEach(b => b.classList.toggle('sel', +b.dataset.min === min)); pauseTimer(); render(); }
+  function startTimer(){ if(tick) return; if(remaining <= 0) remaining = total;
+    tick = setInterval(()=>{ remaining--; if(remaining <= 0){ remaining = 0; render(); pauseTimer(); return; } render(); }, 1000); }
+  function pauseTimer(){ clearInterval(tick); tick = null; }
+  function resetTimer(){ pauseTimer(); remaining = total; render(); }
+  presets.addEventListener('click', e=>{ if(e.target.dataset.min) setMinutes(+e.target.dataset.min); });
+  setMinutes(18);
+
+  /* ---------- copy buttons ---------- */
+  document.querySelectorAll('.promptbox .copy').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const box = btn.closest('.promptbox');
+      const text = [...box.querySelectorAll('p')].map(p=>{
+        const clone = p.cloneNode(true);
+        clone.querySelectorAll('.c-cmt').forEach(c=>c.remove());
+        return clone.innerText.split('\n').map(l=>l.replace(/\s+$/,'')).join('\n');
+      }).join(box.classList.contains('shell') ? '\n' : '\n\n').trim();
+      const done = ()=>{ btn.textContent='✓ copied'; btn.classList.add('ok');
+        setTimeout(()=>{ btn.textContent='⧉ copy'; btn.classList.remove('ok'); }, 1400); };
+      if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(text).then(done, ()=>fallback(text, done)); }
+      else fallback(text, done);
+    });
+  });
+  function fallback(text, done){ const ta=document.createElement('textarea'); ta.value=text;
+    document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); done(); }catch(e){} ta.remove(); }
+
+  /* ---------- progressive hints: level n+1 unlocks after n is opened ---------- */
+  document.querySelectorAll('.hints').forEach(group=>{
+    const ds = [...group.querySelectorAll('details')];
+    ds.forEach((d,i)=> d.addEventListener('toggle', ()=>{ if(d.open && ds[i+1]) ds[i+1].classList.remove('locked'); }));
+  });
+
+  /* ---------- step progress (remembered per browser) ---------- */
+  const KEY = 'latent-ledgerly-ex00-done';
+  let done = {};
+  try{ done = JSON.parse(localStorage.getItem(KEY) || '{}'); }catch(e){ done = {}; }
+  function paint(){
+    document.querySelectorAll('.step').forEach(s=>{
+      const n = s.dataset.step, on = !!done[n];
+      s.classList.toggle('done', on);
+      const b = s.querySelector('.donebtn'); if(b) b.textContent = on ? '✓ Step done' : '☐ Mark step done';
+      const node = document.querySelector('.rail .node[data-step="'+n+'"]'); if(node) node.classList.toggle('done', on);
+    });
+  }
+  document.querySelectorAll('.donebtn').forEach(b=>b.addEventListener('click', ()=>{
+    const n = b.closest('.step').dataset.step; done[n] = !done[n];
+    try{ localStorage.setItem(KEY, JSON.stringify(done)); }catch(e){}
+    paint();
+  }));
+  paint();
+
+  /* ---------- reference reveal ---------- */
+  document.getElementById('unlock').addEventListener('click', e=>{
+    const g = document.getElementById('refgrid'); g.classList.toggle('open');
+    e.target.textContent = g.classList.contains('open') ? 'Hide the reference' : "I've finished, show me the reference";
+  });
+</script>
+</body>
+</html>

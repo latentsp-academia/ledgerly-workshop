@@ -1,0 +1,29 @@
+diff --git a/src/ledgerly/api/app.py b/src/ledgerly/api/app.py
+index f67727e..9c4d6f6 100644
+--- a/src/ledgerly/api/app.py
++++ b/src/ledgerly/api/app.py
+@@ -18,6 +18,10 @@ def create_app(conn: sqlite3.Connection | None = None) -> FastAPI:
+     def health() -> dict[str, str]:
+         return {"status": "ok"}
+ 
++    @app.get("/version")
++    def version() -> dict[str, str]:
++        return {"name": "ledgerly", "version": app.version}
++
+     return app
+ 
+ 
+diff --git a/tests/test_api.py b/tests/test_api.py
+index 3a99850..5bbde7f 100644
+--- a/tests/test_api.py
++++ b/tests/test_api.py
+@@ -36,3 +36,9 @@ def test_full_refund(client: TestClient, paid_invoice: dict) -> None:  # type: i
+ def test_refund_twice_conflicts(client: TestClient, paid_invoice: dict) -> None:  # type: ignore[type-arg]
+     client.post(f"/invoices/{paid_invoice['id']}/refund")
+     assert client.post(f"/invoices/{paid_invoice['id']}/refund").status_code == 409
++
++
++def test_version_reports_the_package_version(client: TestClient) -> None:
++    resp = client.get("/version")
++    assert resp.status_code == 200
++    assert resp.json() == {"name": "ledgerly", "version": "0.4.2"}

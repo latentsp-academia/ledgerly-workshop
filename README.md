@@ -56,6 +56,7 @@ ledgerly-workshop/
 ├── README.md            ← you are here
 ├── ledgerly/            ← the sample app (its own git repo, tag `baseline`). Open Claude Code HERE.
 ├── exercises/           ← one folder per exercise
+│   ├── ex00-orientation/  ← start here: the app, the tools, the loop
 │   └── ex01-claude-md/
 │       ├── exercise.html  ← the student page: steps, prompts, hints, timer, reference
 │       ├── README.md      ← facilitator notes + timing
@@ -72,6 +73,8 @@ whatever it finds. Answer keys next to the code would leak into its context. Kee
 where the doer can't see it is itself a lesson (LED-103, Ex 3).
 
 ## Setup (10 min, before class)
+
+Shortcut: `tools/doctor.sh` checks all of this and tells you what's missing. [Ex 0](exercises/ex00-orientation/exercise.html) walks through it.
 
 Requirements: [Claude Code](https://code.claude.com), [uv](https://docs.astral.sh/uv/), git,
 python3. Optional: Cursor.
@@ -118,6 +121,7 @@ It also contains what real repos contain:
 
 | command | what it does |
 |---|---|
+| `tools/doctor.sh [--quick]` | is this machine ready? tools, the `baseline` tag, `uv sync`, and green gates (Ex 0) |
 | `tools/reset.sh [--keep-memory]` | `ledgerly/` → `baseline`. `--keep-memory` undoes the agent's code but keeps your CLAUDE.md files |
 | `tools/start.sh <drill>` | ready `ledgerly/` for a drill: keep your memory files, apply the drill's start state (e.g. LED-105 already implemented for `led-120`) |
 | `tools/check.sh <drill>` | grade `ledgerly/` + your newest Claude Code session, e.g. `tools/check.sh led-105` |
@@ -132,7 +136,7 @@ It also contains what real repos contain:
 | `python3 tools/hook_test.py [fence\|lint\|finish]` | run the hook test suites (JSON on stdin → expected allow/ask/deny/block) against `ledgerly/.claude/hooks/` (Ex 3) |
 | `tools/demo_reference.sh <drill> red\|green` | facilitator fallback: apply the hand-written reference patch and check it |
 
-Drills can be named by prefix: `led-105` (revenue endpoint), `led-112` (404 errors), `led-103` (impossible VAT ticket),
+Drills can be named by prefix: `led-100` (warm-up, Ex 0), `led-105` (revenue endpoint), `led-112` (404 errors), `led-103` (impossible VAT ticket),
 `led-120` (PR note), `trigger-implicit`, `trigger-quiet`, `led-132` (relax the lint), `led-141` (seed data,
 deprecated APIs), `led-150` / `led-151` (refund tests, weak vs contract), `led-118` (the flaky test). An ambiguous prefix is refused, never guessed.
 
@@ -147,6 +151,7 @@ Timings and agenda slots for every exercise: [PLAN.md](PLAN.md).
 
 | # | exercise | 🔴 red that opens it | time | status |
 |---|---|---|---|---|
+| 0 | [Orientation](exercises/ex00-orientation/) · [open the page](exercises/ex00-orientation/exercise.html) | no red: machine check, a tour of Ledgerly and its landmines, the anatomy of an exercise (drills, checks, judges, reference, LESSONS), the tools, and one warm-up drill (LED-100) through the loop | 10 · 18 full | ✅ ready |
 | 1 | [CLAUDE.md + rules](exercises/ex01-claude-md/) · [open the page](exercises/ex01-claude-md/exercise.html) | no memory → stale README, float legacy, false "done" (tests green); then project · directory · rules (hidden house-style test) · @import · user-level trap | 30–36 | ✅ ready |
 | 2 | [Skills](exercises/ex02-skills/) · [open the page](exercises/ex02-skills/exercise.html) | a generic PR note (wrong format, no ADRs, unverified gates); then author `ship-check`, prove it fires implicitly and stays quiet, and build a forked, read-only `adr-audit` worker | 25 | ✅ ready |
 | 3 | [Hooks](exercises/ex03-hooks/) · [open the page](exercises/ex03-hooks/exercise.html) | LED-103 tampering *rate* from Ex 1 → `PreToolUse` fence (tests append-only, protected configs, `.env`), `PostToolUse` lint, `Stop` finish line with a stop rule → **0/3**; LED-132 "relax the lint" | 25 | ✅ ready |

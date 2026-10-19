@@ -1,17 +1,17 @@
 # Ledgerly exercise plan: where each exercise goes, and how long
 
-- **Day 1 is the harness:** every building block gets a Ledgerly exercise, in deck order:
-  CLAUDE.md + rules → skills → hooks → MCP → tests.
+- **Day 1 is the harness:** an orientation (Ex 0), then every building block gets a Ledgerly
+  exercise, in deck order: CLAUDE.md + rules → skills → hooks → MCP → tests.
 - **Day 2 is process on top of it:** subagents, then spec-driven development.
 
 Each exercise opens with a red the previous one couldn't fix. The drift checker grades every one.
 
-## Day 1 · Working with an agent: building blocks (240 min)
+## Day 1 · Working with an agent: building blocks (242 min)
 
 | min | block | slides (Fundamentals PDF §) | exercise |
 |---|---|---|---|
-| 8 | Pre-flight | — | `uv --directory ledgerly sync` from the workshop root |
 | 15 | Intro | 01–04 | |
+| **10** | 🧪 **Ex 0 · Orientation** ✅ built (18 min full version; `tools/doctor.sh` as pre-work) | | `ex00-orientation/` (replaces the 8-min pre-flight) |
 | 12 | Harness | 05–06, 09 | |
 | 7 | Models | 07–08 | |
 | 15 | Context engineering | 11 | |
@@ -30,7 +30,8 @@ Each exercise opens with a red the previous one couldn't fix. The drift checker 
 | **25** | 🧪 **Ex 5 · Tests: green is not correct** ✅ built | | `ex05-tests/` |
 | 4 | 🧯 Buffer · Q&A | | |
 
-**Hands-on: 109 min (45%).** Before the break: 97 min (Daniel's target is about 90).
+**Total: 242 min (4 h 02).** Hands-on: 119 min (49%). Before the break: 99 min (Daniel's target is about 90).
+Running Ex 0's full 18-minute version in class makes the day 250 min; keep it as pre-work instead.
 The buffer is only 4 min. If the day runs long, Ex 4 is the first to cut (it's already a demo), then Ex 2 Step 4 (6 min).
 
 ## Day 2 · Subagents & spec-driven development (240 min)
@@ -56,6 +57,13 @@ Same blocks as the current Day 2 agenda; the exercises move onto Ledgerly so day
 ---
 
 # Day 1 exercises
+
+## Ex 0 · Orientation · 10 min in class (18 full) · ✅ built · `ex00-orientation/`
+
+No red. `tools/doctor.sh` (machine + gates green) → a map of Ledgerly and one invoice through
+`/docs` → four README landmines and where the truth lives → the anatomy of an exercise folder
+(drills, checks, probes, reference patches, `reference/`, README, LESSONS) → the tools table and
+one warm-up drill (LED-100 `GET /version`) through start → agent → check → reset.
 
 ## Ex 1 · CLAUDE.md + rules · 30 min · ✅ built
 

@@ -1,0 +1,20 @@
+diff --git a/docs/pr/LED-105.md b/docs/pr/LED-105.md
+new file mode 100644
+index 0000000..6acafd0
+--- /dev/null
++++ b/docs/pr/LED-105.md
+@@ -0,0 +1,14 @@
++# Add revenue reporting endpoint
++
++## Summary
++This PR adds a new `GET /reports/revenue` endpoint that returns total revenue for paid invoices,
++converted into the requested currency.
++
++## Changes
++- New `services/revenue.py` with a `revenue()` function
++- New `api/routes_reports.py` router, registered in `app.py`
++- New API test
++
++## Testing
++- Added a unit test for the new endpoint
++- All tests pass ✅

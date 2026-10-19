@@ -1,4 +1,4 @@
-# Gated AI SDLC: keeping coding agents from drifting
+# Keeping coding agents from drifting
 
 *Latent · AI Coding Agents workshop · hands-on companion to the Fundamentals & Advanced decks*
 
@@ -38,15 +38,15 @@ Two rules hold throughout:
 | drift | example in Ledgerly | first caught by |
 |---|---|---|
 | Wrong source of truth | trusts the 2021 README: `make test`, Flask, dollars | Ex 1 · CLAUDE.md |
-| False "done" | stops after pytest; never runs ruff / import-linter | Ex 1 → Ex 5 Stop hook |
+| False "done" | stops after pytest; never runs ruff / import-linter | Ex 1 → Ex 3 `Stop` hook |
 | Architecture | builds on float `legacy_fx`; API imports the DB | Ex 1 → import-linter gate |
 | Convention / scope | team rule in one person's `~/.claude` | Ex 1 |
-| Instruction decay | rule said in chat, gone next session | Ex 1 |
+| House style the code doesn't show | `frozen + slots + kw_only` value objects | Ex 1 · rules |
 | Grader tampering | edits a test to make the suite pass | Ex 1 (measured) → Ex 3 hook |
-| Outdated libraries | Pydantic v1 / deprecated FastAPI APIs from training data | Ex 7 · MCP (Context7) |
-| Scope creep | touches 12 files for a 1-file ticket | Ex 5 scope fence |
+| Outdated libraries | Pydantic v1 / deprecated FastAPI APIs from training data | Ex 4 · MCP (Context7) |
+| Unchecked procedure | PR note in the wrong format, gates claimed but never run | Ex 2 · skills |
 | Security | reads `.env`, edits `generated/`, destructive migrations | Ex 3 PreToolUse |
-| Spec drift | builds what it *thought* you meant | Lesson 2 · spec-kit |
+| Spec drift | builds what it *thought* you meant | Day 2 · Ex 8 Spec Kit |
 
 ## Repo map
 
@@ -75,14 +75,21 @@ where the doer can't see it is itself a lesson (LED-103, Ex 3).
 Requirements: [Claude Code](https://code.claude.com), [uv](https://docs.astral.sh/uv/), git,
 python3. Optional: Cursor.
 
+Run everything from the **workshop root** (`ledgerly-workshop/`). The Python project lives in
+`ledgerly/`, so point uv at it with `--directory` instead of `cd`-ing back and forth:
+
 ```bash
-cd ledgerly
-uv sync
-uv run pytest -q            # 21 passed, 1 deselected
-uv run ruff check . && uv run lint-imports
-cd ..
-tools/reset.sh              # puts ledgerly/ back to the `baseline` tag at any time
+cd ledgerly-workshop
+uv --directory ledgerly sync                  # creates ledgerly/.venv
+uv --directory ledgerly run pytest -q         # 21 passed, 1 deselected
+uv --directory ledgerly run ruff check . && uv --directory ledgerly run lint-imports
+tools/reset.sh                                # puts ledgerly/ back to the `baseline` tag at any time
 ```
+
+`uv sync` in the workshop root fails with "No `pyproject.toml` found": that's the reminder to add
+`--directory ledgerly`. The `tools/` scripts already run uv inside `ledgerly/` for you. Inside a
+Claude Code session started in `ledgerly/`, plain `uv run pytest -q` is correct (that's what the
+project's CLAUDE.md says).
 
 > ⚠️ `tools/reset.sh` deletes untracked files in `ledgerly/`, including your CLAUDE.md.
 > Save attempts first with `tools/snapshot.sh <name>`.
@@ -95,22 +102,23 @@ It also contains what real repos contain:
 
 | landmine | where | used in |
 |---|---|---|
-| Stale README (Flask, Postgres, `make test`, decimal dollars) | `README.md` | Ex 1 (step 0), Ex 7 |
+| Stale README (Flask, Postgres, `make test`, decimal dollars) | `README.md` | Ex 1 (step 0), Ex 4 |
 | Float-based legacy FX + a legacy report built on it | `payments/legacy_fx.py`, `services/reports.py` | Ex 1 (step 0) |
-| Legacy route that bypasses the service layer | `api/routes_refunds.py` (+ an `ignore_imports` exception) | Ex 2 |
+| Legacy route that bypasses the service layer | `api/routes_refunds.py` (+ an `ignore_imports` exception) | Ex 5 (refund mutants), Ex 7 (LED-101) |
 | No error convention in code (it lives in people's heads) | API errors | Ex 1 (step 6) |
 | VAT rounding that surprises customers (by design, ADR-0004) | `services/tax.py` | Ex 1 close (LED-103), Ex 3 |
 | Fake secrets, not git-ignored | `.env` | Ex 3 |
 | Generated code: "DO NOT EDIT" | `generated/tracker_client.py` | Ex 3 |
 | Applied, destructive migration | `migrations/003_drop_audit_log_old.sql` | Ex 3 |
-| Lint & architecture config an agent could "relax" | `ruff.toml`, `.importlinter` | Ex 3, Ex 4 |
-| Flaky test (~10%: random invoice numbers collide) | `tests/test_invoices.py` `-m landmine` | Ex 5, Lesson 2 |
+| Lint & architecture config an agent could "relax" | `ruff.toml`, `.importlinter` | Ex 3 |
+| Flaky test (~10%: random invoice numbers collide) | `tests/test_invoices.py` `-m landmine` | Ex 5 |
 
 ## Tools
 
 | command | what it does |
 |---|---|
 | `tools/reset.sh [--keep-memory]` | `ledgerly/` → `baseline`. `--keep-memory` undoes the agent's code but keeps your CLAUDE.md files |
+| `tools/start.sh <drill>` | ready `ledgerly/` for a drill: keep your memory files, apply the drill's start state (e.g. LED-105 already implemented for `led-120`) |
 | `tools/check.sh <drill>` | grade `ledgerly/` + your newest Claude Code session, e.g. `tools/check.sh led-105` |
 | `tools/run_drill.sh <drill> <none\|current\|folder> [N]` | N × (reset → apply memory files → `claude -p` headless → drift check), then a pass-rate table |
 | `tools/apply_variant.sh <folder>` | copy a set of memory files (e.g. `exercises/ex01-claude-md/reference`) into `ledgerly/` |
@@ -118,37 +126,36 @@ It also contains what real repos contain:
 | `python3 tools/drift_check.py --summary runs/<drill>` | pass rates per variant, plus avg tool calls / tokens / cost |
 | `tools/observe.sh on\|tail\|off` | log every CLAUDE.md / rule load (`InstructionsLoaded` hook) to `runs/loads.log` |
 | `python3 tools/memory_size.py [file]` | approximate token cost of memory files, following `@imports` |
+| `python3 tools/skill_lint.py <skill> [--profile …]` | static skill checks from the Skills lecture (frontmatter, triggers, sandbox, fork) |
 | `tools/demo_reference.sh <drill> red\|green` | facilitator fallback: apply the hand-written reference patch and check it |
 
-Drills can be named by prefix: `led-105` (revenue endpoint), `led-112` (404 errors), `led-103` (impossible VAT ticket).
+Drills can be named by prefix: `led-105` (revenue endpoint), `led-112` (404 errors), `led-103` (impossible VAT ticket),
+`led-120` (PR note), `trigger-implicit`, `trigger-quiet`. An ambiguous prefix is refused, never guessed.
 
 `run_drill.sh` runs Claude Code headless with `--permission-mode acceptEdits` and an allowlist of
 project commands (`uv run`, `git diff`, …). Everything else is denied. Set `MODEL=…` to pin a model.
 
 ## Exercise map
 
-### Lesson 1: build the gates (Fundamentals decks)
+Timings and agenda slots for every exercise: [exercises/PLAN.md](exercises/PLAN.md).
 
-| # | exercise | 🔴 red that opens it | status |
-|---|---|---|---|
-| 1 | [CLAUDE.md hierarchy](exercises/ex01-claude-md/) · [open the page](exercises/ex01-claude-md/exercise.html) | no memory → stale README, float legacy, false "done" (tests green); then project · directory · rules · @import · user-level trap. 35 min | ✅ ready |
-| 2 | Rules (`.claude/rules/`, `paths:`) | the testing rule from Ex 1 loads every session; the refund rule spans `api/` + `services/`; LED-103 tampering rate | planned |
-| 3 | Hooks I: `PreToolUse` fence | tests edited, `.env` read, `generated/` edited, migration rewritten → **rate becomes 0** | planned |
-| 4 | Hooks II: `PostToolUse` feedback | style drift, float money caught at edit time, not review time | planned |
-| 5 | Hooks III: `Stop` finish line + `SessionStart` | false "done", scope creep. **The drift checker becomes the Stop hook** | planned |
-| 6 | Skills | procedures bloating CLAUDE.md; vague tickets (grill-me intake), `/ship-check` | planned |
-| 7 | MCP (+ Context7) | outdated library APIs (Pydantic v1, `on_event`) caught by `pytest -W error::DeprecationWarning`; context cost of MCP schemas | planned |
-| 8 | Capstone | re-run LED-105 + LED-103 on the fully gated repo; compare scorecards | planned |
+### Day 1: the harness, one building block at a time (Fundamentals deck)
 
-### Lesson 2: process on top of the gates (Advanced decks)
+| # | exercise | 🔴 red that opens it | time | status |
+|---|---|---|---|---|
+| 1 | [CLAUDE.md + rules](exercises/ex01-claude-md/) · [open the page](exercises/ex01-claude-md/exercise.html) | no memory → stale README, float legacy, false "done" (tests green); then project · directory · rules (hidden house-style test) · @import · user-level trap | 30–36 | ✅ ready |
+| 2 | [Skills](exercises/ex02-skills/) · [open the page](exercises/ex02-skills/exercise.html) | a generic PR note (wrong format, no ADRs, unverified gates); then author `ship-check`, prove it fires implicitly and stays quiet, and build a forked, read-only `adr-audit` worker | 25 | ✅ ready |
+| 3 | Hooks | LED-103 tampering *rate* from Ex 1 → `PreToolUse` fence (tests append-only, protected configs), `PostToolUse` lint, `Stop` finish line (the drift checker as a hook) → **0/3** | 25 | planned |
+| 4 | MCP + Context7 | outdated library APIs (Pydantic v1 `@validator`) caught by `pytest -W error::DeprecationWarning`; MCP schema cost in `/context` | 4 demo · 20 homework | planned |
+| 5 | Tests: green is not correct | weak tests survive a hidden mutation judge; contract tests from ADR-0003 kill the mutants | 25 | planned |
 
-| # | exercise | idea |
-|---|---|---|
-| 9 | Custom agents | explorer / implementer / independent reviewer; **only the test-writer agent may edit tests** (doer ≠ judge) |
-| 10 | Spec-kit | constitution derived from Ex 1–5; specify → clarify → plan → tasks → `analyze` gates `implement` |
-| 11 | ADRs at level 2 | enforce exactly one ADR, the one that broke in LED-103 (ADR-0004) |
-| 12 | Evaluation | requirement IDs ↔ tagged tests, holdout tests in CI, LLM-judge agent hook, `/goal` with all six parts |
-| 13 | Workflows | adversarial fan-out verification; the same gates in CI so they can't be bypassed locally |
+### Day 2: process on top of the gates (Advanced decks)
+
+| # | exercise | idea | time | status |
+|---|---|---|---|---|
+| 6 | Subagents: doer ≠ judge | explorer / implementer / independent reviewer; **only the test-writer agent may edit tests** (the Ex 3 hook checks `agent_type`) | 25 | planned |
+| 7 | Parallel tickets in worktrees | LED-101 + LED-112 at once; the Day 1 gates run in both | 30 | planned |
+| 8 | Spec Kit capstone | LED-201 multi-currency refunds; constitution from Ex 1's rules + ADRs; `/analyze` gates `/implement`; FR-IDs ↔ tagged tests; holdout tests | 40 | planned |
 
 ## Cursor
 

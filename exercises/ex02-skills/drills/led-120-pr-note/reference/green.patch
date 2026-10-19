@@ -1,0 +1,36 @@
+diff --git a/docs/pr/LED-105.md b/docs/pr/LED-105.md
+new file mode 100644
+index 0000000..d10be78
+--- /dev/null
++++ b/docs/pr/LED-105.md
+@@ -0,0 +1,30 @@
++# LED-105: Revenue endpoint
++
++## Ticket
++LED-105 · Finance wants revenue over HTTP: `GET /reports/revenue?currency=EUR`.
++
++## Summary
++- New `GET /reports/revenue?currency=…` (defaults to USD) returns `{currency, total_cents, invoice_count}` for paid invoices.
++- Conversion goes through `payments.fx.convert` on integer cents; the float-based `services/reports.py` is untouched.
++- New `services/revenue.py` holds the logic; `api/routes_reports.py` only maps HTTP.
++
++## ADRs touched
++- ADR-0001 money as integer cents: amounts stay `Money`, converted with `fx.convert`, no floats.
++- ADR-0002 layered architecture: new route → new service → existing repo; no api → repo import.
++
++## Verification
++| gate | command | result | detail |
++|---|---|---|---|
++| tests | `uv run pytest -q` | ✅ pass | 22 passed, 1 deselected in 0.16s |
++| lint | `uv run ruff check .` | ✅ pass | All checks passed! |
++| format | `uv run ruff format --check .` | ✅ pass | 32 files already formatted |
++| architecture | `uv run lint-imports` | ✅ pass | Contracts: 2 kept, 0 broken. |
++
++4/4 gates green.
++
++## Risk & rollback
++- Risk: rounding in multi-currency totals differs from the legacy report (by design, half-even). Finance should expect it.
++- Rollback: additive endpoint, no migration. Revert the commit.
++
++## Changelog
++- 2026-10-19 GET /reports/revenue — revenue of paid invoices in any supported currency

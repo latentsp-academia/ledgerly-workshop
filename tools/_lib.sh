@@ -5,11 +5,18 @@ APP="$ROOT/ledgerly"
 
 # resolve_drill led-105  ->  /…/exercises/ex01-claude-md/drills/led-105-revenue
 resolve_drill() {
-  local arg="$1" hit
+  local arg="$1"
   if [ -d "$arg" ] && [ -f "$arg/checks.json" ]; then (cd "$arg" && pwd); return 0; fi
-  hit="$(find "$ROOT/exercises" -type d -path "*/drills/$arg*" 2>/dev/null | head -1)"
-  if [ -n "$hit" ] && [ -f "$hit/checks.json" ]; then echo "$hit"; return 0; fi
-  echo "no drill matching '$arg' (try: led-105, led-112, led-103)" >&2
+  local hits n
+  hits="$(find "$ROOT/exercises" -type f -path "*/drills/$arg*/checks.json" 2>/dev/null | sort)"
+  n="$(printf '%s' "$hits" | grep -c . || true)"
+  if [ "$n" = "1" ]; then dirname "$hits"; return 0; fi
+  if [ "$n" -gt 1 ]; then
+    echo "'$arg' matches several drills, be more specific:" >&2
+    printf '%s\n' "$hits" | sed "s|$ROOT/||; s|/checks.json||; s|^|  |" >&2
+    return 1
+  fi
+  echo "no drill matching '$arg' (try: led-105, led-112, led-103, led-120, trigger-implicit, trigger-quiet)" >&2
   return 1
 }
 

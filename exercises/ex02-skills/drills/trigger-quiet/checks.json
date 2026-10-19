@@ -1,0 +1,25 @@
+{
+  "title": "Should NOT fire · a plain question",
+  "checks": [
+    {
+      "id": "ship-check-stayed-quiet",
+      "type": "transcript_absent",
+      "scope": "all",
+      "patterns": ["^Skill .*ship-check"],
+      "why": "The description is too broad: it fires on questions that aren't about shipping. Narrow it to the actual domain."
+    },
+    {
+      "id": "adr-audit-stayed-quiet",
+      "type": "transcript_absent",
+      "scope": "all",
+      "patterns": ["^Skill .*adr-audit"],
+      "why": "A question about rounding isn't an audit request."
+    },
+    {
+      "id": "no-files-written",
+      "type": "command",
+      "cmd": "test -z \"$(git status --short docs)\"",
+      "why": "A question must not produce files."
+    }
+  ]
+}

@@ -285,7 +285,7 @@
 <div class="page">
 
   <!-- ============ TITLE ============ -->
-  <div class="kicker">Exercise 1 · Lesson 1 · Fundamentals</div>
+  <div class="kicker">Exercise 1 · Day 1 · Instruction layer</div>
   <h1>CLAUDE.md: see the <span class="accent-r">drift</span>, then <span class="accent">fix it</span> 📜</h1>
 
   <!-- ============ OBJECTIVE ============ -->
@@ -311,15 +311,15 @@
   <div class="rail" id="rail">
     <a class="node red" href="#s0" data-step="0"><div class="k">Step 0</div><div class="v">🔴 No memory</div><div class="t">5 min</div></a>
     <div class="arrow">→</div>
-    <a class="node" href="#s1" data-step="1"><div class="k">Step 1</div><div class="v">📜 Project</div><div class="t">7 min</div></a>
+    <a class="node" href="#s1" data-step="1"><div class="k">Step 1</div><div class="v">📜 Project</div><div class="t">6 min</div></a>
     <div class="arrow">→</div>
     <a class="node" href="#s2" data-step="2"><div class="k">Step 2</div><div class="v">📁 Directory</div><div class="t">5 min</div></a>
     <div class="arrow">→</div>
-    <a class="node" href="#s3" data-step="3"><div class="k">Step 3</div><div class="v">📏 Rules</div><div class="t">4 min</div></a>
+    <a class="node" href="#s3" data-step="3"><div class="k">Step 3</div><div class="v">📏 Rules</div><div class="t">7 min</div></a>
     <div class="arrow">→</div>
     <a class="node" href="#s4" data-step="4"><div class="k">Step 4</div><div class="v">🔗 @ import</div><div class="t">4 min</div></a>
     <div class="arrow">→</div>
-    <a class="node" href="#s5" data-step="5"><div class="k">Step 5</div><div class="v">🔍 Diagnose</div><div class="t">3 min</div></a>
+    <a class="node" href="#s5" data-step="5"><div class="k">Step 5</div><div class="v">🔍 Diagnose</div><div class="t">2 min</div></a>
     <div class="arrow">→</div>
     <a class="node" href="#s6" data-step="6"><div class="k">Step 6</div><div class="v">🪤 User trap</div><div class="t">7 min</div></a>
   </div>
@@ -354,8 +354,9 @@ cd ledgerly &amp;&amp; claude</p>
    <span class="f">FAIL</span>  ran-full-verification   never ran: ruff format, lint-imports
    <span class="p">PASS</span>  tests-pass
    <span class="f">FAIL</span>  no-float-money          routes_reports.py: report = revenue_report(conn, currency)
+   <span class="f">FAIL</span>  value-object-convention no new public function in services/ …
    <span class="p">PASS</span>  endpoint-works          endpoint OK: 16614 EUR cents over 2 paid invoices
-   => <span class="f">RED (3 failing)</span>          <span class="d">← typical result; yours will vary</span></div>
+   => <span class="f">RED (4 failing)</span>          <span class="d">← typical result; yours will vary</span></div>
           <p class="why"><b>Why</b>You can't judge what a CLAUDE.md is worth until you've seen the agent without one.
             Ledgerly's README is from 2021, and a float-based legacy report sits right next to the correct
             cents code. <strong>Nothing in the code tells the agent which one to trust.</strong></p>
@@ -383,7 +384,7 @@ git -C ledgerly diff baseline</pre></div></details>
       <div class="step" id="s1" data-step="1">
         <div class="n">1</div>
         <div>
-          <div class="head"><h3>📜 Write the project-level CLAUDE.md</h3><span class="chip">7 min · green</span></div>
+          <div class="head"><h3>📜 Write the project-level CLAUDE.md</h3><span class="chip">6 min · fewer reds</span></div>
           <p class="task">Create <code>ledgerly/CLAUDE.md</code> (<code>ledgerly/.claude/CLAUDE.md</code> works too) with
             <strong>at least three sections</strong>: the real commands, what "done" means, and the money rule the agent broke.
             <strong>40 lines max.</strong> Only write what the code can't tell the agent.</p>
@@ -400,7 +401,8 @@ cd .. &amp;&amp; tools/check.sh led-105</p>
             <div class="checks">
               <div><code>ledgerly/CLAUDE.md</code> exists with <strong>three or more sections</strong>.</div>
               <div><code>/context</code> lists it under <strong>Memory files</strong>.</div>
-              <div><code>tools/check.sh led-105</code> shows <strong>fewer reds than Step 0</strong>, ideally GREEN.</div>
+              <div><code>tools/check.sh led-105</code> shows <strong>fewer reds than Step 0</strong>.</div>
+              <div>Expect <strong>one red to survive</strong>: <code>value-object-convention</code>. Leave it. Step 3 fixes it with a rule.</div>
             </div>
           </div>
           <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
@@ -480,35 +482,53 @@ cd ~/Development/ledgerly-workshop/ledgerly &amp;&amp; claude   <span class="c-c
       <div class="step" id="s3" data-step="3">
         <div class="n">3</div>
         <div>
-          <div class="head"><h3>📏 Move testing conventions into .claude/rules/</h3><span class="chip">4 min</span></div>
-          <p class="task">Create <code>ledgerly/.claude/rules/testing.md</code> with <strong>at least three</strong> test
-            conventions for Ledgerly: naming, which fixtures to use, how to assert money, and what to do when an existing
-            test contradicts the request.</p>
-          <p class="why"><b>Why</b><code>.claude/rules/</code> holds <strong>topic files</strong> instead of one monolithic
-            CLAUDE.md. Without frontmatter a rule loads every session, at the same cost as CLAUDE.md. Add
-            <code>paths:</code> and it loads only when matching files are touched. That's the whole of Exercise 2.</p>
+          <div class="head"><h3>📏 Rules: teach the house style the code can't show</h3><span class="chip r">7 min · red → green</span></div>
+          <p class="task">The one red left from Step 1 is a <strong>hidden convention test</strong>. Ledgerly's house style is that
+            new value objects are <code>@dataclass(frozen=True, slots=True, kw_only=True)</code> and services never return dicts.
+            Nothing in the codebase shows <code>kw_only</code>, so the agent can't copy it. Write the rule:
+            <code>ledgerly/.claude/rules/value-objects.md</code>. Then add <code>.claude/rules/testing.md</code> with three
+            test conventions.</p>
+          <div class="promptbox shell">
+            <div class="tag">▶ Re-run the same ticket <button class="copy">⧉ copy</button></div>
+            <p>tools/reset.sh --keep-memory   <span class="c-cmt"># undo the code, keep CLAUDE.md + rules</span>
+cd ledgerly &amp;&amp; claude          <span class="c-cmt"># /context → both rules listed; paste LED-105, /exit</span>
+cd .. &amp;&amp; tools/check.sh led-105</p>
+          </div>
+          <div class="out">   <span class="d">Step 1:</span>  <span class="f">FAIL</span>  value-object-convention  Revenue missing slots=True, kw_only=True …
+   <span class="d">Step 3:</span>  <span class="p">PASS</span>  value-object-convention  value objects OK (1 new service function(s))
+   => <span class="p">GREEN</span></div>
+          <p class="why"><b>Why</b><code>.claude/rules/</code> holds <strong>topic files</strong>, so you don't end up with one
+            monolithic CLAUDE.md. The check grading you lives in the drill folder, <strong>outside the repo</strong>: the agent
+            can't read it, copy it or edit it. The only way the convention reaches the agent is your rule. Without
+            frontmatter a rule loads every session. Add <code>paths:</code> and it loads only when matching files are
+            touched. Try that in the stretch below.</p>
           <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
             <div class="checks">
-              <div><code>.claude/rules/testing.md</code> exists with <strong>three or more</strong> test conventions.</div>
-              <div><code>/context</code> at the root lists it under Memory files.</div>
-              <div><em>Stretch:</em> add <code>paths: ["tests/**"]</code> frontmatter and watch it <strong>disappear</strong> from <code>/context</code> until a test file is read.</div>
+              <div><code>.claude/rules/value-objects.md</code> states the house style: <strong>frozen + slots + kw_only, no dicts from services</strong>.</div>
+              <div><code>.claude/rules/testing.md</code> has <strong>three or more</strong> test conventions.</div>
+              <div><code>/context</code> lists both rules, and <code>tools/check.sh led-105</code> shows <strong>value-object-convention PASS</strong>.</div>
             </div>
           </div>
           <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
-            <details><summary><span class="lv">1 · nudge</span>Where do conventions come from?</summary>
-              <div class="body">Open <code>tests/conftest.py</code> and <code>ruff.toml</code>. The fixtures and the <code>PT</code> lint rules are your raw material.</div></details>
-            <details class="locked"><summary><span class="lv">2 · specific</span>Four candidates</summary>
-              <div class="body">Name tests <code>test_&lt;behaviour&gt;</code> · use the <code>conn</code> / <code>client</code> / <code>paid_invoice</code> fixtures · assert money as <code>Money</code> or <code>*_cents</code>, never floats · never change an existing assertion to make a test pass.</div></details>
-            <details class="locked"><summary><span class="lv">3 · near-complete</span>Show me the file</summary>
-              <div class="body"><pre class="codeblock"><span class="hl"># Testing conventions</span>
-- Run with `uv run pytest -q`. `landmine` tests are deselected on purpose.
-- Name tests test_&lt;behaviour&gt;, one behaviour per test.
-- Use fixtures from tests/conftest.py: conn, client, paid_invoice.
-- Assert money as Money or integer *_cents, never floats.
-- pytest.raises always takes match= (ruff PT011).
-- Never change an existing assertion to make a test pass.
-  If an existing test contradicts the request, stop and say so.</pre></div></details>
+            <details><summary><span class="lv">1 · nudge</span>What does the red want?</summary>
+              <div class="body">Read the failure message word for word. It names the class, the missing flags and the house style. A rule is just that message turned into an instruction, plus the reason.</div></details>
+            <details class="locked"><summary><span class="lv">2 · specific</span>The four lines that matter</summary>
+              <div class="body">Logic goes in a <code>services/</code> function · new data classes are <code>@dataclass(frozen=True, slots=True, kw_only=True)</code> · services never return <code>dict</code> / <code>Mapping</code> / <code>TypedDict</code> · <code>Invoice</code>, <code>Line</code> and <code>reports.py</code> predate the rule, so don't copy them. Say <em>why</em> (the LED-077 swapped-arguments bug). Reasons make rules stick.</div></details>
+            <details class="locked"><summary><span class="lv">3 · near-complete</span>Show me the rule</summary>
+              <div class="body"><pre class="codeblock"><span class="hl"># Value objects (house style for services/ and payments/)</span>
+- Business logic for a ticket goes in a services/ function.
+- Every NEW class holding data is
+  @dataclass(frozen=True, slots=True, kw_only=True)
+  - frozen: results can't be mutated after a service returns them
+  - kw_only: two int fields can't be swapped positionally (LED-077)
+  - slots: no stray attributes
+- Services return value objects, never dicts (no dict, Mapping,
+  TypedDict, NamedTuple). The API maps them to pydantic models.
+- Exceptions are exempt. Invoice/Line predate this rule: don't copy.
+- services/reports.py is legacy (dicts, floats). Not an example.</pre></div></details>
           </div>
+          <p class="subnote why" style="border-left-color:var(--amber)"><b style="color:var(--amber)">Stretch</b>Add <code>paths: ["src/ledgerly/services/**"]</code> frontmatter and re-run. Does a <em>new</em>
+            file in <code>services/</code> trigger the rule before the agent writes it? Path-scoped rules load on demand, so whether one fires in time is something to measure.</p>
           <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
         </div>
       </div>
@@ -559,13 +579,13 @@ cd ~/Development/ledgerly-workshop/ledgerly &amp;&amp; claude   <span class="c-c
       <div class="step" id="s5" data-step="5">
         <div class="n">5</div>
         <div>
-          <div class="head"><h3>🔍 Diagnose: what's loaded where?</h3><span class="chip">3 min</span></div>
+          <div class="head"><h3>🔍 Diagnose: what's loaded where?</h3><span class="chip">2 min</span></div>
           <p class="task">Start a <strong>fresh</strong> session in each location, run <code>/context</code> (and <code>/memory</code>), and tick what's listed.</p>
           <table class="diag">
             <tr><th>Memory file</th><th>at ledgerly/</th><th>at …/payments/</th></tr>
             <tr><td>CLAUDE.md (project)</td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr>
             <tr><td>docs/standards/api-conventions.md (@)</td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr>
-            <tr><td>.claude/rules/testing.md</td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr>
+            <tr><td>.claude/rules/*.md (both)</td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr>
             <tr><td>src/ledgerly/payments/CLAUDE.md</td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr>
             <tr><td>~/.claude/CLAUDE.md (user)</td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr>
           </table>
@@ -663,6 +683,13 @@ mv ~/.claude/CLAUDE.md.bak ~/.claude/CLAUDE.md 2&gt;/dev/null || rm ~/.claude/CL
         <div class="note">Step 0 passes pytest, ruff and import-linter, and it's still wrong. That's why there's a drift checker.</div>
       </div>
 
+      <div class="infobox ok">
+        <div class="label">🕵️ The hidden judge</div>
+        <p>Every check lives in <span class="mono">exercises/…/drills/</span>, <strong>outside</strong> <span class="mono">ledgerly/</span>.
+          The agent can't read the convention test, so it can't game it. The only way it learns the house style is from
+          what you write. Keep the doer away from the judge.</p>
+      </div>
+
       <div class="infobox">
         <div class="label">⚖️ Concatenated, not overridden</div>
         <p>Every loaded memory file is <strong>concatenated</strong>. No "more specific wins". When two disagree, the
@@ -686,7 +713,7 @@ mv ~/.claude/CLAUDE.md.bak ~/.claude/CLAUDE.md 2&gt;/dev/null || rm ~/.claude/CL
         <p>Even a perfect CLAUDE.md is <strong>advisory</strong>: it gives you a rate, not a guarantee. The facilitator
           will close with <span class="mono">LED-103</span>, an impossible VAT ticket. Watch whether the agent edits the
           test to make the suite pass.</p>
-        <p>That's why <strong>Exercise 2 (rules)</strong> and <strong>Exercise 3 (hooks)</strong> exist.</p>
+        <p>That's why <strong>Exercise 3 (hooks)</strong> exists: a rate becomes 0 by construction.</p>
       </div>
 
     </div>
@@ -695,7 +722,7 @@ mv ~/.claude/CLAUDE.md.bak ~/.claude/CLAUDE.md 2&gt;/dev/null || rm ~/.claude/CL
   <!-- ============ REFERENCE IMPLEMENTATION ============ -->
   <div class="reference" id="reference">
     <div class="label">🔓 Reference implementation</div>
-    <p>Finished all six steps? Compare with the reference. It's also in the repo as real files:
+    <p>Finished all seven steps? Compare with the reference. It's also in the repo as real files:
       <strong>exercises/ex01-claude-md/reference/</strong>. Apply it with
       <code style="font-family:'Space Mono',monospace;color:var(--green)">tools/apply_variant.sh exercises/ex01-claude-md/reference</code>.</p>
     <button class="unlock" id="unlock">I've finished, show me the reference</button>
@@ -762,8 +789,30 @@ Stop and say so. Don't work around it.</pre>
   Adding one needs a rate in fx.py.</pre>
       </div>
       <div class="reffile">
+        <div class="fname">ledgerly/.claude/rules/value-objects.md</div>
+        <div class="fnote">Rule · the house style the hidden convention test grades</div>
+<pre class="codeblock"><span class="hl"># Value objects (house style for services/ and payments/)</span>
+- Business logic for a ticket goes in a services/ function.
+  Routes only map HTTP in and out.
+- Every NEW class holding data is
+  @dataclass(frozen=True, slots=True, kw_only=True):
+  - frozen: a result can't be mutated after a service
+    hands it back.
+  - kw_only: two int fields (amount_cents, invoice_id)
+    can't be swapped positionally. That shipped once (LED-077).
+  - slots: no stray attributes.
+- Services return value objects, never dicts (no dict,
+  Mapping, TypedDict, NamedTuple). The API maps them to
+  pydantic response models.
+- Exceptions are exempt. Older classes (Invoice, Line)
+  predate this rule; don't copy them, and don't rewrite
+  them unless the ticket asks.
+- services/reports.py is legacy (dicts and floats).
+  It is not an example.</pre>
+      </div>
+      <div class="reffile">
         <div class="fname">ledgerly/.claude/rules/testing.md</div>
-        <div class="fnote">Rule · no paths: yet, so always loaded (Exercise 2 scopes it)</div>
+        <div class="fnote">Rule · no paths:, so always loaded (scoping it is the stretch)</div>
 <pre class="codeblock"><span class="hl"># Testing conventions</span>
 - Run with `uv run pytest -q`. Tests marked
   `landmine` are deselected on purpose; leave them.

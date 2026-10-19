@@ -1,0 +1,2 @@
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"q1","name":"Skill","input":{"skill":"ship-check"}}]}}
+{"type":"result","num_turns":3,"total_cost_usd":0.09,"result":"I ran the ship check first… fx.convert rounds half-even once at the end.","usage":{"input_tokens":600,"output_tokens":300,"cache_read_input_tokens":12000}}

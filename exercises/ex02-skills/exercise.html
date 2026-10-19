@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Latent · Exercise 2 — Skills: Package the Procedure, Prove It Fires</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     LATENT · EXERCISE 2 — Skills on Ledgerly
+     Built off exercise-template.html (terminal aesthetic),
+     plus: why / acceptance / progressive hints / reference reveal.
+     ============================================================ */
+
+  :root{
+    --space-black:#0d0f0d;
+    --panel:#161a16;
+    --panel-2:#1c211c;
+    --border:#2a302a;
+    --green:#3ddc84;
+    --green-dim:#7fae8e;
+    --red:#EB323C;
+    --red-dark:#A12229;
+    --amber:#d9a441;
+    --silver:#A8B0A8;
+    --dove:#6a726a;
+    --steel-white:#FDFDFD;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html,body{min-height:100%;background:var(--space-black);
+    font-family:'Space Grotesk',system-ui,sans-serif;color:var(--steel-white);
+    -webkit-font-smoothing:antialiased;}
+
+  .page{max-width:1600px;margin:0 auto;padding:3vmin 4vmin 22vmin;}
+
+  /* ---------- kicker + title ---------- */
+  .kicker{font-family:'Space Mono',monospace;font-size:1.5vmin;font-weight:700;letter-spacing:.35em;
+    text-transform:uppercase;color:var(--green);margin-bottom:1.6vmin;}
+  h1{font-size:8.5vmin;font-weight:700;line-height:1.0;letter-spacing:-.02em;margin-bottom:4vmin;}
+  .accent{color:var(--green);}
+  .accent-r{color:var(--red);}
+
+  /* ---------- objective banner ---------- */
+  .objective{background:var(--panel);border:1px solid var(--border);
+    border-radius:1.4vmin;padding:3.5vmin 4vmin;margin-bottom:3vmin;}
+  .objective .label{font-family:'Space Mono',monospace;font-size:1.5vmin;font-weight:700;
+    letter-spacing:.25em;text-transform:uppercase;color:var(--green);
+    display:flex;align-items:center;gap:1.2vmin;margin-bottom:2vmin;}
+  .objective p{font-size:3vmin;line-height:1.45;color:var(--silver);max-width:92ch;}
+  .objective strong{color:var(--steel-white);font-weight:700;}
+  .objective code{font-family:'Space Mono',monospace;font-size:.8em;color:var(--green);}
+
+  /* learning objectives */
+  .goals{display:grid;grid-template-columns:repeat(5,1fr);gap:1.4vmin;margin-bottom:3vmin;}
+  .goal{background:var(--panel);border:1px solid var(--border);border-radius:1vmin;padding:2vmin 2.2vmin;}
+  .goal .gi{font-size:2.6vmin;margin-bottom:1vmin;}
+  .goal p{font-size:1.8vmin;line-height:1.45;color:var(--silver);}
+  .goal p strong{color:var(--steel-white);}
+
+  /* ---------- workflow rail ---------- */
+  .rail{display:flex;gap:1.2vmin;margin-bottom:4vmin;flex-wrap:wrap;}
+  .rail .node{flex:1;min-width:14vmin;background:var(--panel);border:1px solid var(--border);
+    border-radius:1vmin;padding:1.8vmin 1.6vmin;text-align:center;cursor:pointer;transition:.2s;
+    text-decoration:none;color:inherit;}
+  .rail .node:hover{border-color:var(--green-dim);}
+  .rail .node .k{font-family:'Space Mono',monospace;font-size:1.2vmin;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--dove);margin-bottom:.8vmin;}
+  .rail .node .v{font-size:2.2vmin;font-weight:700;}
+  .rail .node .t{font-family:'Space Mono',monospace;font-size:1.3vmin;color:var(--dove);margin-top:.6vmin;}
+  .rail .node.red{border-color:var(--red-dark);}
+  .rail .node.red .v{color:var(--red);}
+  .rail .node.done{border-color:var(--green);background:#122016;}
+  .rail .node.done .v{color:var(--green);}
+  .rail .node.done .k::after{content:" ✓";color:var(--green);}
+  .rail .arrow{align-self:center;color:var(--dove);font-size:2.2vmin;}
+
+  /* ---------- layout: steps (left) + side panel (right) ---------- */
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,0.42fr);gap:3vmin;align-items:start;}
+
+  .steps{display:flex;flex-direction:column;gap:2.4vmin;}
+  .step{background:var(--panel);border:1px solid var(--border);border-radius:1.2vmin;
+    padding:3vmin 3.5vmin;display:grid;grid-template-columns:auto minmax(0,1fr);gap:3vmin;align-items:start;
+    scroll-margin-top:3vmin;transition:border-color .2s;}
+  .step.red-step{border-color:var(--red-dark);}
+  .step.done{border-color:var(--green);}
+  .step .n{font-family:'Space Mono',monospace;font-size:5vmin;font-weight:700;
+    color:var(--green);line-height:1;}
+  .step.red-step .n{color:var(--red);}
+  .step .head{display:flex;align-items:baseline;justify-content:space-between;gap:2vmin;}
+  .step h3{font-size:3.6vmin;font-weight:700;line-height:1.1;}
+  .chip{font-family:'Space Mono',monospace;font-size:1.4vmin;color:var(--silver);
+    border:1px solid var(--border);border-radius:99px;padding:.4vmin 1.4vmin;white-space:nowrap;}
+  .chip.r{color:var(--red);border-color:var(--red-dark);}
+  .step code,.cmd{font-family:'Space Mono',monospace;font-size:.82em;
+    background:var(--panel-2);border:1px solid var(--border);border-radius:.5vmin;
+    padding:.15em .5em;color:var(--green);white-space:nowrap;}
+  .step em{color:var(--steel-white);font-style:italic;}
+  .task{font-size:2.2vmin;line-height:1.5;color:var(--silver);margin-top:1.6vmin;}
+  .task strong{color:var(--steel-white);}
+
+  /* verbatim prompt / shell boxes */
+  .promptbox{margin-top:2vmin;background:#0a0c0a;border:1px solid var(--border);
+    border-left:5px solid var(--green);border-radius:.9vmin;padding:2.2vmin 2.6vmin;position:relative;}
+  .promptbox .tag{font-family:'Space Mono',monospace;font-size:1.3vmin;font-weight:700;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--green);margin-bottom:1.4vmin;
+    display:flex;justify-content:space-between;align-items:center;gap:2vmin;}
+  .promptbox p{font-family:'Space Mono',monospace;font-size:1.9vmin;line-height:1.55;color:var(--steel-white);}
+  .promptbox p + p{margin-top:1.2vmin;}
+  .promptbox.shell{border-left-color:var(--amber);}
+  .promptbox.shell .tag{color:var(--amber);}
+  .promptbox.shell p{white-space:pre-wrap;}
+  .promptbox .c-cmt{color:var(--dove);}
+  .copy{font-family:'Space Mono',monospace;font-size:1.2vmin;letter-spacing:.1em;
+    background:transparent;border:1px solid var(--border);color:var(--silver);
+    border-radius:.5vmin;padding:.4vmin 1vmin;cursor:pointer;}
+  .copy:hover{border-color:var(--green);color:var(--green);}
+  .copy.ok{border-color:var(--green);color:var(--green);}
+
+  /* why + acceptance */
+  .why{margin-top:2.2vmin;font-size:2vmin;line-height:1.55;color:var(--silver);
+    border-left:3px solid var(--green-dim);padding-left:1.8vmin;}
+  .why b{font-family:'Space Mono',monospace;font-size:1.3vmin;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--green-dim);margin-right:1vmin;}
+  .why strong{color:var(--steel-white);}
+  .accept{margin-top:2vmin;}
+  .accept .lbl{font-family:'Space Mono',monospace;font-size:1.3vmin;font-weight:700;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--steel-white);margin-bottom:1.2vmin;}
+  .checks{display:flex;flex-direction:column;gap:1vmin;}
+  .checks div{font-size:2vmin;line-height:1.45;color:var(--silver);
+    padding-left:3.2vmin;position:relative;}
+  .checks div::before{content:"☐";position:absolute;left:0;color:var(--green);
+    font-family:'Space Mono',monospace;}
+  .checks div strong{color:var(--steel-white);}
+
+  /* expected red output */
+  .out{margin-top:1.6vmin;font-family:'Space Mono',monospace;font-size:1.65vmin;line-height:1.6;
+    background:#0a0c0a;border:1px solid var(--border);border-radius:.9vmin;padding:1.8vmin 2.4vmin;
+    color:var(--silver);white-space:pre;overflow-x:auto;}
+  .out .f{color:var(--red);font-weight:700;}
+  .out .p{color:var(--green);}
+  .out .d{color:var(--dove);}
+
+  /* progressive hints */
+  .hints{margin-top:2.2vmin;display:flex;flex-direction:column;gap:1vmin;}
+  .hints .hl{font-family:'Space Mono',monospace;font-size:1.3vmin;font-weight:700;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--amber);}
+  .hints details{background:var(--panel-2);border:1px solid var(--border);border-radius:.8vmin;}
+  .hints summary{list-style:none;cursor:pointer;padding:1.2vmin 1.8vmin;font-size:1.9vmin;
+    color:var(--silver);display:flex;gap:1.2vmin;align-items:center;user-select:none;}
+  .hints summary::-webkit-details-marker{display:none;}
+  .hints summary .lv{font-family:'Space Mono',monospace;font-size:1.3vmin;color:var(--amber);
+    border:1px solid #5a4620;border-radius:.4vmin;padding:.2vmin .8vmin;}
+  .hints details[open] summary{color:var(--steel-white);border-bottom:1px solid var(--border);}
+  .hints details.locked{opacity:.38;pointer-events:none;}
+  .hints details.locked summary::after{content:"🔒 open the previous hint first";margin-left:auto;
+    font-family:'Space Mono',monospace;font-size:1.2vmin;color:var(--dove);}
+  .hints .body{padding:1.6vmin 2vmin;font-size:1.9vmin;line-height:1.55;color:var(--silver);}
+  .hints .body strong{color:var(--steel-white);}
+  pre.codeblock{font-family:'Space Mono',monospace;font-size:1.6vmin;line-height:1.55;
+    background:#0a0c0a;border:1px solid var(--border);border-radius:.8vmin;padding:1.6vmin 2vmin;
+    color:var(--steel-white);white-space:pre;overflow-x:auto;margin-top:1vmin;}
+  pre.codeblock .cm{color:var(--dove);}
+  pre.codeblock .hl{color:var(--green);}
+  pre.codeblock .fn{color:var(--amber);}
+
+  .stepfoot{margin-top:2.4vmin;display:flex;justify-content:flex-end;}
+  .donebtn{font-family:'Space Mono',monospace;font-size:1.5vmin;background:var(--panel-2);
+    border:1px solid var(--border);color:var(--silver);border-radius:.7vmin;padding:1vmin 1.8vmin;cursor:pointer;}
+  .donebtn:hover{border-color:var(--green);color:var(--green);}
+  .step.done .donebtn{background:var(--green);color:#04210f;border-color:var(--green);font-weight:700;}
+
+  /* side panel */
+  .side{display:flex;flex-direction:column;gap:3vmin;position:sticky;top:3vmin;}
+  .infobox{background:var(--panel);border:1px solid var(--border);
+    border-radius:1.4vmin;padding:3vmin;}
+  .infobox .label{font-family:'Space Mono',monospace;font-size:1.3vmin;font-weight:700;
+    letter-spacing:.25em;text-transform:uppercase;color:var(--red);margin-bottom:2vmin;}
+  .infobox p{font-size:1.9vmin;line-height:1.6;color:var(--silver);}
+  .infobox p strong{color:var(--steel-white);}
+  .infobox p + p{margin-top:1.4vmin;}
+  .infobox .mono{font-family:'Space Mono',monospace;font-size:1.55vmin;color:var(--green);}
+  .infobox.ok{border-color:#245a39;}
+  .infobox.ok .label{color:var(--green);}
+
+  /* hierarchy ladder */
+  .ladder{display:flex;flex-direction:column;gap:.9vmin;}
+  .rung{display:grid;grid-template-columns:auto 1fr;gap:1.4vmin;align-items:start;
+    background:var(--panel-2);border:1px solid var(--border);border-radius:.8vmin;padding:1.2vmin 1.4vmin;}
+  .rung .ri{font-size:2.2vmin;line-height:1.2;}
+  .rung .rp{font-family:'Space Mono',monospace;font-size:1.45vmin;color:var(--green);}
+  .rung .rd{font-size:1.65vmin;color:var(--silver);line-height:1.4;margin-top:.3vmin;}
+  .rung .rd b{color:var(--steel-white);font-weight:600;}
+  .rung.trap{border-color:var(--red-dark);}
+  .rung.trap .rp{color:var(--red);}
+
+  /* warning box variant */
+  .warn{background:#1f1414;border:1px solid var(--red-dark);text-align:center;}
+  .warn .big{font-size:3vmin;margin-bottom:1vmin;}
+  .warn .head{color:var(--red);font-weight:700;font-size:2.4vmin;margin-bottom:.6vmin;}
+  .warn .note{font-family:'Space Mono',monospace;font-size:1.5vmin;color:var(--green-dim);line-height:1.5;}
+
+  /* commands cheat list */
+  .cmds{display:flex;flex-direction:column;gap:1vmin;}
+  .cmds div{display:grid;grid-template-columns:1fr;gap:.2vmin;}
+  .cmds .c{font-family:'Space Mono',monospace;font-size:1.45vmin;color:var(--green);}
+  .cmds .e{font-size:1.6vmin;color:var(--dove);}
+
+  /* ---------- diagnose table ---------- */
+  table.diag{width:100%;border-collapse:collapse;margin-top:2vmin;font-size:1.8vmin;}
+  table.diag th{font-family:'Space Mono',monospace;font-size:1.3vmin;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--dove);text-align:left;padding:1vmin 1.2vmin;border-bottom:1px solid var(--border);}
+  table.diag td{padding:1vmin 1.2vmin;border-bottom:1px solid #222822;color:var(--silver);}
+  table.diag td:first-child{font-family:'Space Mono',monospace;color:var(--steel-white);font-size:1.6vmin;}
+  table.diag input{width:2.2vmin;height:2.2vmin;accent-color:var(--green);}
+
+  /* ---------- reference implementation ---------- */
+  .reference{margin-top:4vmin;background:var(--panel);border:1px solid var(--border);
+    border-radius:1.4vmin;padding:3.5vmin 4vmin;}
+  .reference .label{font-family:'Space Mono',monospace;font-size:1.5vmin;font-weight:700;
+    letter-spacing:.25em;text-transform:uppercase;color:var(--green);margin-bottom:1.6vmin;}
+  .reference > p{font-size:2.2vmin;color:var(--silver);line-height:1.5;max-width:90ch;}
+  .reference > p strong{color:var(--steel-white);}
+  .unlock{margin-top:2.4vmin;font-family:'Space Mono',monospace;font-size:1.7vmin;font-weight:700;
+    background:transparent;border:1px solid var(--green);color:var(--green);border-radius:.8vmin;
+    padding:1.4vmin 2.4vmin;cursor:pointer;}
+  .unlock:hover{background:var(--green);color:#04210f;}
+  .refgrid{display:none;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2.4vmin;margin-top:3vmin;}
+  .refgrid.open{display:grid;}
+  .reffile .fname{font-family:'Space Mono',monospace;font-size:1.5vmin;color:var(--amber);margin-bottom:.4vmin;}
+  .reffile .fnote{font-size:1.6vmin;color:var(--dove);margin-bottom:.6vmin;}
+  .reffile.wide{grid-column:1 / -1;}
+
+  /* ---------- lessons strip ---------- */
+  .lessons{margin-top:3vmin;display:grid;grid-template-columns:repeat(3,1fr);gap:1.6vmin;}
+  .lesson{background:var(--panel);border:1px solid var(--border);border-radius:1vmin;padding:2.2vmin 2.4vmin;}
+  .lesson .li{font-size:2.6vmin;margin-bottom:.8vmin;}
+  .lesson h4{font-size:2.2vmin;margin-bottom:.6vmin;}
+  .lesson p{font-size:1.75vmin;line-height:1.5;color:var(--silver);}
+
+  /* ---------- timer (bottom-right, fixed) ---------- */
+  .timer{position:fixed;bottom:3vmin;right:3vmin;z-index:50;
+    background:var(--panel);border:1px solid var(--border);border-radius:1.4vmin;
+    padding:2.4vmin 2.8vmin;box-shadow:0 1.5vmin 4vmin rgba(0,0,0,.6);
+    display:flex;flex-direction:column;gap:1.8vmin;min-width:34vmin;}
+  .timer .clock{font-family:'Space Mono',monospace;font-size:6vmin;font-weight:700;
+    color:var(--green);text-align:center;line-height:1;letter-spacing:.04em;}
+  .timer .clock.warn-time{color:var(--red);}
+  .timer .presets{display:flex;gap:1vmin;justify-content:center;}
+  .timer .presets button{font-family:'Space Mono',monospace;font-size:1.5vmin;
+    background:var(--panel-2);border:1px solid var(--border);color:var(--silver);
+    border-radius:.6vmin;padding:.9vmin 1.4vmin;cursor:pointer;transition:.15s;}
+  .timer .presets button:hover{border-color:var(--green);color:var(--green);}
+  .timer .presets button.sel{background:var(--green);color:#04210f;border-color:var(--green);font-weight:700;}
+  .timer .controls{display:flex;gap:1vmin;}
+  .timer .controls button{flex:1;font-family:'Space Mono',monospace;font-size:1.6vmin;
+    border-radius:.7vmin;padding:1.1vmin;cursor:pointer;transition:.15s;
+    border:1px solid var(--border);background:var(--panel-2);color:var(--silver);
+    display:flex;align-items:center;justify-content:center;gap:.6vmin;}
+  .timer #start{border-color:var(--green);color:var(--green);}
+  .timer #start:hover{background:var(--green);color:#04210f;}
+  .timer #pause{border-color:#d9a441;color:#d9a441;}
+  .timer #pause:hover{background:#d9a441;color:#211803;}
+  .timer #reset:hover{background:var(--panel);color:var(--steel-white);}
+
+  /* ---------- footer ---------- */
+  .footer{display:flex;justify-content:space-between;align-items:center;
+    margin-top:5vmin;font-family:'Space Mono',monospace;font-size:1.5vmin;color:var(--dove);}
+  .footer .brand{color:var(--silver);}
+  .footer .brand b{color:var(--steel-white);}
+
+  @media (max-aspect-ratio: 1/1){
+    .layout{grid-template-columns:1fr;}
+    .side{position:static;}
+    .goals{grid-template-columns:1fr 1fr;}
+    .refgrid.open{grid-template-columns:1fr;}
+    .lessons{grid-template-columns:1fr;}
+  }
+
+  /* file tree (from exercise-ralph-loop) */
+  .tree{margin-top:2vmin;font-family:'Space Mono',monospace;font-size:1.65vmin;
+    line-height:1.75;color:var(--silver);background:#0a0c0a;border:1px solid var(--border);
+    border-radius:.9vmin;padding:2vmin 2.6vmin;white-space:pre;overflow-x:auto;}
+  .tree b{color:var(--green);font-weight:400;}
+  .tree i{color:var(--dove);font-style:normal;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ============ TITLE ============ -->
+  <div class="kicker">Exercise 2 · Day 1 · Extension layer</div>
+  <h1>Skills: package the <span class="accent-r">procedure</span>, prove it <span class="accent">fires</span> 🧩</h1>
+
+  <!-- ============ OBJECTIVE ============ -->
+  <div class="objective">
+    <div class="label">🎯 Objective</div>
+    <p>Ledgerly's PR notes follow a house format: six sections, the ADRs the change touches, and a
+      verification table that matches reality. That's a <strong>procedure</strong>, not a fact, so it doesn't belong
+      in CLAUDE.md. Watch the agent write a generic note, then package the procedure as a skill with a
+      <strong>description that fires it</strong>, a <strong>script it runs</strong> and a <strong>template it reads
+      only when needed</strong>. Finish by turning a second skill into a sandboxed, forked worker. Each step is graded
+      by a check the agent can't see.</p>
+  </div>
+
+  <!-- ============ LEARNING OBJECTIVES ============ -->
+  <div class="goals">
+    <div class="goal"><div class="gi">🗂️</div><p>Build a skill folder: <strong>SKILL.md</strong>, a <strong>reference.md</strong> loaded on demand, a <strong>script</strong> that's run, not read.</p></div>
+    <div class="goal"><div class="gi">📝</div><p>Write a <strong>description + when_to_use</strong> that fire the skill without naming it, and <em>not</em> on everything else.</p></div>
+    <div class="goal"><div class="gi">⚡</div><p>Pre-fill a skill with <strong>!`command`</strong> dynamic context and <strong>${CLAUDE_SKILL_DIR}</strong>.</p></div>
+    <div class="goal"><div class="gi">🛡️</div><p>Use <strong>allowed-tools</strong> as a sandbox: it pre-approves <em>and</em> forbids.</p></div>
+    <div class="goal"><div class="gi">🍴</div><p>Move work off your context with <strong>context: fork · agent · model · effort</strong>.</p></div>
+  </div>
+
+  <!-- ============ WORKFLOW RAIL ============ -->
+  <div class="rail" id="rail">
+    <a class="node red" href="#s0" data-step="0"><div class="k">Step 0</div><div class="v">🔴 No skill</div><div class="t">4 min</div></a>
+    <div class="arrow">→</div>
+    <a class="node" href="#s1" data-step="1"><div class="k">Step 1</div><div class="v">✍️ Author</div><div class="t">7 min</div></a>
+    <div class="arrow">→</div>
+    <a class="node" href="#s2" data-step="2"><div class="k">Step 2</div><div class="v">🎯 By name</div><div class="t">3 min</div></a>
+    <div class="arrow">→</div>
+    <a class="node" href="#s3" data-step="3"><div class="k">Step 3</div><div class="v">🪄 Implicit</div><div class="t">5 min</div></a>
+    <div class="arrow">→</div>
+    <a class="node" href="#s4" data-step="4"><div class="k">Step 4</div><div class="v">⚙️ Worker</div><div class="t">6 min</div></a>
+  </div>
+
+  <!-- ============ STEPS (left) + SIDE PANEL (right) ============ -->
+  <div class="layout">
+    <div class="steps">
+
+      <!-- 0 · RED -->
+      <div class="step red-step" id="s0" data-step="0">
+        <div class="n">0</div>
+        <div>
+          <div class="head"><h3>🔴 Ask for a PR note with no skill</h3><span class="chip r">4 min · red</span></div>
+          <div class="promptbox shell">
+            <div class="tag">▶ Run in your terminal (workshop root) <button class="copy">⧉ copy</button></div>
+            <p>tools/start.sh led-120     <span class="c-cmt"># keeps your Ex 1 memory files; LED-105 is already implemented</span>
+cd ledgerly &amp;&amp; claude</p>
+          </div>
+          <div class="promptbox">
+            <div class="tag">▶ Paste into your agent · LED-120 <button class="copy">⧉ copy</button></div>
+            <p>LED-120 — LED-105 (the revenue endpoint) is implemented on this branch. Write the PR note for it to docs/pr/LED-105.md so a reviewer can pick it up.</p>
+          </div>
+          <div class="promptbox shell">
+            <div class="tag">▶ When it says done: /exit, then <button class="copy">⧉ copy</button></div>
+            <p>cd .. &amp;&amp; tools/check.sh led-120</p>
+          </div>
+          <div class="out">   <span class="f">FAIL</span>  house-sections        missing: ticket, adrs touched, verification, risk &amp; rollback, changelog
+   <span class="f">FAIL</span>  adrs-touched          'ADRs touched' misses ADR-0001, ADR-0002
+   <span class="f">FAIL</span>  honest-verification   no Verification section
+   <span class="p">PASS</span>  code-untouched        only docs/ changed
+   => <span class="f">RED (3 failing)</span>        <span class="d">← typical result; yours will vary</span></div>
+          <p class="why"><b>Why</b>The note looks fine: summary, changes, "all tests pass ✅". But it isn't the team's format, it
+            doesn't say which decisions the change touches, and nobody ran lint or import-linter. The format is
+            <strong>a 30-line procedure used only sometimes</strong>. In CLAUDE.md it would cost every session; as a
+            skill it costs about 100 tokens until it fires (Steering deck, 07 · Decide).</p>
+          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
+            <div class="checks">
+              <div>The checker prints <strong>RED</strong> on the house sections, the ADRs and verification.</div>
+              <div>You can say why this is a <strong>skill</strong> and not a CLAUDE.md line.</div>
+            </div>
+          </div>
+          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
+            <details><summary><span class="lv">1 · nudge</span>"no drill matching"?</summary>
+              <div class="body">Run tools from the <strong>workshop root</strong> (<code>ledgerly-workshop/</code>), not from inside <code>ledgerly/</code>.</div></details>
+            <details class="locked"><summary><span class="lv">2 · specific</span>The note landed somewhere else</summary>
+              <div class="body">The checker reads exactly <code>ledgerly/docs/pr/LED-105.md</code>. If the agent picked another path, that's also a result: the path is part of the house procedure too.</div></details>
+            <details class="locked"><summary><span class="lv">3 · near-complete</span>My note came back green</summary>
+              <div class="body">Possible if your Ex 1 CLAUDE.md happens to describe PR notes. Note it, then see the typical red:
+                <pre class="codeblock">tools/demo_reference.sh led-120 red    <span class="cm"># hand-written reproduction</span>
+cat ledgerly/docs/pr/LED-105.md</pre></div></details>
+          </div>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+      <!-- 1 · AUTHOR -->
+      <div class="step" id="s1" data-step="1">
+        <div class="n">1</div>
+        <div>
+          <div class="head"><h3>✍️ Author <code>ship-check</code>: description first</h3><span class="chip">7 min</span></div>
+          <p class="task">Create the folder, copy the gates script in, then write two files yourself:
+            <strong>SKILL.md</strong> (frontmatter + a short body) and <strong>reference.md</strong> (the PR template and the
+            path → ADR map). The house headings are <em>Ticket · Summary · ADRs touched · Verification · Risk &amp; rollback · Changelog</em>.</p>
+          <div class="promptbox shell">
+            <div class="tag">▶ Scaffold <button class="copy">⧉ copy</button></div>
+            <p>mkdir -p ledgerly/.claude/skills/ship-check/scripts
+cp exercises/ex02-skills/starter/gates.py ledgerly/.claude/skills/ship-check/scripts/
+<span class="c-cmt"># now write SKILL.md and reference.md in ledgerly/.claude/skills/ship-check/</span></p>
+          </div>
+          <div class="tree"><b>.claude/skills/ship-check/</b>
+├─ <b>SKILL.md</b>        <i># name · description · when_to_use · argument-hint · allowed-tools + body</i>
+├─ <b>reference.md</b>    <i># PR template + path → ADR map · loaded only when the body says "read it"</i>
+└─ scripts/
+   └─ <b>gates.py</b>     <i># runs the 4 gates, prints a table · run, never loaded</i></div>
+          <div class="promptbox shell">
+            <div class="tag">▶ Lint it before you trust it <button class="copy">⧉ copy</button></div>
+            <p>python3 tools/skill_lint.py ship-check --profile ship-check</p>
+          </div>
+          <p class="why"><b>Why</b>The <strong>description is the only part Claude sees before choosing</strong>: write it first. The
+            body pulls the diff and the gate results in with <code>!`…`</code> lines <em>before</em> Claude reads it, and points at
+            <code>reference.md</code> so the template costs nothing until it's needed. <code>allowed-tools</code> pre-approves
+            the commands it runs and forbids the rest, so this skill can write a note but can't touch code.</p>
+          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
+            <div class="checks">
+              <div><code>skill_lint.py … --profile ship-check</code> prints <strong>GREEN</strong> (18 checks).</div>
+              <div><code>when_to_use</code> lists <strong>3+ phrasings</strong> people actually type.</div>
+              <div><code>allowed-tools</code> has <strong>no bare Bash</strong> and <strong>no Edit</strong>.</div>
+            </div>
+          </div>
+          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
+            <details><summary><span class="lv">1 · nudge</span>What goes in the frontmatter?</summary>
+              <div class="body">What it does (third person) · when to use it, in the words your team types · what to pass · which tools. The linter's failure lines say exactly which field is missing.</div></details>
+            <details class="locked"><summary><span class="lv">2 · specific</span>The body, in four lines</summary>
+              <div class="body">Dynamic context: <code>!`git status --short`</code>, <code>!`git diff HEAD --stat`</code>, <code>!`python3 ${CLAUDE_SKILL_DIR}/scripts/gates.py`</code>. Then: read <code>reference.md</code> · copy the gate table into Verification unchanged · never claim a gate passed unless the table says so · write to <code>docs/pr/&lt;ticket&gt;.md</code>.</div></details>
+            <details class="locked"><summary><span class="lv">3 · near-complete</span>Show me the frontmatter</summary>
+              <div class="body"><pre class="codeblock">---
+<span class="fn">name</span>: ship-check
+<span class="fn">description</span>: Prepares a Ledgerly change for review. Runs the four
+  quality gates, works out which ADRs the diff touches, and writes
+  the PR note to docs/pr/&lt;ticket&gt;.md in the team's format.
+<span class="fn">when_to_use</span>: Use when someone wants a change "ready for review",
+  asks for a "PR description" or "PR note", says "make this
+  reviewable", "is this ready to ship", or is about to open a PR.
+<span class="fn">argument-hint</span>: &lt;ticket-id, e.g. LED-105&gt;
+<span class="fn">allowed-tools</span>: Read, Grep, Glob, Write, Bash(git diff:*),
+  Bash(git status:*), Bash(python3 *), Bash(uv run:*)
+---</pre></div></details>
+          </div>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+      <!-- 2 · BY NAME -->
+      <div class="step" id="s2" data-step="2">
+        <div class="n">2</div>
+        <div>
+          <div class="head"><h3>🎯 Trigger it by name</h3><span class="chip">3 min · green</span></div>
+          <div class="promptbox shell">
+            <div class="tag">▶ Fresh start, fresh session <button class="copy">⧉ copy</button></div>
+            <p>tools/start.sh led-120 &amp;&amp; cd ledgerly &amp;&amp; claude</p>
+          </div>
+          <div class="promptbox">
+            <div class="tag">▶ Type in the chat <button class="copy">⧉ copy</button></div>
+            <p>/ship-check LED-105</p>
+          </div>
+          <div class="promptbox shell">
+            <div class="tag">▶ /exit, then <button class="copy">⧉ copy</button></div>
+            <p>cd .. &amp;&amp; tools/check.sh led-120 --label by-name</p>
+          </div>
+          <p class="why"><b>Why</b>The folder name is the command. Calling it by name proves the <strong>body</strong> works:
+            the dynamic context ran, the template was read, and the verification table is real. The checker re-runs every
+            gate, so a note that says "pass" for a failing gate stays red.</p>
+          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
+            <div class="checks">
+              <div><code>/ship-check</code> appears in the <code>/</code> picker with your <strong>argument-hint</strong>.</div>
+              <div><code>tools/check.sh led-120</code> → <strong>GREEN</strong> on all four checks.</div>
+            </div>
+          </div>
+          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
+            <details><summary><span class="lv">1 · nudge</span>/ship-check isn't in the picker</summary>
+              <div class="body">Skills load at session start. Did you start a <strong>new</strong> session after writing it? Is the path exactly <code>ledgerly/.claude/skills/ship-check/SKILL.md</code>?</div></details>
+            <details class="locked"><summary><span class="lv">2 · specific</span>It's listed but errors / looks empty</summary>
+              <div class="body">Run the linter again: broken YAML (first line not exactly <code>---</code>, tabs) or a missing linked file are the usual causes. <code>claude --debug</code> shows the skill loading.</div></details>
+            <details class="locked"><summary><span class="lv">3 · near-complete</span>honest-verification is red</summary>
+              <div class="body">The note's Verification must name all four gates, each with pass or fail, matching a re-run. Make the body say: <em>"Copy the gate results table into Verification unchanged."</em> The table comes from <code>gates.py</code>, so the agent has nothing to make up.</div></details>
+          </div>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+      <!-- 3 · IMPLICIT -->
+      <div class="step" id="s3" data-step="3">
+        <div class="n">3</div>
+        <div>
+          <div class="head"><h3>🪄 Make it fire without its name, and only then</h3><span class="chip r">5 min · red → green</span></div>
+          <p class="task">Two fresh sessions. The first should fire <code>ship-check</code> <strong>without you naming it</strong>.
+            The second is a plain question and should <strong>not</strong> fire anything. The checker reads your transcript for a
+            <code>Skill</code> call.</p>
+          <div class="promptbox shell">
+            <div class="tag">▶ A · should fire <button class="copy">⧉ copy</button></div>
+            <p>tools/start.sh trigger-implicit &amp;&amp; cd ledgerly &amp;&amp; claude
+<span class="c-cmt"># paste the prompt below, /exit, then:</span>
+cd .. &amp;&amp; tools/check.sh trigger-implicit</p>
+          </div>
+          <div class="promptbox">
+            <div class="tag">▶ A · paste (don't name the skill) <button class="copy">⧉ copy</button></div>
+            <p>LED-105 is done on this branch. Can you make it reviewable?</p>
+          </div>
+          <div class="promptbox shell">
+            <div class="tag">▶ B · should stay quiet <button class="copy">⧉ copy</button></div>
+            <p>tools/start.sh trigger-quiet &amp;&amp; cd ledgerly &amp;&amp; claude
+<span class="c-cmt"># paste the prompt below, /exit, then:</span>
+cd .. &amp;&amp; tools/check.sh trigger-quiet</p>
+          </div>
+          <div class="promptbox">
+            <div class="tag">▶ B · paste <button class="copy">⧉ copy</button></div>
+            <p>Quick question, no changes please: how does fx.convert round amounts, and why that way?</p>
+          </div>
+          <p class="why"><b>Why</b>Claude picks skills by <strong>reasoning over descriptions</strong>, not keyword matching.
+            "Won't fire" means the description is too vague or uses words nobody types. "Fires when it shouldn't" means it's
+            too broad. The lecture's test is three prompts that should trigger it and one that shouldn't. This is that
+            test with a grader.</p>
+          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
+            <div class="checks">
+              <div><code>tools/check.sh trigger-implicit</code> → <strong>skill-fired PASS</strong>, and the note is green again.</div>
+              <div><code>tools/check.sh trigger-quiet</code> → <strong>both skills stayed quiet</strong>, no files written.</div>
+              <div><em>Measure it:</em> <code>tools/run_drill.sh trigger-implicit current 3</code> gives you a firing <strong>rate</strong>.</div>
+            </div>
+          </div>
+          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
+            <details><summary><span class="lv">1 · nudge</span>It didn't fire</summary>
+              <div class="body">Say it out loud: do the words in prompt A appear in your description or <code>when_to_use</code>? "Reviewable" won't match "review-ready" in every run.</div></details>
+            <details class="locked"><summary><span class="lv">2 · specific</span>It fired on the question too</summary>
+              <div class="body">The description is claiming the whole repo ("helps with Ledgerly changes"). Narrow it to the job: <em>preparing a change for review</em>, and list the moments: before opening a PR, asked for a PR note, "is this ready to ship".</div></details>
+            <details class="locked"><summary><span class="lv">3 · near-complete</span>A when_to_use that does both</summary>
+              <div class="body"><pre class="codeblock"><span class="fn">when_to_use</span>: Use when someone wants a change "ready for review",
+  asks for a "PR description" or "PR note", says "make this
+  reviewable", "is this ready to ship", "write up what changed",
+  or is about to open a pull request.</pre>Specific moments, the team's own words, nothing about general questions.</div></details>
+          </div>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+      <!-- 4 · WORKER -->
+      <div class="step" id="s4" data-step="4">
+        <div class="n">4</div>
+        <div>
+          <div class="head"><h3>⚙️ Advanced: turn a skill into a sandboxed worker</h3><span class="chip">6 min</span></div>
+          <p class="task">Author a second skill, <code>adr-audit</code>, that reviews the diff against <code>docs/decisions/</code>
+            and <strong>physically can't edit</strong>. Then move it off your main context with the four worker fields.</p>
+          <div class="promptbox">
+            <div class="tag">▶ The frontmatter fields to use <button class="copy">⧉ copy</button></div>
+            <p style="white-space:pre-wrap">allowed-tools: Read, Grep, Glob, Bash(git diff:*)   <span class="c-cmt"># read-only sandbox</span>
+context: fork      <span class="c-cmt"># its own window: only the findings come back</span>
+agent: Explore     <span class="c-cmt"># hand it to a specific subagent</span>
+model: haiku       <span class="c-cmt"># a cheap tier for a mechanical sweep</span>
+effort: low        <span class="c-cmt"># don't overthink a first pass</span></p>
+          </div>
+          <div class="promptbox shell">
+            <div class="tag">▶ Lint, then run it <button class="copy">⧉ copy</button></div>
+            <p>python3 tools/skill_lint.py adr-audit --profile adr-audit
+tools/start.sh led-120 &amp;&amp; cd ledgerly &amp;&amp; claude   <span class="c-cmt"># /context → note the token count</span>
+<span class="c-cmt"># /adr-audit  → then /context again</span>
+<span class="c-cmt"># then type: "now fix the first finding yourself, from inside the audit"</span></p>
+          </div>
+          <table class="diag">
+            <tr><th>Try this</th><th>What to notice</th><th>Your note</th></tr>
+            <tr><td>with <code>context: fork</code></td><td>Only the findings land in your window</td><td>Δ tokens: ____</td></tr>
+            <tr><td>remove <code>context: fork</code>, re-run</td><td>Every file it read now stays in your context</td><td>Δ tokens: ____</td></tr>
+            <tr><td>"fix the first finding"</td><td>The audit can't write: <code>Write</code> isn't allowed</td><td>refused? ____</td></tr>
+            <tr><td><code>effort: low</code> → <code>high</code></td><td>Slower, more thorough</td><td>worth it? ____</td></tr>
+          </table>
+          <p class="why"><b>Why</b><code>allowed-tools</code> turns "please don't edit" into "can't edit". <code>context: fork</code>
+            plus <code>agent</code>, <code>model</code> and <code>effort</code> turn an instruction into a <strong>worker with its own
+            settings</strong>: a cheap model on low effort for a mechanical sweep, and your window gets the answer, not the 40 tool
+            calls that produced it.</p>
+          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
+            <div class="checks">
+              <div><code>skill_lint.py adr-audit --profile adr-audit</code> → <strong>GREEN</strong>.</div>
+              <div>Your <code>/context</code> grew by <strong>less</strong> with <code>fork</code> than without (fill in the table).</div>
+              <div>Asked to fix from inside the audit, it <strong>reports the fix instead of making it</strong>.</div>
+            </div>
+          </div>
+          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
+            <details><summary><span class="lv">1 · nudge</span>Lint says "not read-only"</summary>
+              <div class="body">Only <code>Read, Grep, Glob</code> and git <em>read</em> commands are allowed. <code>Bash</code> on its own, <code>Write</code> or <code>Edit</code> each break the sandbox.</div></details>
+            <details class="locked"><summary><span class="lv">2 · specific</span>The main agent fixed it anyway</summary>
+              <div class="body">That's a real finding. The sandbox applies to the <strong>skill's</strong> run. When the forked audit returns, your main session still has its own tools. To make "can't edit tests/" hold for <em>everyone</em>, you need a hook: Exercise 3.</div></details>
+            <details class="locked"><summary><span class="lv">3 · near-complete</span>Show me the skill</summary>
+              <div class="body"><pre class="codeblock">---
+<span class="fn">name</span>: adr-audit
+<span class="fn">description</span>: Audits the current diff against Ledgerly's
+  architecture decision records and reports violations
+  worst-first. Read-only; never edits files.
+<span class="fn">when_to_use</span>: Use for "check this against the ADRs", "does this
+  break any decisions", "architecture review", "audit the diff".
+<span class="fn">allowed-tools</span>: Read, Grep, Glob, Bash(git diff:*)
+<span class="fn">context</span>: fork
+<span class="fn">agent</span>: Explore
+<span class="fn">model</span>: haiku
+<span class="fn">effort</span>: low
+---
+Diff under review: !`git diff HEAD --stat`
+1. Read every file in docs/decisions/.
+2. Check each changed file against each ADR that applies.
+3. Report worst-first: ADR · file:line · what breaks it · fix.</pre></div></details>
+          </div>
+          <p class="subnote why" style="border-left-color:var(--amber)"><b style="color:var(--amber)">Stretch</b>Install someone else's
+            skills and compare: <code>/plugin install superpowers@claude-plugins-official</code>, then run its reviewer on the same
+            diff. Or add <code>disable-model-invocation: true</code> to a skill with side effects and confirm <code>trigger-quiet</code>
+            never fires it.</p>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SIDE PANEL -->
+    <div class="side">
+
+      <div class="infobox">
+        <div class="label">🗂️ Loads in three tiers</div>
+        <div class="ladder">
+          <div class="rung"><div class="ri">🏷️</div><div><div class="rp">name + description</div><div class="rd"><b>Always</b>, every session · ~100 tokens. The only part Claude sees before choosing.</div></div></div>
+          <div class="rung"><div class="ri">📄</div><div><div class="rp">SKILL.md body</div><div class="rd"><b>On trigger</b> · ~1–5k tokens, already filled by <code style="font-size:1em">!`…`</code>.</div></div></div>
+          <div class="rung"><div class="ri">📚</div><div><div class="rp">reference.md · scripts/</div><div class="rd"><b>Only if opened.</b> Scripts are run, their output enters, the code never does.</div></div></div>
+        </div>
+      </div>
+
+      <div class="infobox warn">
+        <div class="big">🧭</div>
+        <div class="head">Fact, procedure or guarantee?</div>
+        <div class="note">Always true → CLAUDE.md. 30+ lines used sometimes → a skill. Must happen → a hook (Ex 3).</div>
+      </div>
+
+      <div class="infobox ok">
+        <div class="label">⚙️ Frontmatter you'll use</div>
+        <div class="cmds">
+          <div><span class="c">description · when_to_use</span><span class="e">what it does · when to fire, in team words</span></div>
+          <div><span class="c">argument-hint</span><span class="e">shown in the / picker: &lt;ticket-id&gt;</span></div>
+          <div><span class="c">allowed-tools</span><span class="e">pre-approves the listed tools, forbids the rest</span></div>
+          <div><span class="c">context: fork · agent</span><span class="e">own window, a specific subagent</span></div>
+          <div><span class="c">model · effort</span><span class="e">cheap + low for sweeps, strong + high for design</span></div>
+          <div><span class="c">disable-model-invocation</span><span class="e">slash-only, for side effects</span></div>
+          <div><span class="c">!`cmd` · ${CLAUDE_SKILL_DIR}</span><span class="e">pre-fill the body · paths that resolve anywhere</span></div>
+        </div>
+      </div>
+
+      <div class="infobox">
+        <div class="label">🛡️ Sandbox patterns</div>
+        <p><span class="mono">Read, Grep, Glob</span>: read-only analysis<br>
+          <span class="mono">+ Bash(git diff:*), Bash(git log:*)</span>: history digging<br>
+          <span class="mono">+ Write</span>: writes docs, never edits code<br>
+          <span class="mono">Bash(python3 *)</span>: one script, no prompts<br>
+          <span class="mono">omit the field</span>: inherits everything</p>
+      </div>
+
+      <div class="infobox ok">
+        <div class="label">🧰 Your commands</div>
+        <div class="cmds">
+          <div><span class="c">tools/start.sh led-120</span><span class="e">keep memory + skills, LED-105 pre-applied</span></div>
+          <div><span class="c">python3 tools/skill_lint.py &lt;name&gt; --profile &lt;name&gt;</span><span class="e">static checks from the lecture</span></div>
+          <div><span class="c">tools/check.sh led-120</span><span class="e">grade the PR note (hidden judge)</span></div>
+          <div><span class="c">tools/check.sh trigger-implicit · trigger-quiet</span><span class="e">did it fire? did it stay quiet?</span></div>
+          <div><span class="c">tools/run_drill.sh trigger-implicit current 3</span><span class="e">your firing rate</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ REFERENCE IMPLEMENTATION ============ -->
+  <div class="reference" id="reference">
+    <div class="label">🔓 Reference implementation</div>
+    <p>Finished all five steps? Compare with the reference. It's also in the repo as real files:
+      <strong>exercises/ex02-skills/reference/</strong>. Apply it with
+      <code style="font-family:'Space Mono',monospace;color:var(--green)">tools/apply_variant.sh exercises/ex02-skills/reference</code>.</p>
+    <button class="unlock" id="unlock">I've finished, show me the reference</button>
+    <div class="refgrid" id="refgrid">
+      <div class="reffile">
+        <div class="fname">.claude/skills/ship-check/SKILL.md</div>
+        <div class="fnote">Fires implicitly · pre-filled · sandboxed to writing notes</div>
+<pre class="codeblock">---
+<span class="fn">name</span>: ship-check
+<span class="fn">description</span>: Prepares a Ledgerly change for review.
+  Runs the four quality gates, works out which ADRs the
+  diff touches, and writes the PR note to
+  docs/pr/&lt;ticket&gt;.md in the team's format.
+<span class="fn">when_to_use</span>: Use when someone wants a change "ready for
+  review", asks for a "PR description" or "PR note", says
+  "make this reviewable", "is this ready to ship", "write
+  up what changed", or is about to open a pull request.
+<span class="fn">argument-hint</span>: &lt;ticket-id, e.g. LED-105&gt;
+<span class="fn">allowed-tools</span>: Read, Grep, Glob, Write, Bash(git diff:*),
+  Bash(git status:*), Bash(python3 *), Bash(uv run:*)
+---
+<span class="hl"># Ship check</span>
+
+<span class="hl">## Context (filled in before you read this)</span>
+Changed files:
+!`git status --short`
+Diff summary:
+!`git diff HEAD --stat`
+Gate results (run by the script, not by you):
+!`python3 ${CLAUDE_SKILL_DIR}/scripts/gates.py`
+
+<span class="hl">## Your task</span>
+1. Ticket id: the argument, or LED-&lt;n&gt; from the chat.
+2. Read reference.md: template + path → ADR map.
+   Follow the template's headings exactly.
+3. Copy the gate table into Verification as-is. Never
+   claim a gate passed unless the table says so. If one
+   failed, say so and stop: don't fix code here.
+4. Write docs/pr/&lt;ticket&gt;.md; reply with the path and
+   one line per failed gate.</pre>
+      </div>
+      <div class="reffile">
+        <div class="fname">.claude/skills/ship-check/reference.md</div>
+        <div class="fnote">Loaded only when the body says so</div>
+<pre class="codeblock"><span class="hl"># PR note template (Ledgerly)</span>
+# &lt;ticket&gt;: &lt;one-line title&gt;
+## Ticket
+## Summary
+## ADRs touched
+## Verification
+## Risk &amp; rollback
+## Changelog
+
+<span class="hl">## Path → ADR map</span>
+money, payments/, conversion  → ADR-0001
+new route, api/, new service  → ADR-0002
+refunds                       → ADR-0003
+tax.py, VAT                   → ADR-0004</pre>
+        <div class="fname" style="margin-top:2.4vmin">.claude/skills/ship-check/scripts/gates.py</div>
+        <div class="fnote">Run, never loaded · prints a markdown table</div>
+<pre class="codeblock">| gate | command | result | detail |
+|---|---|---|---|
+| tests | `uv run pytest -q` | ✅ pass | 22 passed… |
+| lint | `uv run ruff check .` | ✅ pass | All checks passed! |
+| format | `uv run ruff format --check .` | ✅ pass | … |
+| architecture | `uv run lint-imports` | ✅ pass | 2 kept |
+
+<span class="cm"># it lives in the repo, so ruff lints it too</span></pre>
+      </div>
+      <div class="reffile wide">
+        <div class="fname">.claude/skills/adr-audit/SKILL.md</div>
+        <div class="fnote">A worker: read-only sandbox, forked window, cheap model, low effort</div>
+<pre class="codeblock">---
+<span class="fn">name</span>: adr-audit
+<span class="fn">description</span>: Audits the current diff against Ledgerly's architecture decision records and reports violations worst-first. Read-only; never edits files.
+<span class="fn">when_to_use</span>: Use for "check this against the ADRs", "does this break any decisions", "architecture review", "audit the diff", or before a reviewer looks at a change.
+<span class="fn">allowed-tools</span>: Read, Grep, Glob, Bash(git diff:*)
+<span class="fn">context</span>: fork
+<span class="fn">agent</span>: Explore
+<span class="fn">model</span>: haiku
+<span class="fn">effort</span>: low
+---
+Diff under review: !`git diff HEAD --stat`
+1. Read every file in docs/decisions/.   2. Check each changed file against each ADR that applies.
+3. Report findings worst-first: ADR-000N · file:line · what breaks it · suggested fix.
+You cannot edit files from this skill. If asked to fix something, report the fix instead.</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ LESSONS ============ -->
+  <div class="lessons">
+    <div class="lesson"><div class="li">📝</div><h4>The description decides everything</h4><p>Claude chooses from name + description alone. Write it first, in the team's words, and test both directions: fires when it should, stays quiet when it shouldn't.</p></div>
+    <div class="lesson"><div class="li">⚡</div><h4>Pre-fill, don't ask</h4><p><code style="font-family:'Space Mono',monospace;color:var(--green)">!`cmd`</code> and scripts put facts in front of the model: a gate table it copies is a table it can't invent.</p></div>
+    <div class="lesson"><div class="li">🛡️</div><h4>Sandbox ≠ guarantee</h4><p><code style="font-family:'Space Mono',monospace;color:var(--green)">allowed-tools</code> limits the skill's own run. Making a rule hold for every agent, every time, is a hook: Exercise 3.</p></div>
+  </div>
+
+  <!-- ============ FOOTER ============ -->
+  <div class="footer">
+    <div>⏱ <span id="dur-label">25 minutes</span> · Ledgerly · ex02-skills</div>
+    <div class="brand"><b>LATENT</b> · AI Coding Agents Workshop</div>
+  </div>
+
+</div>
+
+<!-- ============ TIMER (fixed bottom-right) ============ -->
+<div class="timer">
+  <div class="clock" id="clock">25:00</div>
+  <div class="presets" id="presets">
+    <button data-min="20">20</button>
+    <button data-min="25" class="sel">25</button>
+    <button data-min="30">30</button>
+  </div>
+  <div class="controls">
+    <button id="start" onclick="startTimer()">▶ Start</button>
+    <button id="pause" onclick="pauseTimer()">❚❚ Pause</button>
+    <button id="reset" onclick="resetTimer()">↺ Reset</button>
+  </div>
+</div>
+
+<script>
+  /* ---------- timer (same as exercise-template) ---------- */
+  let total = 25 * 60, remaining = total, tick = null;
+  const clock = document.getElementById('clock');
+  const durLabel = document.getElementById('dur-label');
+  const presets = document.getElementById('presets');
+  function fmt(s){ const m = Math.floor(s/60), sec = s%60;
+    return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0'); }
+  function render(){ clock.textContent = fmt(remaining); clock.classList.toggle('warn-time', remaining <= 60); }
+  function setMinutes(min){ total = min*60; remaining = total; durLabel.textContent = min + ' minutes';
+    [...presets.children].forEach(b => b.classList.toggle('sel', +b.dataset.min === min)); pauseTimer(); render(); }
+  function startTimer(){ if(tick) return; if(remaining <= 0) remaining = total;
+    tick = setInterval(()=>{ remaining--; if(remaining <= 0){ remaining = 0; render(); pauseTimer(); return; } render(); }, 1000); }
+  function pauseTimer(){ clearInterval(tick); tick = null; }
+  function resetTimer(){ pauseTimer(); remaining = total; render(); }
+  presets.addEventListener('click', e=>{ if(e.target.dataset.min) setMinutes(+e.target.dataset.min); });
+  setMinutes(25);
+
+  /* ---------- copy buttons ---------- */
+  document.querySelectorAll('.promptbox .copy').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const box = btn.closest('.promptbox');
+      const text = [...box.querySelectorAll('p')].map(p=>{
+        const clone = p.cloneNode(true);
+        clone.querySelectorAll('.c-cmt').forEach(c=>c.remove());
+        return clone.innerText.split('\n').map(l=>l.replace(/\s+$/,'')).join('\n');
+      }).join(box.classList.contains('shell') ? '\n' : '\n\n').trim();
+      const done = ()=>{ btn.textContent='✓ copied'; btn.classList.add('ok');
+        setTimeout(()=>{ btn.textContent='⧉ copy'; btn.classList.remove('ok'); }, 1400); };
+      if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(text).then(done, ()=>fallback(text, done)); }
+      else fallback(text, done);
+    });
+  });
+  function fallback(text, done){ const ta=document.createElement('textarea'); ta.value=text;
+    document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); done(); }catch(e){} ta.remove(); }
+
+  /* ---------- progressive hints: level n+1 unlocks after n is opened ---------- */
+  document.querySelectorAll('.hints').forEach(group=>{
+    const ds = [...group.querySelectorAll('details')];
+    ds.forEach((d,i)=> d.addEventListener('toggle', ()=>{ if(d.open && ds[i+1]) ds[i+1].classList.remove('locked'); }));
+  });
+
+  /* ---------- step progress (remembered per browser) ---------- */
+  const KEY = 'latent-ledgerly-ex02-done';
+  let done = {};
+  try{ done = JSON.parse(localStorage.getItem(KEY) || '{}'); }catch(e){ done = {}; }
+  function paint(){
+    document.querySelectorAll('.step').forEach(s=>{
+      const n = s.dataset.step, on = !!done[n];
+      s.classList.toggle('done', on);
+      const b = s.querySelector('.donebtn'); if(b) b.textContent = on ? '✓ Step done' : '☐ Mark step done';
+      const node = document.querySelector('.rail .node[data-step="'+n+'"]'); if(node) node.classList.toggle('done', on);
+    });
+  }
+  document.querySelectorAll('.donebtn').forEach(b=>b.addEventListener('click', ()=>{
+    const n = b.closest('.step').dataset.step; done[n] = !done[n];
+    try{ localStorage.setItem(KEY, JSON.stringify(done)); }catch(e){}
+    paint();
+  }));
+  paint();
+
+  /* ---------- reference reveal ---------- */
+  document.getElementById('unlock').addEventListener('click', e=>{
+    const g = document.getElementById('refgrid'); g.classList.toggle('open');
+    e.target.textContent = g.classList.contains('open') ? 'Hide the reference' : "I've finished, show me the reference";
+  });
+</script>
+</body>
+</html>

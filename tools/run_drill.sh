@@ -49,6 +49,7 @@ for i in $(seq 1 "$RUNS"); do
   echo; echo "──── $NAME / $LABEL / run $i of $RUNS"
   "$ROOT/tools/reset.sh" >/dev/null
   [ -n "$SRC" ] && "$ROOT/tools/apply_variant.sh" "$SRC" >/dev/null
+  if [ -x "$DRILL/setup.sh" ]; then "$DRILL/setup.sh" "$APP" >/dev/null; fi
   T="$OUT/run-$i.jsonl"
   ( cd "$APP" && claude -p "$(cat "$DRILL/prompt.md")" \
       --output-format stream-json --verbose \

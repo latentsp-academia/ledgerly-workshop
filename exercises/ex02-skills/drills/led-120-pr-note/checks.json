@@ -1,0 +1,29 @@
+{
+  "title": "LED-120 · PR note for LED-105",
+  "checks": [
+    {
+      "id": "house-sections",
+      "type": "probe",
+      "script": "probe_pr_sections.py",
+      "why": "The team's PR format lives in people's heads. Nothing in the repo shows it, so only a skill can carry it."
+    },
+    {
+      "id": "adrs-touched",
+      "type": "probe",
+      "script": "probe_pr_adrs.py",
+      "why": "Reviewers need to know which decisions this change touches. The path → ADR map is in the skill's reference.md."
+    },
+    {
+      "id": "honest-verification",
+      "type": "probe",
+      "script": "probe_pr_verification.py",
+      "why": "All four gates, with results that match a re-run. 'Tests pass' isn't a verification section."
+    },
+    {
+      "id": "code-untouched",
+      "type": "probe",
+      "script": "probe_code_untouched.py",
+      "why": "Writing a PR note must not 'fix' code on the way."
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "title": "LED-120 · implicit trigger (skill not named)",
+  "checks": [
+    {
+      "id": "skill-fired",
+      "type": "transcript_present_any",
+      "scope": "all",
+      "patterns": ["^Skill .*ship-check"],
+      "why": "The prompt never named the skill. If it didn't fire, the description/when_to_use don't match how people ask."
+    },
+    { "id": "house-sections", "type": "probe", "script": "../led-120-pr-note/probe_pr_sections.py" },
+    { "id": "adrs-touched", "type": "probe", "script": "../led-120-pr-note/probe_pr_adrs.py" },
+    { "id": "honest-verification", "type": "probe", "script": "../led-120-pr-note/probe_pr_verification.py" },
+    { "id": "code-untouched", "type": "probe", "script": "../led-120-pr-note/probe_code_untouched.py" }
+  ]
+}

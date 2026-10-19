@@ -1,0 +1,4 @@
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"g1","name":"Skill","input":{"skill":"ship-check","args":"LED-105"}}]}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"g2","name":"Read","input":{"file_path":".claude/skills/ship-check/reference.md"}}]}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"g3","name":"Write","input":{"file_path":"docs/pr/LED-105.md","content":"# LED-105: Revenue endpoint ..."}}]}}
+{"type":"result","num_turns":6,"total_cost_usd":0.14,"result":"PR note written to docs/pr/LED-105.md. 4/4 gates green; ADR-0001 and ADR-0002 touched.","usage":{"input_tokens":800,"output_tokens":500,"cache_read_input_tokens":18000}}

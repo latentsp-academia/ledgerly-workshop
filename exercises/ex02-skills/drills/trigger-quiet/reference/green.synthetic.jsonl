@@ -1,0 +1,2 @@
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"q2","name":"Read","input":{"file_path":"src/ledgerly/payments/fx.py"}}]}}
+{"type":"result","num_turns":2,"total_cost_usd":0.03,"result":"fx.convert multiplies integer cents by basis-point rates and rounds half-even exactly once at the end, so totals don't drift (ADR-0001).","usage":{"input_tokens":400,"output_tokens":200,"cache_read_input_tokens":9000}}

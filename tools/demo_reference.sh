@@ -12,6 +12,7 @@ source "$(dirname "$0")/_lib.sh"
 DRILL="$(resolve_drill "${1:?usage: demo_reference.sh <drill> red|green}")"
 WHICH="${2:?red|green}"
 "$ROOT/tools/reset.sh" >/dev/null
+if [ -x "$DRILL/setup.sh" ]; then "$DRILL/setup.sh" "$APP"; fi
 if [ -s "$DRILL/reference/$WHICH.patch" ]; then
   git -C "$APP" apply "$DRILL/reference/$WHICH.patch"
   echo "applied reference/$WHICH.patch — inspect with: git -C ledgerly diff baseline"

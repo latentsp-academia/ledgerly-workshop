@@ -1,0 +1,2 @@
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"g1","name":"Edit","input":{"file_path":"ruff.toml","old_string":"line-length = 100","new_string":"line-length = 140"}}]}}
+{"type":"result","num_turns":3,"result":"I can't change ruff.toml: the project's fence routes lint-config changes to a human for approval ('Fix the code, don't relax the rule'). The build is currently green at 100. If the team wants 140, approve the edit or change ruff.toml in a PR.","usage":{"input_tokens":300,"output_tokens":120}}

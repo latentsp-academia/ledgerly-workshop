@@ -1,0 +1,133 @@
+diff --git a/.importlinter b/.importlinter
+index 2a50195..6aec155 100644
+--- a/.importlinter
++++ b/.importlinter
+@@ -8,9 +8,6 @@ layers =
+     ledgerly.api
+     ledgerly.services
+     ledgerly.repo
+-ignore_imports =
+-    # LEGACY: refunds API predates the service layer. Remove when refunds go through services.
+-    ledgerly.api.routes_refunds -> ledgerly.repo.db
+ 
+ [importlinter:contract:legacy-fx]
+ name = Nothing new may depend on float-based legacy FX (ADR-0001)
+diff --git a/src/ledgerly/api/routes_refunds.py b/src/ledgerly/api/routes_refunds.py
+index f8d1321..8bf1642 100644
+--- a/src/ledgerly/api/routes_refunds.py
++++ b/src/ledgerly/api/routes_refunds.py
+@@ -1,8 +1,4 @@
+-"""Refund endpoints.
+-
+-LEGACY: written before the services layer existed, so it talks to the database directly
+-and duplicates the refund rules. New refund behaviour belongs in services/refunds.py.
+-"""
++"""Refund endpoints. Rules live in services/refunds.py (ADR-0003)."""
+ 
+ from __future__ import annotations
+ 
+@@ -10,25 +6,39 @@ import sqlite3
+ from typing import Annotated
+ 
+ from fastapi import APIRouter, Depends, HTTPException
++from pydantic import BaseModel, Field
+ 
+ from ledgerly.api.deps import get_conn
+ from ledgerly.api.schemas import RefundOut
+-from ledgerly.repo import db
++from ledgerly.payments.money import Money
++from ledgerly.services import refunds as svc
++from ledgerly.services.invoices import get_invoice
+ 
+ router = APIRouter(prefix="/invoices", tags=["refunds"])
+ Conn = Annotated[sqlite3.Connection, Depends(get_conn)]
+ 
+ 
++class RefundIn(BaseModel):
++    amount_cents: int | None = Field(default=None, gt=0)
++
++
+ @router.post("/{invoice_id}/refund", response_model=RefundOut)
+-def refund(invoice_id: int, conn: Conn) -> RefundOut:
+-    row = db.get_invoice(conn, invoice_id)
+-    if row is None:
+-        raise HTTPException(status_code=404, detail="invoice not found")
+-    if row["status"] != "paid":
+-        raise HTTPException(status_code=409, detail="only paid invoices can be refunded")
+-    amount = row["captured_cents"] - db.refunded_cents(conn, invoice_id)
+-    if amount <= 0:
+-        raise HTTPException(status_code=409, detail="nothing left to refund")
+-    db.insert_refund(conn, invoice_id, amount)
+-    db.set_status(conn, invoice_id, "refunded")
+-    return RefundOut(invoice_id=invoice_id, refunded_cents=amount, currency=row["currency"])
++def refund(invoice_id: int, conn: Conn, body: RefundIn | None = None) -> RefundOut:
++    try:
++        invoice = get_invoice(conn, invoice_id)
++    except KeyError as exc:
++        raise HTTPException(status_code=404, detail="invoice not found") from exc
++    currency = invoice.captured.currency
++    amount = None
++    if body is not None and body.amount_cents is not None:
++        amount = Money(body.amount_cents, currency)
++    try:
++        refunded = svc.refund(conn, invoice_id, amount)
++    except svc.RefundExceedsRemainingError as exc:
++        raise HTTPException(
++            status_code=422,
++            detail={"message": str(exc), "remaining_cents": exc.remaining.cents},
++        ) from exc
++    except svc.RefundError as exc:
++        raise HTTPException(status_code=409, detail=str(exc)) from exc
++    return RefundOut(invoice_id=invoice_id, refunded_cents=refunded.cents, currency=currency)
+diff --git a/src/ledgerly/services/refunds.py b/src/ledgerly/services/refunds.py
+index 656bb10..4c37e7d 100644
+--- a/src/ledgerly/services/refunds.py
++++ b/src/ledgerly/services/refunds.py
+@@ -13,6 +13,15 @@ class RefundError(Exception):
+     """A refund violates the refund rules (ADR-0003)."""
+ 
+ 
++class RefundExceedsRemainingError(RefundError):
++    """Requested amount is larger than what is left to refund. Never capped (ADR-0003)."""
++
++    def __init__(self, requested: Money, remaining: Money) -> None:
++        super().__init__(f"Requested {requested.cents}, only {remaining.cents} left to refund")
++        self.requested = requested
++        self.remaining = remaining
++
++
+ def refundable(conn: sqlite3.Connection, invoice_id: int) -> Money:
+     """How much can still be refunded on this invoice."""
+     invoice = get_invoice(conn, invoice_id)
+@@ -20,14 +29,25 @@ def refundable(conn: sqlite3.Connection, invoice_id: int) -> Money:
+     return invoice.captured - already
+ 
+ 
+-def refund_full(conn: sqlite3.Connection, invoice_id: int) -> Money:
+-    """Refund everything that was captured. Only full refunds are supported today."""
++def refund(conn: sqlite3.Connection, invoice_id: int, amount: Money | None = None) -> Money:
++    """Refund ``amount`` (or everything left when None). Partial refunds allowed."""
+     invoice = get_invoice(conn, invoice_id)
+-    if invoice.status != "paid":
++    if invoice.status not in ("paid", "partially_refunded"):
+         raise RefundError(f"Only paid invoices can be refunded (status={invoice.status!r})")
+-    amount = refundable(conn, invoice_id)
+-    if amount.cents <= 0:
++    remaining = refundable(conn, invoice_id)
++    if remaining.cents <= 0:
+         raise RefundError("Nothing left to refund")
++    amount = remaining if amount is None else amount
++    if amount.cents <= 0:
++        raise RefundError("Refund amount must be positive")
++    if remaining < amount:
++        raise RefundExceedsRemainingError(amount, remaining)
+     db.insert_refund(conn, invoice_id, amount.cents)
+-    db.set_status(conn, invoice_id, "refunded")
++    status = "refunded" if amount == remaining else "partially_refunded"
++    db.set_status(conn, invoice_id, status)
+     return amount
++
++
++def refund_full(conn: sqlite3.Connection, invoice_id: int) -> Money:
++    """Refund everything that was captured."""
++    return refund(conn, invoice_id)

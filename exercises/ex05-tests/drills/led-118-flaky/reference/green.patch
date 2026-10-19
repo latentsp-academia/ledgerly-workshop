@@ -1,0 +1,50 @@
+diff --git a/src/ledgerly/repo/db.py b/src/ledgerly/repo/db.py
+index 411fcac..75270f6 100644
+--- a/src/ledgerly/repo/db.py
++++ b/src/ledgerly/repo/db.py
+@@ -26,6 +26,11 @@ def _now() -> str:
+     return datetime.now(UTC).isoformat()
+ 
+ 
++def next_invoice_seq(conn: sqlite3.Connection) -> int:
++    row = conn.execute("SELECT COALESCE(MAX(id), 0) + 1 AS n FROM invoices").fetchone()
++    return int(row["n"])
++
++
+ def insert_invoice(
+     conn: sqlite3.Connection,
+     *,
+diff --git a/src/ledgerly/services/invoices.py b/src/ledgerly/services/invoices.py
+index 937da99..5df558a 100644
+--- a/src/ledgerly/services/invoices.py
++++ b/src/ledgerly/services/invoices.py
+@@ -2,7 +2,6 @@
+ 
+ from __future__ import annotations
+ 
+-import secrets
+ import sqlite3
+ from dataclasses import dataclass
+ 
+@@ -37,9 +36,9 @@ class InvoiceStateError(Exception):
+     """The invoice is not in a state that allows this operation."""
+ 
+ 
+-def generate_invoice_number() -> str:
+-    # Known issue: random numbers can collide under the UNIQUE constraint. See LED-118.
+-    return f"INV-{secrets.randbelow(999_999) + 1:06d}"
++def generate_invoice_number(conn: sqlite3.Connection) -> str:
++    """Sequential, so two invoices can never share a number (LED-118)."""
++    return f"INV-{db.next_invoice_seq(conn):06d}"
+ 
+ 
+ def _from_row(row: sqlite3.Row) -> Invoice:
+@@ -72,7 +71,7 @@ def create_invoice(
+     vat = vat_for(net, vat_rate_bp)
+     invoice_id = db.insert_invoice(
+         conn,
+-        number=generate_invoice_number(),
++        number=generate_invoice_number(conn),
+         customer=customer,
+         currency=currency,
+         net_cents=net.cents,

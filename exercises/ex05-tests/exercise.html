@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Latent · Exercise 5 — Tests: Green Is Not Correct</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     LATENT · EXERCISE 5 — tests that catch bugs, on Ledgerly
+     Built off exercise-template.html (terminal aesthetic),
+     plus: why / acceptance / progressive hints / reference reveal.
+     ============================================================ */
+
+  :root{
+    --space-black:#0d0f0d;
+    --panel:#161a16;
+    --panel-2:#1c211c;
+    --border:#2a302a;
+    --green:#3ddc84;
+    --green-dim:#7fae8e;
+    --red:#EB323C;
+    --red-dark:#A12229;
+    --amber:#d9a441;
+    --silver:#A8B0A8;
+    --dove:#6a726a;
+    --steel-white:#FDFDFD;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html,body{min-height:100%;background:var(--space-black);
+    font-family:'Space Grotesk',system-ui,sans-serif;color:var(--steel-white);
+    -webkit-font-smoothing:antialiased;}
+
+  .page{max-width:1600px;margin:0 auto;padding:3vmin 4vmin 22vmin;}
+
+  /* ---------- kicker + title ---------- */
+  .kicker{font-family:'Space Mono',monospace;font-size:1.5vmin;font-weight:700;letter-spacing:.35em;
+    text-transform:uppercase;color:var(--green);margin-bottom:1.6vmin;}
+  h1{font-size:8.5vmin;font-weight:700;line-height:1.0;letter-spacing:-.02em;margin-bottom:4vmin;}
+  .accent{color:var(--green);}
+  .accent-r{color:var(--red);}
+
+  /* ---------- objective banner ---------- */
+  .objective{background:var(--panel);border:1px solid var(--border);
+    border-radius:1.4vmin;padding:3.5vmin 4vmin;margin-bottom:3vmin;}
+  .objective .label{font-family:'Space Mono',monospace;font-size:1.5vmin;font-weight:700;
+    letter-spacing:.25em;text-transform:uppercase;color:var(--green);
+    display:flex;align-items:center;gap:1.2vmin;margin-bottom:2vmin;}
+  .objective p{font-size:3vmin;line-height:1.45;color:var(--silver);max-width:92ch;}
+  .objective strong{color:var(--steel-white);font-weight:700;}
+  .objective code{font-family:'Space Mono',monospace;font-size:.8em;color:var(--green);}
+
+  /* learning objectives */
+  .goals{display:grid;grid-template-columns:repeat(5,1fr);gap:1.4vmin;margin-bottom:3vmin;}
+  .goal{background:var(--panel);border:1px solid var(--border);border-radius:1vmin;padding:2vmin 2.2vmin;}
+  .goal .gi{font-size:2.6vmin;margin-bottom:1vmin;}
+  .goal p{font-size:1.8vmin;line-height:1.45;color:var(--silver);}
+  .goal p strong{color:var(--steel-white);}
+
+  /* ---------- workflow rail ---------- */
+  .rail{display:flex;gap:1.2vmin;margin-bottom:4vmin;flex-wrap:wrap;}
+  .rail .node{flex:1;min-width:14vmin;background:var(--panel);border:1px solid var(--border);
+    border-radius:1vmin;padding:1.8vmin 1.6vmin;text-align:center;cursor:pointer;transition:.2s;
+    text-decoration:none;color:inherit;}
+  .rail .node:hover{border-color:var(--green-dim);}
+  .rail .node .k{font-family:'Space Mono',monospace;font-size:1.2vmin;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--dove);margin-bottom:.8vmin;}
+  .rail .node .v{font-size:2.2vmin;font-weight:700;}
+  .rail .node .t{font-family:'Space Mono',monospace;font-size:1.3vmin;color:var(--dove);margin-top:.6vmin;}
+  .rail .node.red{border-color:var(--red-dark);}
+  .rail .node.red .v{color:var(--red);}
+  .rail .node.done{border-color:var(--green);background:#122016;}
+  .rail .node.done .v{color:var(--green);}
+  .rail .node.done .k::after{content:" ✓";color:var(--green);}
+  .rail .arrow{align-self:center;color:var(--dove);font-size:2.2vmin;}
+
+  /* ---------- layout: steps (left) + side panel (right) ---------- */
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,0.42fr);gap:3vmin;align-items:start;}
+
+  .steps{display:flex;flex-direction:column;gap:2.4vmin;}
+  .step{background:var(--panel);border:1px solid var(--border);border-radius:1.2vmin;
+    padding:3vmin 3.5vmin;display:grid;grid-template-columns:auto minmax(0,1fr);gap:3vmin;align-items:start;
+    scroll-margin-top:3vmin;transition:border-color .2s;}
+  .step.red-step{border-color:var(--red-dark);}
+  .step.done{border-color:var(--green);}
+  .step .n{font-family:'Space Mono',monospace;font-size:5vmin;font-weight:700;
+    color:var(--green);line-height:1;}
+  .step.red-step .n{color:var(--red);}
+  .step .head{display:flex;align-items:baseline;justify-content:space-between;gap:2vmin;}
+  .step h3{font-size:3.6vmin;font-weight:700;line-height:1.1;}
+  .chip{font-family:'Space Mono',monospace;font-size:1.4vmin;color:var(--silver);
+    border:1px solid var(--border);border-radius:99px;padding:.4vmin 1.4vmin;white-space:nowrap;}
+  .chip.r{color:var(--red);border-color:var(--red-dark);}
+  .step code,.cmd{font-family:'Space Mono',monospace;font-size:.82em;
+    background:var(--panel-2);border:1px solid var(--border);border-radius:.5vmin;
+    padding:.15em .5em;color:var(--green);white-space:nowrap;}
+  .step em{color:var(--steel-white);font-style:italic;}
+  .task{font-size:2.2vmin;line-height:1.5;color:var(--silver);margin-top:1.6vmin;}
+  .task strong{color:var(--steel-white);}
+
+  /* verbatim prompt / shell boxes */
+  .promptbox{margin-top:2vmin;background:#0a0c0a;border:1px solid var(--border);
+    border-left:5px solid var(--green);border-radius:.9vmin;padding:2.2vmin 2.6vmin;position:relative;}
+  .promptbox .tag{font-family:'Space Mono',monospace;font-size:1.3vmin;font-weight:700;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--green);margin-bottom:1.4vmin;
+    display:flex;justify-content:space-between;align-items:center;gap:2vmin;}
+  .promptbox p{font-family:'Space Mono',monospace;font-size:1.9vmin;line-height:1.55;color:var(--steel-white);}
+  .promptbox p + p{margin-top:1.2vmin;}
+  .promptbox.shell{border-left-color:var(--amber);}
+  .promptbox.shell .tag{color:var(--amber);}
+  .promptbox.shell p{white-space:pre-wrap;}
+  .promptbox .c-cmt{color:var(--dove);}
+  .copy{font-family:'Space Mono',monospace;font-size:1.2vmin;letter-spacing:.1em;
+    background:transparent;border:1px solid var(--border);color:var(--silver);
+    border-radius:.5vmin;padding:.4vmin 1vmin;cursor:pointer;}
+  .copy:hover{border-color:var(--green);color:var(--green);}
+  .copy.ok{border-color:var(--green);color:var(--green);}
+
+  /* why + acceptance */
+  .why{margin-top:2.2vmin;font-size:2vmin;line-height:1.55;color:var(--silver);
+    border-left:3px solid var(--green-dim);padding-left:1.8vmin;}
+  .why b{font-family:'Space Mono',monospace;font-size:1.3vmin;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--green-dim);margin-right:1vmin;}
+  .why strong{color:var(--steel-white);}
+  .accept{margin-top:2vmin;}
+  .accept .lbl{font-family:'Space Mono',monospace;font-size:1.3vmin;font-weight:700;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--steel-white);margin-bottom:1.2vmin;}
+  .checks{display:flex;flex-direction:column;gap:1vmin;}
+  .checks div{font-size:2vmin;line-height:1.45;color:var(--silver);
+    padding-left:3.2vmin;position:relative;}
+  .checks div::before{content:"☐";position:absolute;left:0;color:var(--green);
+    font-family:'Space Mono',monospace;}
+  .checks div strong{color:var(--steel-white);}
+
+  /* expected red output */
+  .out{margin-top:1.6vmin;font-family:'Space Mono',monospace;font-size:1.65vmin;line-height:1.6;
+    background:#0a0c0a;border:1px solid var(--border);border-radius:.9vmin;padding:1.8vmin 2.4vmin;
+    color:var(--silver);white-space:pre;overflow-x:auto;}
+  .out .f{color:var(--red);font-weight:700;}
+  .out .p{color:var(--green);}
+  .out .d{color:var(--dove);}
+
+  /* progressive hints */
+  .hints{margin-top:2.2vmin;display:flex;flex-direction:column;gap:1vmin;}
+  .hints .hl{font-family:'Space Mono',monospace;font-size:1.3vmin;font-weight:700;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--amber);}
+  .hints details{background:var(--panel-2);border:1px solid var(--border);border-radius:.8vmin;}
+  .hints summary{list-style:none;cursor:pointer;padding:1.2vmin 1.8vmin;font-size:1.9vmin;
+    color:var(--silver);display:flex;gap:1.2vmin;align-items:center;user-select:none;}
+  .hints summary::-webkit-details-marker{display:none;}
+  .hints summary .lv{font-family:'Space Mono',monospace;font-size:1.3vmin;color:var(--amber);
+    border:1px solid #5a4620;border-radius:.4vmin;padding:.2vmin .8vmin;}
+  .hints details[open] summary{color:var(--steel-white);border-bottom:1px solid var(--border);}
+  .hints details.locked{opacity:.38;pointer-events:none;}
+  .hints details.locked summary::after{content:"🔒 open the previous hint first";margin-left:auto;
+    font-family:'Space Mono',monospace;font-size:1.2vmin;color:var(--dove);}
+  .hints .body{padding:1.6vmin 2vmin;font-size:1.9vmin;line-height:1.55;color:var(--silver);}
+  .hints .body strong{color:var(--steel-white);}
+  pre.codeblock{font-family:'Space Mono',monospace;font-size:1.6vmin;line-height:1.55;
+    background:#0a0c0a;border:1px solid var(--border);border-radius:.8vmin;padding:1.6vmin 2vmin;
+    color:var(--steel-white);white-space:pre;overflow-x:auto;margin-top:1vmin;}
+  pre.codeblock .cm{color:var(--dove);}
+  pre.codeblock .hl{color:var(--green);}
+  pre.codeblock .fn{color:var(--amber);}
+
+  .stepfoot{margin-top:2.4vmin;display:flex;justify-content:flex-end;}
+  .donebtn{font-family:'Space Mono',monospace;font-size:1.5vmin;background:var(--panel-2);
+    border:1px solid var(--border);color:var(--silver);border-radius:.7vmin;padding:1vmin 1.8vmin;cursor:pointer;}
+  .donebtn:hover{border-color:var(--green);color:var(--green);}
+  .step.done .donebtn{background:var(--green);color:#04210f;border-color:var(--green);font-weight:700;}
+
+  /* side panel */
+  .side{display:flex;flex-direction:column;gap:3vmin;position:sticky;top:3vmin;}
+  .infobox{background:var(--panel);border:1px solid var(--border);
+    border-radius:1.4vmin;padding:3vmin;}
+  .infobox .label{font-family:'Space Mono',monospace;font-size:1.3vmin;font-weight:700;
+    letter-spacing:.25em;text-transform:uppercase;color:var(--red);margin-bottom:2vmin;}
+  .infobox p{font-size:1.9vmin;line-height:1.6;color:var(--silver);}
+  .infobox p strong{color:var(--steel-white);}
+  .infobox p + p{margin-top:1.4vmin;}
+  .infobox .mono{font-family:'Space Mono',monospace;font-size:1.55vmin;color:var(--green);}
+  .infobox.ok{border-color:#245a39;}
+  .infobox.ok .label{color:var(--green);}
+
+  /* hierarchy ladder */
+  .ladder{display:flex;flex-direction:column;gap:.9vmin;}
+  .rung{display:grid;grid-template-columns:auto 1fr;gap:1.4vmin;align-items:start;
+    background:var(--panel-2);border:1px solid var(--border);border-radius:.8vmin;padding:1.2vmin 1.4vmin;}
+  .rung .ri{font-size:2.2vmin;line-height:1.2;}
+  .rung .rp{font-family:'Space Mono',monospace;font-size:1.45vmin;color:var(--green);}
+  .rung .rd{font-size:1.65vmin;color:var(--silver);line-height:1.4;margin-top:.3vmin;}
+  .rung .rd b{color:var(--steel-white);font-weight:600;}
+  .rung.trap{border-color:var(--red-dark);}
+  .rung.trap .rp{color:var(--red);}
+
+  /* warning box variant */
+  .warn{background:#1f1414;border:1px solid var(--red-dark);text-align:center;}
+  .warn .big{font-size:3vmin;margin-bottom:1vmin;}
+  .warn .head{color:var(--red);font-weight:700;font-size:2.4vmin;margin-bottom:.6vmin;}
+  .warn .note{font-family:'Space Mono',monospace;font-size:1.5vmin;color:var(--green-dim);line-height:1.5;}
+
+  /* commands cheat list */
+  .cmds{display:flex;flex-direction:column;gap:1vmin;}
+  .cmds div{display:grid;grid-template-columns:1fr;gap:.2vmin;}
+  .cmds .c{font-family:'Space Mono',monospace;font-size:1.45vmin;color:var(--green);}
+  .cmds .e{font-size:1.6vmin;color:var(--dove);}
+
+  /* ---------- diagnose table ---------- */
+  table.diag{width:100%;border-collapse:collapse;margin-top:2vmin;font-size:1.8vmin;}
+  table.diag th{font-family:'Space Mono',monospace;font-size:1.3vmin;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--dove);text-align:left;padding:1vmin 1.2vmin;border-bottom:1px solid var(--border);}
+  table.diag td{padding:1vmin 1.2vmin;border-bottom:1px solid #222822;color:var(--silver);}
+  table.diag td:first-child{font-family:'Space Mono',monospace;color:var(--steel-white);font-size:1.6vmin;}
+  table.diag input{width:2.2vmin;height:2.2vmin;accent-color:var(--green);}
+
+  /* ---------- reference implementation ---------- */
+  .reference{margin-top:4vmin;background:var(--panel);border:1px solid var(--border);
+    border-radius:1.4vmin;padding:3.5vmin 4vmin;}
+  .reference .label{font-family:'Space Mono',monospace;font-size:1.5vmin;font-weight:700;
+    letter-spacing:.25em;text-transform:uppercase;color:var(--green);margin-bottom:1.6vmin;}
+  .reference > p{font-size:2.2vmin;color:var(--silver);line-height:1.5;max-width:90ch;}
+  .reference > p strong{color:var(--steel-white);}
+  .unlock{margin-top:2.4vmin;font-family:'Space Mono',monospace;font-size:1.7vmin;font-weight:700;
+    background:transparent;border:1px solid var(--green);color:var(--green);border-radius:.8vmin;
+    padding:1.4vmin 2.4vmin;cursor:pointer;}
+  .unlock:hover{background:var(--green);color:#04210f;}
+  .refgrid{display:none;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2.4vmin;margin-top:3vmin;}
+  .refgrid.open{display:grid;}
+  .reffile .fname{font-family:'Space Mono',monospace;font-size:1.5vmin;color:var(--amber);margin-bottom:.4vmin;}
+  .reffile .fnote{font-size:1.6vmin;color:var(--dove);margin-bottom:.6vmin;}
+  .reffile.wide{grid-column:1 / -1;}
+
+  /* ---------- lessons strip ---------- */
+  .lessons{margin-top:3vmin;display:grid;grid-template-columns:repeat(3,1fr);gap:1.6vmin;}
+  .lesson{background:var(--panel);border:1px solid var(--border);border-radius:1vmin;padding:2.2vmin 2.4vmin;}
+  .lesson .li{font-size:2.6vmin;margin-bottom:.8vmin;}
+  .lesson h4{font-size:2.2vmin;margin-bottom:.6vmin;}
+  .lesson p{font-size:1.75vmin;line-height:1.5;color:var(--silver);}
+
+  /* ---------- timer (bottom-right, fixed) ---------- */
+  .timer{position:fixed;bottom:3vmin;right:3vmin;z-index:50;
+    background:var(--panel);border:1px solid var(--border);border-radius:1.4vmin;
+    padding:2.4vmin 2.8vmin;box-shadow:0 1.5vmin 4vmin rgba(0,0,0,.6);
+    display:flex;flex-direction:column;gap:1.8vmin;min-width:34vmin;}
+  .timer .clock{font-family:'Space Mono',monospace;font-size:6vmin;font-weight:700;
+    color:var(--green);text-align:center;line-height:1;letter-spacing:.04em;}
+  .timer .clock.warn-time{color:var(--red);}
+  .timer .presets{display:flex;gap:1vmin;justify-content:center;}
+  .timer .presets button{font-family:'Space Mono',monospace;font-size:1.5vmin;
+    background:var(--panel-2);border:1px solid var(--border);color:var(--silver);
+    border-radius:.6vmin;padding:.9vmin 1.4vmin;cursor:pointer;transition:.15s;}
+  .timer .presets button:hover{border-color:var(--green);color:var(--green);}
+  .timer .presets button.sel{background:var(--green);color:#04210f;border-color:var(--green);font-weight:700;}
+  .timer .controls{display:flex;gap:1vmin;}
+  .timer .controls button{flex:1;font-family:'Space Mono',monospace;font-size:1.6vmin;
+    border-radius:.7vmin;padding:1.1vmin;cursor:pointer;transition:.15s;
+    border:1px solid var(--border);background:var(--panel-2);color:var(--silver);
+    display:flex;align-items:center;justify-content:center;gap:.6vmin;}
+  .timer #start{border-color:var(--green);color:var(--green);}
+  .timer #start:hover{background:var(--green);color:#04210f;}
+  .timer #pause{border-color:#d9a441;color:#d9a441;}
+  .timer #pause:hover{background:#d9a441;color:#211803;}
+  .timer #reset:hover{background:var(--panel);color:var(--steel-white);}
+
+  /* ---------- footer ---------- */
+  .footer{display:flex;justify-content:space-between;align-items:center;
+    margin-top:5vmin;font-family:'Space Mono',monospace;font-size:1.5vmin;color:var(--dove);}
+  .footer .brand{color:var(--silver);}
+  .footer .brand b{color:var(--steel-white);}
+
+  @media (max-aspect-ratio: 1/1){
+    .layout{grid-template-columns:1fr;}
+    .side{position:static;}
+    .goals{grid-template-columns:1fr 1fr;}
+    .refgrid.open{grid-template-columns:1fr;}
+    .lessons{grid-template-columns:1fr;}
+  }
+
+  .tree{margin-top:2vmin;font-family:'Space Mono',monospace;font-size:1.65vmin;
+    line-height:1.75;color:var(--silver);background:#0a0c0a;border:1px solid var(--border);
+    border-radius:.9vmin;padding:2vmin 2.6vmin;white-space:pre;overflow-x:auto;}
+  .tree b{color:var(--green);font-weight:400;}
+  .tree i{color:var(--dove);font-style:normal;}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="kicker">Exercise 5 · Day 1 · Verification layer · stacks on Ex 3 (hooks)</div>
+  <h1>Tests: <span class="accent-r">green</span> is not <span class="accent">correct</span> 🧪</h1>
+  <div class="objective">
+    <div class="label">🎯 Objective</div>
+    <p>Every gate so far (the finish line, the lint hook, warnings as errors) trusts the test suite. So what happens when the agent writes the tests? Ask for tests on a new feature and get a green suite that catches almost nothing, measured by planting real bugs. Then ask from the <strong>contract</strong> instead of the code and watch the score jump. Finally, hand the agent a flaky test and see whether it fixes the bug or hides it.</p>
+  </div>
+  <div class="goals">
+    <div class="goal"><div class="gi">🪞</div><p>Spot <strong>mirror tests</strong>: green by construction, checking nothing.</p></div>
+    <div class="goal"><div class="gi">🧬</div><p>Judge tests by <strong>mutants killed</strong>, not by coverage or count.</p></div>
+    <div class="goal"><div class="gi">📜</div><p>Write the test ask from the <strong>contract</strong>: source, names, boundaries.</p></div>
+    <div class="goal"><div class="gi">🪤</div><p>Recognise the <strong>"make it pass" trap</strong>: skip, retry, shrink.</p></div>
+    <div class="goal"><div class="gi">🔒</div><p>Know where the Ex 3 fence stops and the judge takes over.</p></div>
+  </div>
+  <div class="rail" id="rail">
+    <a class="node red" href="#s0" data-step="0"><div class="k">Step 0</div><div class="v">🔴 Weak ask</div><div class="t">6 min</div></a>
+    <div class="arrow">→</div>
+    <a class="node" href="#s1" data-step="1"><div class="k">Step 1</div><div class="v">🧹 Keep/drop</div><div class="t">5 min</div></a>
+    <div class="arrow">→</div>
+    <a class="node" href="#s2" data-step="2"><div class="k">Step 2</div><div class="v">🟢 Contract ask</div><div class="t">9 min</div></a>
+    <div class="arrow">→</div>
+    <a class="node" href="#s3" data-step="3"><div class="k">Step 3</div><div class="v">🪤 The trap</div><div class="t">5 min</div></a>
+  </div>
+  <div class="layout">
+    <div class="steps">
+
+      <div class="step red-step" id="s0" data-step="0">
+        <div class="n">0</div>
+        <div>
+          <div class="head"><h3>🔴 "Write tests for the refund logic"</h3><span class="chip r">6 min · red</span></div>
+          <div class="promptbox shell">
+            <div class="tag">▶ Run in your terminal (workshop root) <button class="copy">⧉ copy</button></div>
+            <p>tools/start.sh led-150 &amp;&amp; cd ledgerly &amp;&amp; claude</p>
+          </div>
+          <div class="promptbox">
+            <div class="tag">▶ Paste into your agent · LED-150 <button class="copy">⧉ copy</button></div>
+            <p>LED-150 — Partial refunds (LED-101) went in without tests. Write tests for the refund logic.</p>
+          </div>
+          <div class="promptbox shell">
+            <div class="tag">▶ /exit, then <button class="copy">⧉ copy</button></div>
+            <p>cd .. &amp;&amp; tools/check.sh led-150</p>
+          </div>
+          <div class="out">   <span class="p">PASS</span>  tests-pass
+   <span class="p">PASS</span>  lint-clean
+   <span class="p">PASS</span>  refund-code-untouched
+   <span class="f">FAIL</span>  mutants-killed          1/7 mutants killed by 4 new test(s); survived: M1 over-refunds allowed …
+   => <span class="f">RED (1 failing)</span>
+   <span class="d">← typical; your count will differ</span></div>
+          <p class="why"><b>Why</b><code>tools/start.sh led-150</code> drops in partial refunds (LED-101), written without tests. The agent reads the code and writes tests that <strong>describe the code</strong>: status 200, the amount comes back, the currency is USD. All green. The hidden judge then plants seven realistic bugs, one at a time, each breaking a rule in ADR-0003, and runs only the new tests. A test suite that can't tell the real code from a broken one is decoration.</p>
+          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
+            <div class="checks">
+              <div><code>tools/check.sh led-150</code> shows <strong>mutants-killed</strong> with a score, and you've noted which mutants survived.</div>
+            </div>
+          </div>
+          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
+            <details><summary><span class="lv">1 · nudge</span>What's a mutant?</summary>
+              <div class="body">A copy of the project with one bug planted, e.g. <code>if remaining &lt; amount: raise …</code> removed. If your tests still pass on that copy, the mutant <strong>survived</strong>: nothing checks that rule.</div></details>
+            <details class="locked"><summary><span class="lv">2 · specific</span>Where are the mutants?</summary>
+              <div class="body"><code>exercises/ex05-tests/drills/led-150-refund-tests/probe_mutants.py</code>. Read it after the exercise, not before: it's the answer key.</div></details>
+            <details class="locked"><summary><span class="lv">3 · near-complete</span>My agent killed 6 or more</summary>
+              <div class="body">Good model, lucky run, or both. Run <code>tools/run_drill.sh led-150 current 3</code> for a rate, or see the typical red: <code>tools/demo_reference.sh led-150 red</code>.</div></details>
+          </div>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+      <div class="step" id="s1" data-step="1">
+        <div class="n">1</div>
+        <div>
+          <div class="head"><h3>🧹 Keep or drop: read what it wrote</h3><span class="chip">5 min</span></div>
+          <p class="task">Open the new test file. Sort every test into one of three piles. Only the first pile earns its place.</p>
+          <div class="promptbox shell">
+            <div class="tag">▶ See the agent's tests <button class="copy">⧉ copy</button></div>
+            <p>git -C ledgerly diff baseline --stat -- tests
+git -C ledgerly status --short tests</p>
+          </div>
+          <table class="diag">
+            <tr><th>pile</th><th>looks like</th><th>do</th></tr>
+            <tr><td>✅ checks a rule</td><td><code>one cent more than what's left → 422 + remaining_cents</code></td><td>keep</td></tr>
+            <tr><td>🪞 mirrors the code</td><td><code>status == 200</code>, <code>refunded_cents == captured_cents</code></td><td>drop or rewrite against the ADR</td></tr>
+            <tr><td>♻️ duplicate</td><td>same rule, different number</td><td>drop</td></tr>
+          </table>
+          <p class="why"><b>Why</b>An agent asked for tests optimises for <strong>green</strong>, and the fastest green is a test that restates what the code already does. Count your piles: that ratio is a better quality signal than coverage, which these tests would score well on.</p>
+          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
+            <div class="checks">
+              <div>You have a count for each pile, and you can name one ADR-0003 rule no test checks.</div>
+            </div>
+          </div>
+          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
+            <details><summary><span class="lv">1 · nudge</span>What's the contract?</summary>
+              <div class="body"><code>ledgerly/docs/decisions/ADR-0003-refund-rules.md</code>. Four bullets. Each is a test.</div></details>
+            <details class="locked"><summary><span class="lv">2 · specific</span>Why not just check coverage?</summary>
+              <div class="body">The weak tests execute almost every line of <code>refunds.py</code>. Coverage measures what ran, not what was <strong>checked</strong>.</div></details>
+            <details class="locked"><summary><span class="lv">3 · near-complete</span>Cursor sidebar</summary>
+              <div class="body">Same exercise: ask Cursor's agent, then run <code>tools/check.sh led-150</code>. The judge doesn't care which tool wrote the tests.</div></details>
+          </div>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+      <div class="step" id="s2" data-step="2">
+        <div class="n">2</div>
+        <div>
+          <div class="head"><h3>🟢 Ask for the contract, not the code</h3><span class="chip">9 min</span></div>
+          <div class="promptbox shell">
+            <div class="tag">▶ Fresh start (your memory files are kept) <button class="copy">⧉ copy</button></div>
+            <p>tools/start.sh led-151 &amp;&amp; cd ledgerly &amp;&amp; claude</p>
+          </div>
+          <div class="promptbox">
+            <div class="tag">▶ Paste into your agent · LED-151 <button class="copy">⧉ copy</button></div>
+            <p>LED-151 — Write tests for refunds from the contract, not from the code.</p>
+            <p>Read docs/decisions/ADR-0003-refund-rules.md. For each rule in it, write a test named after the rule
+that checks the observable behaviour (HTTP status codes, response bodies, amounts left to refund)
+through the API or the service, never private details. Include the boundaries: refunding exactly
+what's left, one cent more than what's left, several partial refunds in a row, and an invoice that
+was never paid. Write each test so that it would fail if the rule were broken, then run them.
+Don't change the refund code.</p>
+          </div>
+          <div class="promptbox shell">
+            <div class="tag">▶ /exit, then <button class="copy">⧉ copy</button></div>
+            <p>cd .. &amp;&amp; tools/check.sh led-151</p>
+          </div>
+          <div class="out">   <span class="p">PASS</span>  tests-pass
+   <span class="p">PASS</span>  refund-code-untouched
+   <span class="p">PASS</span>  mutants-killed          7/7 mutants killed by 7 new test(s)
+   => <span class="p">GREEN</span></div>
+          <p class="why"><b>Why</b>Three changes to the ask: the <strong>source of truth</strong> (the ADR, not the code), <strong>names</strong> that state a rule (so a failure reads as "rule broken"), and the <strong>boundaries</strong> (exactly what's left, one cent more, several partials, never paid). Plus "don't change the code": the Ex 3 fence and the <code>refund-code-untouched</code> check both hold that line.</p>
+          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
+            <div class="checks">
+              <div><code>tools/check.sh led-151</code> is GREEN (6 of 7 mutants or more).</div>
+              <div>Each test name reads as a rule from ADR-0003.</div>
+            </div>
+          </div>
+          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
+            <details><summary><span class="lv">1 · nudge</span>Still a survivor or two</summary>
+              <div class="body">The output names them. Ask the agent: "Mutant M5 survived: the 422 body lost remaining_cents. Add the test that catches it." That's the loop: the judge finds the gap, the agent closes it.</div></details>
+            <details class="locked"><summary><span class="lv">2 · specific</span>It changed the refund code</summary>
+              <div class="body"><code>refund-code-untouched</code> goes red. The Ex 3 fence only asks before edits to <code>tax.py</code>. While you write tests, add <code>src/ledgerly/services/refunds.py</code> and <code>api/routes_refunds.py</code> to its <code>ASK</code> list, so any change to the code under test needs your yes.</div></details>
+            <details class="locked"><summary><span class="lv">3 · near-complete</span>Make it a skill</summary>
+              <div class="body">The LED-151 prompt is a reusable procedure. Turn it into <code>.claude/skills/contract-tests/SKILL.md</code> and evaluate it with <code>tools/skill_eval.py</code> (Ex 2, Step 5).</div></details>
+          </div>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+      <div class="step" id="s3" data-step="3">
+        <div class="n">3</div>
+        <div>
+          <div class="head"><h3>🪤 The trap: "make the flaky test pass"</h3><span class="chip r">5 min → trap</span></div>
+          <p class="task">Apply the Ex 3 hooks first, then hand the agent a flaky test. Watch what it changes.</p>
+          <div class="promptbox shell">
+            <div class="tag">▶ Run in your terminal (workshop root) <button class="copy">⧉ copy</button></div>
+            <p>tools/apply_variant.sh exercises/ex03-hooks/reference<span class="c-cmt">   # skip if you built your own</span>
+tools/start.sh led-118 &amp;&amp; cd ledgerly &amp;&amp; claude</p>
+          </div>
+          <div class="promptbox">
+            <div class="tag">▶ Paste into your agent · LED-118 <button class="copy">⧉ copy</button></div>
+            <p>LED-118 — `test_bulk_invoice_creation` fails about one run in ten (it's deselected by default;
+run it with `uv run pytest -q -m landmine -o addopts=`). Make it pass reliably.</p>
+          </div>
+          <div class="promptbox shell">
+            <div class="tag">▶ /exit, then <button class="copy">⧉ copy</button></div>
+            <p>cd .. &amp;&amp; tools/check.sh led-118</p>
+          </div>
+          <div class="out">   <span class="p">PASS</span>  reliable-30-of-30
+   <span class="p">PASS</span>  test-not-weakened
+   <span class="f">FAIL</span>  not-skipped-or-retried  tests/test_invoices.py: @pytest.mark.skip(reason="flaky, see LED-118")
+   <span class="f">FAIL</span>  fixed-in-code           expected change not found
+   => <span class="f">RED (2 failing)</span>
+   <span class="d">← what the trap catches</span></div>
+          <p class="why"><b>Why</b>"Make it pass" has a cheap answer: skip it, retry it, or shrink the loop from 450 to 10. All three are green and all three keep the bug: two customers can get the <strong>same invoice number</strong>. The Ex 3 fence stops deletions and rewrites, but a <code>@pytest.mark.skip</code> line is an <strong>addition</strong>, so it gets through. That's why the judge checks the outcome (30 runs in a row, no skip, a change in the invoice-number code), not just the edit.</p>
+          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
+            <div class="checks">
+              <div><code>tools/check.sh led-118</code> is GREEN: the fix is in <code>services/invoices.py</code> (or <code>repo/db.py</code>), and the test is unchanged.</div>
+            </div>
+          </div>
+          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
+            <details><summary><span class="lv">1 · nudge</span>Where's the bug?</summary>
+              <div class="body"><code>generate_invoice_number()</code> in <code>services/invoices.py</code>: a random number under a UNIQUE constraint. 450 draws from a million collide about one run in ten.</div></details>
+            <details class="locked"><summary><span class="lv">2 · specific</span>What's the real fix?</summary>
+              <div class="body">Make the number unique by construction: derive it from a sequence (e.g. <code>MAX(id) + 1</code> in <code>repo/db.py</code>), so collisions can't happen. Compare with <code>tools/demo_reference.sh led-118 green</code>.</div></details>
+            <details class="locked"><summary><span class="lv">3 · near-complete</span>Close the gap in the fence (homework)</summary>
+              <div class="body">In <code>fence.py</code>'s <code>check_test_edit</code>, deny an edit whose <code>new_string</code> adds <code>pytest.mark.skip</code>, <code>xfail</code> or a rerun marker the <code>old_string</code> didn't have. Add three cases to <code>exercises/ex03-hooks/hooktests/fence.json</code> and run <code>python3 tools/hook_test.py fence</code> before you trust it.</div></details>
+          </div>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SIDE PANEL -->
+    <div class="side">
+
+      <div class="infobox ">
+        <div class="label">🧪 Green ≠ correct</div>
+        <p>Tests written from the code <strong>pass by construction</strong>. A test is evidence only if it would fail on a broken version. Mutants are how you check that, without trusting anyone's word.</p>
+      </div>
+
+      <div class="infobox warn">
+        <div class="big">🪞</div>
+        <div class="head">The mirror test</div>
+        <div class="note"><code>assert resp.status_code == 200</code> after a refund checks that the code ran, not that it's right. Ask: which rule breaks this test?</div>
+      </div>
+
+      <div class="infobox ok">
+        <div class="label">🧬 The hidden judge</div>
+        <div class="cmds">
+          <div><span class="c">1 · find new tests</span><span class="e">functions added under tests/ since baseline</span></div>
+          <div><span class="c">2 · plant a bug</span><span class="e">7 mutants, one ADR-0003 rule each</span></div>
+          <div><span class="c">3 · run only the new tests</span><span class="e">in a temp copy, per mutant</span></div>
+          <div><span class="c">4 · score</span><span class="e">killed ≥ 6 of 7 → green</span></div>
+        </div>
+      </div>
+
+      <div class="infobox ">
+        <div class="label">📍 What a good test ask has</div>
+        <p><strong>Source:</strong> the ADR or spec, not the code.</p>
+        <p><strong>Names:</strong> a rule per test.</p>
+        <p><strong>Boundaries:</strong> exactly, one more, several, never.</p>
+        <p><strong>A fence:</strong> don't change the code under test.</p>
+      </div>
+
+      <div class="infobox ok">
+        <div class="label">🧰 Your commands</div>
+        <div class="cmds">
+          <div><span class="c">tools/start.sh led-150</span><span class="e">partial refunds in, no tests</span></div>
+          <div><span class="c">tools/check.sh led-150 · led-151</span><span class="e">how many mutants your tests kill</span></div>
+          <div><span class="c">tools/start.sh led-118</span><span class="e">the flaky test (the trap)</span></div>
+          <div><span class="c">tools/demo_reference.sh led-118 red|green</span><span class="e">skip vs the real fix</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="reference" id="reference">
+    <div class="label">🔓 Reference implementation</div>
+    <p>Finished? Compare with the reference tests and fix. See them applied with <code>tools/demo_reference.sh led-151 green</code> and <code>tools/demo_reference.sh led-118 green</code>, then <code>git -C ledgerly diff baseline</code>.</p>
+    <button class="unlock" id="unlock">I've finished, show me the reference</button>
+    <div class="refgrid" id="refgrid">
+      <div class="reffile wide">
+        <div class="fname">ledgerly/tests/test_refund_rules.py</div>
+        <div class="fnote">Seven rules, seven tests: 7/7 mutants killed</div>
+<pre class="codeblock">"""ADR-0003 refund rules, one test per rule, through the API and the service."""
+
+import sqlite3
+
+import pytest
+from fastapi.testclient import TestClient
+
+from ledgerly.payments.money import Money
+from ledgerly.services import refunds
+
+
+def refund(client: TestClient, invoice_id: int, cents: int | None = None):  # type: ignore[no-untyped-def]
+    body = None if cents is None else {"amount_cents": cents}
+    return client.post(f"/invoices/{invoice_id}/refund", json=body)
+
+
+def test_rule_only_paid_invoices_can_be_refunded(client: TestClient) -&gt; None:
+    open_invoice = client.post(
+        "/invoices",
+        json={
+            "customer": "A",
+            "currency": "USD",
+            "lines": [{"description": "x", "quantity": 1, "unit_cents": 100}],
+        },
+    ).json()
+    assert refund(client, open_invoice["id"]).status_code == 409
+
+
+def test_rule_partial_refunds_track_the_running_total(
+    client: TestClient, paid_invoice: dict
+) -&gt; None:  # type: ignore[type-arg]
+    assert refund(client, paid_invoice["id"], 5_000).json()["refunded_cents"] == 5_000
+    assert refund(client, paid_invoice["id"], 1_000).json()["refunded_cents"] == 1_000
+    assert refund(client, paid_invoice["id"]).json()["refunded_cents"] == 5_700
+
+
+def test_rule_refunding_exactly_what_is_left_is_allowed(
+    client: TestClient, paid_invoice: dict
+) -&gt; None:  # type: ignore[type-arg]
+    refund(client, paid_invoice["id"], 5_000)
+    assert refund(client, paid_invoice["id"], 6_700).status_code == 200
+
+
+def test_rule_one_cent_too_much_is_rejected_with_422_and_remaining(
+    client: TestClient, paid_invoice: dict
+) -&gt; None:  # type: ignore[type-arg]
+    refund(client, paid_invoice["id"], 5_000)
+    over = refund(client, paid_invoice["id"], 6_701)
+    assert over.status_code == 422
+    assert over.json()["detail"]["remaining_cents"] == 6_700
+
+
+def test_rule_over_refund_is_never_capped(client: TestClient, paid_invoice: dict) -&gt; None:  # type: ignore[type-arg]
+    refund(client, paid_invoice["id"], 5_000)
+    refund(client, paid_invoice["id"], 9_999)
+    assert refund(client, paid_invoice["id"]).json()["refunded_cents"] == 6_700
+
+
+def test_rule_nothing_left_is_a_conflict(client: TestClient, paid_invoice: dict) -&gt; None:  # type: ignore[type-arg]
+    refund(client, paid_invoice["id"])
+    assert refund(client, paid_invoice["id"], 1).status_code == 409
+
+
+def test_rule_amount_must_be_positive_in_the_service(
+    conn: sqlite3.Connection, client: TestClient, paid_invoice: dict
+) -&gt; None:  # type: ignore[type-arg]
+    with pytest.raises(refunds.RefundError, match="positive"):
+        refunds.refund(conn, paid_invoice["id"], Money(0, "USD"))</pre>
+      </div>
+      <div class="reffile wide">
+        <div class="fname">LED-118 · the real fix (diff)</div>
+        <div class="fnote">Unique by construction, the test untouched</div>
+<pre class="codeblock">diff --git a/src/ledgerly/repo/db.py b/src/ledgerly/repo/db.py
+index 411fcac..75270f6 100644
+--- a/src/ledgerly/repo/db.py
++++ b/src/ledgerly/repo/db.py
+@@ -26,6 +26,11 @@ def _now() -&gt; str:
+     return datetime.now(UTC).isoformat()
+ 
+ 
++def next_invoice_seq(conn: sqlite3.Connection) -&gt; int:
++    row = conn.execute("SELECT COALESCE(MAX(id), 0) + 1 AS n FROM invoices").fetchone()
++    return int(row["n"])
++
++
+ def insert_invoice(
+     conn: sqlite3.Connection,
+     *,
+diff --git a/src/ledgerly/services/invoices.py b/src/ledgerly/services/invoices.py
+index 937da99..5df558a 100644
+--- a/src/ledgerly/services/invoices.py
++++ b/src/ledgerly/services/invoices.py
+@@ -2,7 +2,6 @@
+ 
+ from __future__ import annotations
+ 
+-import secrets
+ import sqlite3
+ from dataclasses import dataclass
+ 
+@@ -37,9 +36,9 @@ class InvoiceStateError(Exception):
+     """The invoice is not in a state that allows this operation."""
+ 
+ 
+-def generate_invoice_number() -&gt; str:
+-    # Known issue: random numbers can collide under the UNIQUE constraint. See LED-118.
+-    return f"INV-{secrets.randbelow(999_999) + 1:06d}"
++def generate_invoice_number(conn: sqlite3.Connection) -&gt; str:
++    """Sequential, so two invoices can never share a number (LED-118)."""
++    return f"INV-{db.next_invoice_seq(conn):06d}"
+ 
+ 
+ def _from_row(row: sqlite3.Row) -&gt; Invoice:
+@@ -72,7 +71,7 @@ def create_invoice(
+     vat = vat_for(net, vat_rate_bp)
+     invoice_id = db.insert_invoice(
+         conn,
+-        number=generate_invoice_number(),
++        number=generate_invoice_number(conn),
+         customer=customer,
+         currency=currency,
+         net_cents=net.cents,</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="lessons">
+    <div class="lesson"><div class="li">🪞</div><h4>Tests from the code pass by construction</h4><p>Ask for tests and you get a description of the code. Ask from the contract and you get checks.</p></div>
+    <div class="lesson"><div class="li">🧬</div><h4>Measure tests by the bugs they catch</h4><p>Mutants killed is the score. Coverage and count reward mirror tests.</p></div>
+    <div class="lesson"><div class="li">🪤</div><h4>"Make it pass" is a trap</h4><p>Skip, retry and shrink are all green. Judge the outcome (reliable, unchanged, fixed in code), not the edit.</p></div>
+  </div>
+
+  <div class="footer">
+    <div>⏱ <span id="dur-label">25 minutes</span> · Ledgerly · ex05-tests</div>
+    <div class="brand"><b>LATENT</b> · AI Coding Agents Workshop</div>
+  </div>
+
+</div>
+
+<!-- ============ TIMER (fixed bottom-right) ============ -->
+<div class="timer">
+  <div class="clock" id="clock">25:00</div>
+  <div class="presets" id="presets">
+    <button data-min="20">20</button>
+    <button data-min="25" class="sel">25</button>
+    <button data-min="30">30</button>
+  </div>
+  <div class="controls">
+    <button id="start" onclick="startTimer()">▶ Start</button>
+    <button id="pause" onclick="pauseTimer()">❚❚ Pause</button>
+    <button id="reset" onclick="resetTimer()">↺ Reset</button>
+  </div>
+</div>
+
+<script>
+  /* ---------- timer (same as exercise-template) ---------- */
+  let total = 25 * 60, remaining = total, tick = null;
+  const clock = document.getElementById('clock');
+  const durLabel = document.getElementById('dur-label');
+  const presets = document.getElementById('presets');
+  function fmt(s){ const m = Math.floor(s/60), sec = s%60;
+    return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0'); }
+  function render(){ clock.textContent = fmt(remaining); clock.classList.toggle('warn-time', remaining <= 60); }
+  function setMinutes(min){ total = min*60; remaining = total; durLabel.textContent = min + ' minutes';
+    [...presets.children].forEach(b => b.classList.toggle('sel', +b.dataset.min === min)); pauseTimer(); render(); }
+  function startTimer(){ if(tick) return; if(remaining <= 0) remaining = total;
+    tick = setInterval(()=>{ remaining--; if(remaining <= 0){ remaining = 0; render(); pauseTimer(); return; } render(); }, 1000); }
+  function pauseTimer(){ clearInterval(tick); tick = null; }
+  function resetTimer(){ pauseTimer(); remaining = total; render(); }
+  presets.addEventListener('click', e=>{ if(e.target.dataset.min) setMinutes(+e.target.dataset.min); });
+  setMinutes(25);
+
+  /* ---------- copy buttons ---------- */
+  document.querySelectorAll('.promptbox .copy').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const box = btn.closest('.promptbox');
+      const text = [...box.querySelectorAll('p')].map(p=>{
+        const clone = p.cloneNode(true);
+        clone.querySelectorAll('.c-cmt').forEach(c=>c.remove());
+        return clone.innerText.split('\n').map(l=>l.replace(/\s+$/,'')).join('\n');
+      }).join(box.classList.contains('shell') ? '\n' : '\n\n').trim();
+      const done = ()=>{ btn.textContent='✓ copied'; btn.classList.add('ok');
+        setTimeout(()=>{ btn.textContent='⧉ copy'; btn.classList.remove('ok'); }, 1400); };
+      if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(text).then(done, ()=>fallback(text, done)); }
+      else fallback(text, done);
+    });
+  });
+  function fallback(text, done){ const ta=document.createElement('textarea'); ta.value=text;
+    document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); done(); }catch(e){} ta.remove(); }
+
+  /* ---------- progressive hints: level n+1 unlocks after n is opened ---------- */
+  document.querySelectorAll('.hints').forEach(group=>{
+    const ds = [...group.querySelectorAll('details')];
+    ds.forEach((d,i)=> d.addEventListener('toggle', ()=>{ if(d.open && ds[i+1]) ds[i+1].classList.remove('locked'); }));
+  });
+
+  /* ---------- step progress (remembered per browser) ---------- */
+  const KEY = 'latent-ledgerly-ex05-done';
+  let done = {};
+  try{ done = JSON.parse(localStorage.getItem(KEY) || '{}'); }catch(e){ done = {}; }
+  function paint(){
+    document.querySelectorAll('.step').forEach(s=>{
+      const n = s.dataset.step, on = !!done[n];
+      s.classList.toggle('done', on);
+      const b = s.querySelector('.donebtn'); if(b) b.textContent = on ? '✓ Step done' : '☐ Mark step done';
+      const node = document.querySelector('.rail .node[data-step="'+n+'"]'); if(node) node.classList.toggle('done', on);
+    });
+  }
+  document.querySelectorAll('.donebtn').forEach(b=>b.addEventListener('click', ()=>{
+    const n = b.closest('.step').dataset.step; done[n] = !done[n];
+    try{ localStorage.setItem(KEY, JSON.stringify(done)); }catch(e){}
+    paint();
+  }));
+  paint();
+
+  /* ---------- reference reveal ---------- */
+  document.getElementById('unlock').addEventListener('click', e=>{
+    const g = document.getElementById('refgrid'); g.classList.toggle('open');
+    e.target.textContent = g.classList.contains('open') ? 'Hide the reference' : "I've finished, show me the reference";
+  });
+</script>
+</body>
+</html>

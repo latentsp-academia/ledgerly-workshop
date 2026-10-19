@@ -43,7 +43,8 @@ Two rules hold throughout:
 | Convention / scope | team rule in one person's `~/.claude` | Ex 1 |
 | House style the code doesn't show | `frozen + slots + kw_only` value objects | Ex 1 · rules |
 | Grader tampering | edits a test to make the suite pass | Ex 1 (measured) → Ex 3 hook |
-| Outdated libraries | Pydantic v1 / deprecated FastAPI APIs from training data | Ex 4 · MCP (Context7) |
+| Outdated libraries | deprecated FastAPI / Pydantic APIs from training data | Ex 4 · MCP (Context7) |
+| Tests that check nothing | mirror tests on refunds; skipping a flaky test | Ex 5 · mutation judge |
 | Unchecked procedure | PR note in the wrong format, gates claimed but never run | Ex 2 · skills |
 | Security | reads `.env`, edits `generated/`, destructive migrations | Ex 3 PreToolUse |
 | Spec drift | builds what it *thought* you meant | Day 2 · Ex 8 Spec Kit |
@@ -111,7 +112,7 @@ It also contains what real repos contain:
 | Generated code: "DO NOT EDIT" | `generated/tracker_client.py` | Ex 3 |
 | Applied, destructive migration | `migrations/003_drop_audit_log_old.sql` | Ex 3 |
 | Lint & architecture config an agent could "relax" | `ruff.toml`, `.importlinter` | Ex 3 |
-| Flaky test (~10%: random invoice numbers collide) | `tests/test_invoices.py` `-m landmine` | Ex 5 |
+| Flaky test (~10%: random invoice numbers collide) | `tests/test_invoices.py` `-m landmine` | Ex 5 (LED-118 trap) |
 
 ## Tools
 
@@ -127,17 +128,20 @@ It also contains what real repos contain:
 | `tools/observe.sh on\|tail\|off` | log every CLAUDE.md / rule load (`InstructionsLoaded` hook) to `runs/loads.log` |
 | `python3 tools/memory_size.py [file]` | approximate token cost of memory files, following `@imports` |
 | `python3 tools/skill_lint.py <skill> [--profile …]` | static skill checks from the Skills lecture (frontmatter, triggers, sandbox, fork) |
+| `python3 tools/skill_eval.py <evals.json> [--runs N] [--baseline]` | evaluate a skill like a feature: trigger recall, false fires, quality with vs without it (Ex 2 Step 5) |
+| `python3 tools/hook_test.py [fence\|lint\|finish]` | run the hook test suites (JSON on stdin → expected allow/ask/deny/block) against `ledgerly/.claude/hooks/` (Ex 3) |
 | `tools/demo_reference.sh <drill> red\|green` | facilitator fallback: apply the hand-written reference patch and check it |
 
 Drills can be named by prefix: `led-105` (revenue endpoint), `led-112` (404 errors), `led-103` (impossible VAT ticket),
-`led-120` (PR note), `trigger-implicit`, `trigger-quiet`. An ambiguous prefix is refused, never guessed.
+`led-120` (PR note), `trigger-implicit`, `trigger-quiet`, `led-132` (relax the lint), `led-141` (seed data,
+deprecated APIs), `led-150` / `led-151` (refund tests, weak vs contract), `led-118` (the flaky test). An ambiguous prefix is refused, never guessed.
 
 `run_drill.sh` runs Claude Code headless with `--permission-mode acceptEdits` and an allowlist of
 project commands (`uv run`, `git diff`, …). Everything else is denied. Set `MODEL=…` to pin a model.
 
 ## Exercise map
 
-Timings and agenda slots for every exercise: [exercises/PLAN.md](exercises/PLAN.md).
+Timings and agenda slots for every exercise: [PLAN.md](PLAN.md).
 
 ### Day 1: the harness, one building block at a time (Fundamentals deck)
 
@@ -145,9 +149,9 @@ Timings and agenda slots for every exercise: [exercises/PLAN.md](exercises/PLAN.
 |---|---|---|---|---|
 | 1 | [CLAUDE.md + rules](exercises/ex01-claude-md/) · [open the page](exercises/ex01-claude-md/exercise.html) | no memory → stale README, float legacy, false "done" (tests green); then project · directory · rules (hidden house-style test) · @import · user-level trap | 30–36 | ✅ ready |
 | 2 | [Skills](exercises/ex02-skills/) · [open the page](exercises/ex02-skills/exercise.html) | a generic PR note (wrong format, no ADRs, unverified gates); then author `ship-check`, prove it fires implicitly and stays quiet, and build a forked, read-only `adr-audit` worker | 25 | ✅ ready |
-| 3 | Hooks | LED-103 tampering *rate* from Ex 1 → `PreToolUse` fence (tests append-only, protected configs), `PostToolUse` lint, `Stop` finish line (the drift checker as a hook) → **0/3** | 25 | planned |
-| 4 | MCP + Context7 | outdated library APIs (Pydantic v1 `@validator`) caught by `pytest -W error::DeprecationWarning`; MCP schema cost in `/context` | 4 demo · 20 homework | planned |
-| 5 | Tests: green is not correct | weak tests survive a hidden mutation judge; contract tests from ADR-0003 kill the mutants | 25 | planned |
+| 3 | [Hooks](exercises/ex03-hooks/) · [open the page](exercises/ex03-hooks/exercise.html) | LED-103 tampering *rate* from Ex 1 → `PreToolUse` fence (tests append-only, protected configs, `.env`), `PostToolUse` lint, `Stop` finish line with a stop rule → **0/3**; LED-132 "relax the lint" | 25 | ✅ ready |
+| 4 | [MCP + Context7](exercises/ex04-mcp/) · [open the page](exercises/ex04-mcp/exercise.html) | LED-141: green tests on a deprecated FastAPI API (`on_event`) → Context7 + a rule → `lifespan`; then deprecations become failing tests; MCP cost in `/context` | 4 demo · 20 homework | ✅ ready |
+| 5 | [Tests: green is not correct](exercises/ex05-tests/) · [open the page](exercises/ex05-tests/exercise.html) | LED-150 weak tests survive a hidden mutation judge (7 mutants); LED-151 contract tests from ADR-0003 kill them; LED-118 trap: skip the flaky test or fix the bug? | 25 | ✅ ready |
 
 ### Day 2: process on top of the gates (Advanced decks)
 

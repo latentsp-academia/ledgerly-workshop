@@ -1,0 +1,7 @@
+runs/
+my-variants/
+.DS_Store
+__pycache__/
+*.pyc
+.pytest_cache/
+.ex0*-update.*

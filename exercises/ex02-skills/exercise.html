@@ -326,6 +326,8 @@
     <a class="node" href="#s3" data-step="3"><div class="k">Step 3</div><div class="v">🪄 Implicit</div><div class="t">5 min</div></a>
     <div class="arrow">→</div>
     <a class="node" href="#s4" data-step="4"><div class="k">Step 4</div><div class="v">⚙️ Worker</div><div class="t">6 min</div></a>
+    <div class="arrow">→</div>
+    <a class="node" href="#s5" data-step="5"><div class="k">Step 5</div><div class="v">📊 Evaluate</div><div class="t">homework</div></a>
   </div>
 
   <!-- ============ STEPS (left) + SIDE PANEL (right) ============ -->
@@ -600,6 +602,48 @@ Diff under review: !`git diff HEAD --stat`
         </div>
       </div>
 
+
+      <!-- 5 · EVALUATE -->
+      <div class="step" id="s5" data-step="5">
+        <div class="n">5</div>
+        <div>
+          <div class="head"><h3>📊 Evaluate the skill like a feature</h3><span class="chip">homework · ~10 min of your time</span></div>
+          <p class="task">Step 3 was one prompt each way. Before you trust a skill, run an <strong>eval set</strong>: four
+            prompts that should fire it, three that shouldn't, each 3 times, plus a <strong>baseline</strong> with the skill
+            removed. The eval file is <code>exercises/ex02-skills/evals/ship-check.json</code>. Add your own phrasings to it.</p>
+          <div class="promptbox shell">
+            <div class="tag">▶ Run it (headless, uses your current memory files) <button class="copy">⧉ copy</button></div>
+            <p>python3 tools/skill_eval.py exercises/ex02-skills/evals/ship-check.json --quick      <span class="c-cmt"># 2 runs, a smoke test</span>
+python3 tools/skill_eval.py exercises/ex02-skills/evals/ship-check.json --runs 3 --baseline   <span class="c-cmt"># the real eval, ~33 runs</span></p>
+          </div>
+          <div class="out">   <span class="d">metric</span>                                  <span class="d">value</span>        <span class="d">target</span>
+   trigger recall (fires when it should)   <span class="p">11/12 · 91%</span>  ≥ 80%
+   false fires (fires when it shouldn't)   <span class="f">1/9 · 11%</span>    0%
+   output quality WITH the skill           <span class="p">10/12 · 83%</span>  ≥ 80%
+   output quality WITHOUT it (baseline)    <span class="f">0/12 · 0%</span>    lower than with
+   <b>Verdict: sharpen it 🔁</b>                <span class="d">← example numbers; yours will vary</span></div>
+          <p class="why"><b>Why</b>The lecture's rule: <strong>baseline with vs. without before you trust it</strong>, and test it
+            like a feature. Four numbers tell you what to fix. Low recall: add phrasings. False fires: narrow the
+            description. Fires but low quality: fix the body, template or script. No gap against the baseline: the skill
+            isn't earning its tokens. The report is saved to <code>runs/skill-eval/ship-check/report.md</code>.</p>
+          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
+            <div class="checks">
+              <div>Recall <strong>≥ 80%</strong>, false fires <strong>0</strong>, quality with the skill <strong>≥ 80%</strong>.</div>
+              <div>The baseline is <strong>clearly lower</strong> than with the skill.</div>
+              <div>You added <strong>one prompt of your own</strong> to each list, and the verdict still says <em>ship it</em>.</div>
+            </div>
+          </div>
+          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
+            <details><summary><span class="lv">1 · nudge</span>It takes too long</summary>
+              <div class="body">Each run is a full headless agent session. Use <code>--quick</code> while iterating on the description, and the full run once, before you commit the skill.</div></details>
+            <details class="locked"><summary><span class="lv">2 · specific</span>One should-fire prompt keeps missing</summary>
+              <div class="body">Open its transcript in <code>runs/skill-eval/ship-check/should-*.jsonl</code>. Did the agent do the job <em>without</em> the skill? Then the description doesn't connect that phrasing to this job. Add the phrase itself to <code>when_to_use</code>.</div></details>
+            <details class="locked"><summary><span class="lv">3 · near-complete</span>The rename prompt fires it</summary>
+              <div class="body">The description is claiming "changes" in general. Tie it to the <strong>review moment</strong>: <em>"Prepares a change for review … Use when someone wants it ready for review / a PR note / about to open a pull request."</em> Nothing about editing code.</div></details>
+          </div>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
     </div>
 
     <!-- SIDE PANEL -->
@@ -650,6 +694,7 @@ Diff under review: !`git diff HEAD --stat`
           <div><span class="c">tools/check.sh led-120</span><span class="e">grade the PR note (hidden judge)</span></div>
           <div><span class="c">tools/check.sh trigger-implicit · trigger-quiet</span><span class="e">did it fire? did it stay quiet?</span></div>
           <div><span class="c">tools/run_drill.sh trigger-implicit current 3</span><span class="e">your firing rate</span></div>
+          <div><span class="c">python3 tools/skill_eval.py exercises/ex02-skills/evals/ship-check.json</span><span class="e">the full eval: recall, false fires, quality, baseline</span></div>
         </div>
       </div>
 
@@ -659,7 +704,7 @@ Diff under review: !`git diff HEAD --stat`
   <!-- ============ REFERENCE IMPLEMENTATION ============ -->
   <div class="reference" id="reference">
     <div class="label">🔓 Reference implementation</div>
-    <p>Finished all five steps? Compare with the reference. It's also in the repo as real files:
+    <p>Finished the steps? Compare with the reference. It's also in the repo as real files:
       <strong>exercises/ex02-skills/reference/</strong>. Apply it with
       <code style="font-family:'Space Mono',monospace;color:var(--green)">tools/apply_variant.sh exercises/ex02-skills/reference</code>.</p>
     <button class="unlock" id="unlock">I've finished, show me the reference</button>

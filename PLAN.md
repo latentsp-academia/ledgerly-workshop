@@ -1,8 +1,5 @@
 # Ledgerly exercise plan: where each exercise goes, and how long
 
-Built against `AI coding agents3.1/AGENDA-MAPPING.md` (2 days × 240 min) and Daniel's targets in
-`DRYRUN-TIMINGS.md`.
-
 - **Day 1 is the harness:** every building block gets a Ledgerly exercise, in deck order:
   CLAUDE.md + rules → skills → hooks → MCP → tests.
 - **Day 2 is process on top of it:** subagents, then spec-driven development.
@@ -25,12 +22,12 @@ Each exercise opens with a red the previous one couldn't fix. The drift checker 
 | 12 | Skills | 16–17 | |
 | **25** | 🧪 **Ex 2 · Skills** ✅ built | | `ex02-skills/` |
 | 8 | Hooks | 18 | |
-| **25** | 🧪 **Ex 3 · Hooks** | | `ex03-hooks/` |
+| **25** | 🧪 **Ex 3 · Hooks** ✅ built | | `ex03-hooks/` |
 | 6 | MCP | 19 | |
-| **4** | 🧪 **Ex 4 · MCP + Context7** (live demo; full version is homework) | | `ex04-mcp/` |
+| **4** | 🧪 **Ex 4 · MCP + Context7** ✅ built (live demo; full version is homework) | | `ex04-mcp/` |
 | 8 | Cost optimisation | 21–22 | |
 | 10 | Testing with AI agents | 23 | |
-| **25** | 🧪 **Ex 5 · Tests: green is not correct** | | `ex05-tests/` |
+| **25** | 🧪 **Ex 5 · Tests: green is not correct** ✅ built | | `ex05-tests/` |
 | 4 | 🧯 Buffer · Q&A | | |
 
 **Hands-on: 109 min (45%).** Before the break: 97 min (Daniel's target is about 90).
@@ -72,7 +69,9 @@ implicit **and** quiet triggers → `adr-audit` as a forked, read-only worker. E
 (`when_to_use`, `argument-hint`, `allowed-tools`, `!`cmd``, `${CLAUDE_SKILL_DIR}`, `reference.md`,
 `context: fork`, `agent`, `model`, `effort`) has a check.
 
-## Ex 3 · Hooks · 25 min · `ex03-hooks/`
+## Ex 3 · Hooks · 25 min · ✅ built · `ex03-hooks/`
+
+Test the hooks with `python3 tools/hook_test.py` (34 cases; the starter goes red on 8).
 
 From `exercise-hooks`. Opens on Ex 1's LED-103 rate and ends at **0/3 by construction**.
 
@@ -86,24 +85,25 @@ From `exercise-hooks`. Opens on Ex 1's LED-103 rate and ends at **0/3 by constru
 
 Homework: `exercise-hook-debug` rebuilt on Ledgerly.
 
-## Ex 4 · MCP + Context7 · 4 min demo (20 min homework) · `ex04-mcp/`
+## Ex 4 · MCP + Context7 · 4 min demo (20 min homework) · ✅ built · `ex04-mcp/`
 
-Red: "validate currency codes on the invoice payload" → the agent writes Pydantic v1
-`@validator`. Plain pytest is green; `pytest -W error::DeprecationWarning` is red.
-Green: add Context7 to `.mcp.json` → `field_validator`. Homework adds a local tracker MCP server
-(tickets for the drills) and a `/context` before/after on schema cost.
+Red: LED-141 "seed demo data at startup" → agents often write FastAPI `@app.on_event`, deprecated
+in the pinned FastAPI. Tests green; the hidden judge records DeprecationWarnings raised from
+`src/ledgerly/`. Green: Context7 in `.mcp.json` + `.claude/rules/libraries.md` → `lifespan`.
+Enforce: a human adds `filterwarnings = ["error::DeprecationWarning:ledgerly"]`. Cost: the MCP tools
+line in `/context`. Homework: a local tracker MCP server for the tickets.
 
-## Ex 5 · Tests: green is not correct · 25 min · `ex05-tests/`
+## Ex 5 · Tests: green is not correct · 25 min · ✅ built · `ex05-tests/`
 
 From `exercise-testing-ai-generated-code` and `space-invaders-tdd`. Since Ex 3's hook fences the
 tests, the question is no longer "will it cheat?" but "are the tests any good?"
 
 | step | what | min |
 |---|---|---|
-| 0 🔴 | Weak ask: "write tests for refunds". The hidden judge **mutates** `services/refunds.py` (drops the over-refund guard, caps instead of rejecting, flips rounding). Weak tests let most mutants survive | 6 |
-| 1 | Keep/drop filter on the agent's tests: which assert behaviour and which assert implementation? | 5 |
-| 2 | Contract ask from ADR-0003 → red test first, then the smallest change → mutants killed | 9 |
-| 3 🪤 | The trap: a requirement the code violates (LED-118, the flaky invoice numbers). Does it fix the code or skip the test? The Ex 3 hook decides | 5 |
+| 0 🔴 | LED-150 weak ask on partial refunds (LED-101 pre-applied). A hidden judge plants 7 mutants, one per ADR-0003 rule, and runs only the new tests. Weak tests kill few | 6 |
+| 1 | Keep/drop: rule-check, mirror of the code, or duplicate? | 5 |
+| 2 | LED-151 contract ask from ADR-0003 (a rule per test, boundaries, don't change the code) → ≥ 6/7 killed | 9 |
+| 3 🪤 | The trap: LED-118 "make the flaky test pass" with the Ex 3 hooks on. A `skip` line is an addition, so the append-only fence lets it through; the judge (30/30 runs, no skip, fix in code) catches it | 5 |
 
 # Day 2 exercises
 

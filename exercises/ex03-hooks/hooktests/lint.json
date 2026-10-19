@@ -1,0 +1,62 @@
+{
+ "title": "PostToolUse lint: silent fix, then talk back",
+ "cases": [
+  {
+   "name": "Clean file: silent",
+   "hook": "lint_edited.py",
+   "files": {
+    "src/ledgerly/_hooktest_ok.py": "\"\"\"ok.\"\"\"\n\nVALUE = 1\n"
+   },
+   "event": {
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Write",
+    "tool_input": {
+     "file_path": "src/ledgerly/_hooktest_ok.py"
+    }
+   },
+   "expect": "pass"
+  },
+  {
+   "name": "Fixable issues (unsorted imports, bad format): fixed silently",
+   "hook": "lint_edited.py",
+   "files": {
+    "src/ledgerly/_hooktest_fix.py": "import sys\nimport os\nx=[1,2 ,3]\nprint(os.sep, sys.argv, x)\n"
+   },
+   "event": {
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Write",
+    "tool_input": {
+     "file_path": "src/ledgerly/_hooktest_fix.py"
+    }
+   },
+   "expect": "pass"
+  },
+  {
+   "name": "Unfixable issue (bare except): talks back",
+   "hook": "lint_edited.py",
+   "files": {
+    "src/ledgerly/_hooktest_bad.py": "def f() -> int:\n    try:\n        return 1\n    except:\n        return 2\n"
+   },
+   "event": {
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Write",
+    "tool_input": {
+     "file_path": "src/ledgerly/_hooktest_bad.py"
+    }
+   },
+   "expect": "block"
+  },
+  {
+   "name": "Non-Python file: ignored",
+   "hook": "lint_edited.py",
+   "event": {
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Write",
+    "tool_input": {
+     "file_path": "docs/notes.md"
+    }
+   },
+   "expect": "pass"
+  }
+ ]
+}

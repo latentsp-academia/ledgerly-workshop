@@ -38,9 +38,10 @@ fi
 
 # The agent may edit files and run project commands. Everything else is denied.
 ALLOWED=(
-  "Read" "Edit" "Write" "Glob" "Grep"
+  "Read" "Edit" "Write" "Glob" "Grep" "Skill"
   "Bash(uv run:*)" "Bash(uv sync:*)" "Bash(make:*)" "Bash(python:*)" "Bash(python3:*)"
   "Bash(git status:*)" "Bash(git diff:*)" "Bash(git log:*)" "Bash(ls:*)" "Bash(cat:*)"
+  "mcp__context7"
 )
 EXTRA=()
 [ -n "${MODEL:-}" ] && EXTRA+=(--model "$MODEL")
@@ -51,11 +52,13 @@ for i in $(seq 1 "$RUNS"); do
   [ -n "$SRC" ] && "$ROOT/tools/apply_variant.sh" "$SRC" >/dev/null
   if [ -x "$DRILL/setup.sh" ]; then "$DRILL/setup.sh" "$APP" >/dev/null; fi
   T="$OUT/run-$i.jsonl"
+  MCP=()  # headless runs can't answer the project-MCP approval prompt, so pass .mcp.json explicitly
+  [ -f "$APP/.mcp.json" ] && MCP=(--mcp-config "$APP/.mcp.json")
   ( cd "$APP" && claude -p "$(cat "$DRILL/prompt.md")" \
       --output-format stream-json --verbose \
       --permission-mode acceptEdits \
       --max-turns "${MAX_TURNS:-40}" \
-      ${EXTRA[@]+"${EXTRA[@]}"} \
+      ${EXTRA[@]+"${EXTRA[@]}"} ${MCP[@]+"${MCP[@]}"} \
       --allowedTools "${ALLOWED[@]}" ) > "$T" 2>"$OUT/run-$i.stderr" || true
   python3 "$ROOT/tools/drift_check.py" "$DRILL" --transcript "$T" --label "$LABEL" || true
 done

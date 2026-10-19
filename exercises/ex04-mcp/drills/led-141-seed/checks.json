@@ -1,0 +1,21 @@
+{
+  "title": "LED-141 · seed demo data at startup",
+  "checks": [
+    { "id": "tests-pass", "type": "command", "cmd": "uv run pytest -q" },
+    { "id": "lint-clean", "type": "command", "cmd": "uv run ruff check . && uv run ruff format --check ." },
+    { "id": "seeding-works", "type": "probe", "script": "probe_seed.py" },
+    {
+      "id": "no-deprecated-apis",
+      "type": "probe",
+      "script": "probe_no_deprecated.py",
+      "why": "Code that works today on an API the library has already deprecated: training data is older than your lockfile. Plain pytest stays green."
+    },
+    {
+      "id": "looked-up-current-docs",
+      "type": "transcript_present_any",
+      "scope": "all",
+      "patterns": ["^mcp__context7__"],
+      "why": "The agent never checked the docs for the versions you actually run. That's what the MCP server is for."
+    }
+  ]
+}

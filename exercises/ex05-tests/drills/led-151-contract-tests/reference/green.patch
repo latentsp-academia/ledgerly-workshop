@@ -1,0 +1,74 @@
+diff --git a/tests/test_refund_rules.py b/tests/test_refund_rules.py
+new file mode 100644
+index 0000000..94f87e0
+--- /dev/null
++++ b/tests/test_refund_rules.py
+@@ -0,0 +1,68 @@
++"""ADR-0003 refund rules, one test per rule, through the API and the service."""
++
++import sqlite3
++
++import pytest
++from fastapi.testclient import TestClient
++
++from ledgerly.payments.money import Money
++from ledgerly.services import refunds
++
++
++def refund(client: TestClient, invoice_id: int, cents: int | None = None):  # type: ignore[no-untyped-def]
++    body = None if cents is None else {"amount_cents": cents}
++    return client.post(f"/invoices/{invoice_id}/refund", json=body)
++
++
++def test_rule_only_paid_invoices_can_be_refunded(client: TestClient) -> None:
++    open_invoice = client.post(
++        "/invoices",
++        json={
++            "customer": "A",
++            "currency": "USD",
++            "lines": [{"description": "x", "quantity": 1, "unit_cents": 100}],
++        },
++    ).json()
++    assert refund(client, open_invoice["id"]).status_code == 409
++
++
++def test_rule_partial_refunds_track_the_running_total(
++    client: TestClient, paid_invoice: dict
++) -> None:  # type: ignore[type-arg]
++    assert refund(client, paid_invoice["id"], 5_000).json()["refunded_cents"] == 5_000
++    assert refund(client, paid_invoice["id"], 1_000).json()["refunded_cents"] == 1_000
++    assert refund(client, paid_invoice["id"]).json()["refunded_cents"] == 5_700
++
++
++def test_rule_refunding_exactly_what_is_left_is_allowed(
++    client: TestClient, paid_invoice: dict
++) -> None:  # type: ignore[type-arg]
++    refund(client, paid_invoice["id"], 5_000)
++    assert refund(client, paid_invoice["id"], 6_700).status_code == 200
++
++
++def test_rule_one_cent_too_much_is_rejected_with_422_and_remaining(
++    client: TestClient, paid_invoice: dict
++) -> None:  # type: ignore[type-arg]
++    refund(client, paid_invoice["id"], 5_000)
++    over = refund(client, paid_invoice["id"], 6_701)
++    assert over.status_code == 422
++    assert over.json()["detail"]["remaining_cents"] == 6_700
++
++
++def test_rule_over_refund_is_never_capped(client: TestClient, paid_invoice: dict) -> None:  # type: ignore[type-arg]
++    refund(client, paid_invoice["id"], 5_000)
++    refund(client, paid_invoice["id"], 9_999)
++    assert refund(client, paid_invoice["id"]).json()["refunded_cents"] == 6_700
++
++
++def test_rule_nothing_left_is_a_conflict(client: TestClient, paid_invoice: dict) -> None:  # type: ignore[type-arg]
++    refund(client, paid_invoice["id"])
++    assert refund(client, paid_invoice["id"], 1).status_code == 409
++
++
++def test_rule_amount_must_be_positive_in_the_service(
++    conn: sqlite3.Connection, client: TestClient, paid_invoice: dict
++) -> None:  # type: ignore[type-arg]
++    with pytest.raises(refunds.RefundError, match="positive"):
++        refunds.refund(conn, paid_invoice["id"], Money(0, "USD"))

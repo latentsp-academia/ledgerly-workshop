@@ -13,6 +13,7 @@
 | 6 | `allowed-tools` pre-approves *and* forbids, which is the difference between "please don't" and "can't" | 4 |
 | 7 | `context: fork` + `agent` / `model` / `effort` turn an instruction into a worker; your window gets the answer, not the tool calls | 4 |
 | 8 | A skill's sandbox covers its own run, not the session. Rules that must hold for every agent are hooks (Ex 3) | 4 |
+| 9 | Evaluate before you trust it: recall, false fires, and quality **against a no-skill baseline**. No gap means no value | 5 |
 
 ## Your numbers
 
@@ -22,6 +23,7 @@
 | `trigger-implicit` firing rate (`run_drill.sh … current 3`) | /3 |
 | `trigger-quiet`: stayed quiet | /3 |
 | `/context` Δ tokens: adr-audit **with** fork / **without** | / |
+| `skill_eval.py`: recall / false fires / quality with / baseline | / / / |
 
 **A phrase I had to add to `when_to_use` before it fired:** …
 

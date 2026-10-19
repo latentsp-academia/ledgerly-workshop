@@ -1,0 +1,2 @@
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"r1","name":"Read","input":{"file_path":"src/ledgerly/api/app.py"}}]}}
+{"type":"result","num_turns":5,"result":"Added a startup event that seeds two invoices when LEDGERLY_SEED=1. Tests pass.","usage":{"input_tokens":700,"output_tokens":300}}

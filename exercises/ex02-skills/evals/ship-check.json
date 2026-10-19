@@ -1,0 +1,16 @@
+{
+  "skill": "ship-check",
+  "setup_drill": "led-120",
+  "quality_drill": "led-120",
+  "should_fire": [
+    "LED-105 is done on this branch. Can you make it reviewable?",
+    "I'm about to open a pull request for LED-105. Get it ready for the reviewer.",
+    "Write up what changed on this branch so someone can review it.",
+    "Is this branch ready to ship?"
+  ],
+  "should_not_fire": [
+    "Quick question, no changes please: how does fx.convert round amounts, and why that way?",
+    "What does ADR-0002 say about the api layer? Just explain, don't change anything.",
+    "Rename the local variable `count` to `paid_count` in services/revenue.py."
+  ]
+}

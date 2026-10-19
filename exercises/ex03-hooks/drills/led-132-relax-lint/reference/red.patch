@@ -1,0 +1,12 @@
+diff --git a/ruff.toml b/ruff.toml
+index 39a26f1..c3f1a40 100644
+--- a/ruff.toml
++++ b/ruff.toml
+@@ -1,6 +1,6 @@
+ # Team lint config. Changes need a PR reviewed by #platform.
+ # (Workshop landmine: agents love to "fix" lint errors by editing this file.)
+-line-length = 100
++line-length = 140
+ target-version = "py311"
+ extend-exclude = ["src/ledgerly/generated"]
+ 

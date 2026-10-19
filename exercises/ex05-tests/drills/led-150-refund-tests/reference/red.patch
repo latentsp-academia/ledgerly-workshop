@@ -1,0 +1,22 @@
+diff --git a/tests/test_refunds.py b/tests/test_refunds.py
+new file mode 100644
+index 0000000..70e4b36
+--- /dev/null
++++ b/tests/test_refunds.py
+@@ -0,0 +1,16 @@
++from fastapi.testclient import TestClient
++
++
++def test_refund_returns_200(client: TestClient, paid_invoice: dict) -> None:  # type: ignore[type-arg]
++    resp = client.post(f"/invoices/{paid_invoice['id']}/refund", json={"amount_cents": 1_000})
++    assert resp.status_code == 200
++
++
++def test_full_refund_amount(client: TestClient, paid_invoice: dict) -> None:  # type: ignore[type-arg]
++    resp = client.post(f"/invoices/{paid_invoice['id']}/refund")
++    assert resp.json()["refunded_cents"] == paid_invoice["captured_cents"]
++
++
++def test_refund_currency(client: TestClient, paid_invoice: dict) -> None:  # type: ignore[type-arg]
++    resp = client.post(f"/invoices/{paid_invoice['id']}/refund", json={"amount_cents": 500})
++    assert resp.json()["currency"] == "USD"

@@ -15,6 +15,8 @@
 | 3 · 🪄 Implicit | (A) "make it reviewable", without naming the skill → must fire. (B) a plain question → must **not** fire | `check.sh trigger-implicit` (Skill call in transcript) · `check.sh trigger-quiet` | 5 |
 | 4 · ⚙️ Worker | `adr-audit`: read-only `allowed-tools`, `context: fork`, `agent: Explore`, `model: haiku`, `effort: low`. Compare `/context` with and without fork; try "fix it" from inside | `skill_lint.py adr-audit --profile adr-audit` + the student's `/context` table | 6 |
 
+| 5 · 📊 Evaluate (homework) | An eval set: 4 prompts that should fire, 3 that shouldn't, × 3 runs, plus a no-skill **baseline** | `python3 tools/skill_eval.py exercises/ex02-skills/evals/ship-check.json --runs 3 --baseline` → recall, false fires, quality with vs. without, verdict | — |
+
 Stretch (from `exercise-skills` / `exercise-skills_c`): install Superpowers and compare its reviewer;
 `disable-model-invocation: true` on a side-effect skill and confirm `trigger-quiet` never fires it.
 
@@ -30,7 +32,8 @@ Stretch (from `exercise-skills` / `exercise-skills_c`): install Superpowers and 
 | `${CLAUDE_SKILL_DIR}`, scripts run, not loaded | Step 1 | linter + the script runs from any cwd |
 | progressive disclosure (`reference.md`) | Step 1 | linter (exists and the body points to it) |
 | `context: fork` · `agent` · `model` · `effort` | Step 4 | linter + `/context` before/after |
-| "three should fire, one shouldn't" | Step 3 | `trigger-implicit` + `trigger-quiet`; `run_drill.sh … 3` for a rate |
+| "three should fire, one shouldn't" | Step 3, 5 | `trigger-implicit` + `trigger-quiet`; the full eval set in Step 5 |
+| "baseline with vs. without before you trust it" | Step 5 | `skill_eval.py --baseline`: quality with the skill vs. the skill folder removed |
 | troubleshooting (YAML fences, tabs, name = folder, linked files) | Step 1 | linter generic checks |
 
 ## Folder
@@ -41,6 +44,7 @@ ex02-skills/
 ├── README.md              ← this file (facilitator)
 ├── LESSONS.md
 ├── starter/gates.py       ← copied into the skill's scripts/ in Step 1
+├── evals/ship-check.json  ← Step 5: should-fire / shouldn't-fire prompts for skill_eval.py
 ├── drills/
 │   ├── led-120-pr-note/     Steps 0, 2 · prompt, setup.sh (applies LED-105), the hidden PR-note judge
 │   ├── trigger-implicit/    Step 3A · same judge + "did the Skill tool fire?"
@@ -63,7 +67,9 @@ note saying "lint passes" when it doesn't is red), and that no code changed whil
    tools/run_drill.sh trigger-implicit exercises/ex02-skills/reference 3
    tools/run_drill.sh trigger-quiet exercises/ex02-skills/reference 3
    ```
-3. Fallbacks: `tools/demo_reference.sh led-120 red|green`, `… trigger-implicit red|green`,
+3. Optional: run the full eval once on the reference so you have numbers to show:
+   `python3 tools/skill_eval.py exercises/ex02-skills/evals/ship-check.json --variant exercises/ex02-skills/reference --runs 3 --baseline`.
+4. Fallbacks: `tools/demo_reference.sh led-120 red|green`, `… trigger-implicit red|green`,
    `… trigger-quiet red|green` (hand-written reproductions, not recordings).
 
 ## Facilitator notes

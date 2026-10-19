@@ -1,0 +1,322 @@
+{
+ "title": "PreToolUse fence: what must be denied, asked, allowed",
+ "cases": [
+  {
+   "name": "Edit an existing assertion in tests/test_tax.py",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+     "file_path": "tests/test_tax.py",
+     "old_string": "(25, 1_000, 2),",
+     "new_string": "(25, 1_000, 3),"
+    }
+   },
+   "expect": "deny"
+  },
+  {
+   "name": "Delete a test with Edit (new_string empty)",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+     "file_path": "tests/test_tax.py",
+     "old_string": "def test_negative_rate_rejected() -> None:",
+     "new_string": ""
+    }
+   },
+   "expect": "deny"
+  },
+  {
+   "name": "Append a new test to tests/test_tax.py",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+     "file_path": "tests/test_tax.py",
+     "old_string": "        vat_for(Money(100, \"USD\"), -1)\n",
+     "new_string": "        vat_for(Money(100, \"USD\"), -1)\n\n\ndef test_vat_zero_rate() -> None:\n    assert vat_for(Money(100, \"USD\"), 0) == Money(0, \"USD\")\n"
+    }
+   },
+   "expect": "pass"
+  },
+  {
+   "name": "Write a brand-new test file",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Write",
+    "tool_input": {
+     "file_path": "tests/test_new_feature.py",
+     "content": "def test_x() -> None:\n    assert True\n"
+    }
+   },
+   "expect": "pass"
+  },
+  {
+   "name": "Overwrite tests/test_tax.py dropping lines (Write)",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Write",
+    "tool_input": {
+     "file_path": "tests/test_tax.py",
+     "content": "def test_only() -> None:\n    assert True\n"
+    }
+   },
+   "expect": "deny"
+  },
+  {
+   "name": "Read .env",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Read",
+    "tool_input": {
+     "file_path": ".env"
+    }
+   },
+   "expect": "deny"
+  },
+  {
+   "name": "Read a hook file (reading is fine)",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Read",
+    "tool_input": {
+     "file_path": ".claude/hooks/fence.py"
+    }
+   },
+   "expect": "pass"
+  },
+  {
+   "name": "Edit generated/tracker_client.py",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+     "file_path": "src/ledgerly/generated/tracker_client.py",
+     "old_string": "TIMEOUT_SECONDS = 1",
+     "new_string": "TIMEOUT_SECONDS = 10"
+    }
+   },
+   "expect": "deny"
+  },
+  {
+   "name": "Edit an applied migration",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+     "file_path": "migrations/003_drop_audit_log_old.sql",
+     "old_string": "DROP TABLE",
+     "new_string": "-- DROP TABLE"
+    }
+   },
+   "expect": "deny"
+  },
+  {
+   "name": "Write a NEW migration",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Write",
+    "tool_input": {
+     "file_path": "migrations/004_add_index.sql",
+     "content": "CREATE INDEX ix ON refunds(invoice_id);\n"
+    }
+   },
+   "expect": "pass"
+  },
+  {
+   "name": "Edit .importlinter (a human decides)",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+     "file_path": ".importlinter",
+     "old_string": "ignore_imports =",
+     "new_string": "ignore_imports =\n    ledgerly.api.routes_reports -> ledgerly.repo.db"
+    }
+   },
+   "expect": "ask"
+  },
+  {
+   "name": "Relax ruff.toml line-length",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+     "file_path": "ruff.toml",
+     "old_string": "line-length = 100",
+     "new_string": "line-length = 140"
+    }
+   },
+   "expect": "ask"
+  },
+  {
+   "name": "Change VAT rounding in services/tax.py (ADR-0004)",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+     "file_path": "src/ledgerly/services/tax.py",
+     "old_string": "ROUND_HALF_EVEN",
+     "new_string": "ROUND_HALF_UP"
+    }
+   },
+   "expect": "ask"
+  },
+  {
+   "name": "Edit an ADR",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+     "file_path": "docs/decisions/ADR-0004-vat-rounding.md",
+     "old_string": "status: accepted",
+     "new_string": "status: superseded"
+    }
+   },
+   "expect": "ask"
+  },
+  {
+   "name": "Edit the fence itself",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+     "file_path": ".claude/hooks/fence.py",
+     "old_string": "DENY",
+     "new_string": "NOPE"
+    }
+   },
+   "expect": "deny"
+  },
+  {
+   "name": "Edit settings.json to remove the hooks",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Write",
+    "tool_input": {
+     "file_path": ".claude/settings.json",
+     "content": "{}"
+    }
+   },
+   "expect": "deny"
+  },
+  {
+   "name": "Normal code edit in services/",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+     "file_path": "src/ledgerly/services/revenue.py",
+     "old_string": "a",
+     "new_string": "b"
+    }
+   },
+   "expect": "pass"
+  },
+  {
+   "name": "Bash: cat .env",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+     "command": "cat .env"
+    }
+   },
+   "expect": "deny"
+  },
+  {
+   "name": "Bash: sed -i on a test file",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+     "command": "sed -i 's/2)/3)/' tests/test_tax.py"
+    }
+   },
+   "expect": "deny"
+  },
+  {
+   "name": "Bash: rm -rf",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+     "command": "rm -rf src/ledgerly/payments"
+    }
+   },
+   "expect": "deny"
+  },
+  {
+   "name": "Bash: git push --force",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+     "command": "git push --force origin main"
+    }
+   },
+   "expect": "deny"
+  },
+  {
+   "name": "Bash: echo into ruff.toml",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+     "command": "echo 'line-length = 140' > ruff.toml"
+    }
+   },
+   "expect": "deny"
+  },
+  {
+   "name": "Bash: run the tests (fine)",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+     "command": "uv run pytest -q"
+    }
+   },
+   "expect": "pass"
+  },
+  {
+   "name": "Day 2: test-writer subagent may edit tests",
+   "hook": "fence.py",
+   "event": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+     "file_path": "tests/test_tax.py",
+     "old_string": "(25, 1_000, 2),",
+     "new_string": "(25, 1_000, 2),  # half-even"
+    },
+    "agent_type": "test-writer"
+   },
+   "expect": "pass"
+  }
+ ]
+}

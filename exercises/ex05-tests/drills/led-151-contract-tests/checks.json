@@ -1,0 +1,27 @@
+{
+  "title": "LED-151 \u00b7 tests from the contract",
+  "checks": [
+    {
+      "id": "tests-pass",
+      "type": "command",
+      "cmd": "uv run pytest -q"
+    },
+    {
+      "id": "lint-clean",
+      "type": "command",
+      "cmd": "uv run ruff check . && uv run ruff format --check ."
+    },
+    {
+      "id": "refund-code-untouched",
+      "type": "command",
+      "cmd": "git apply --check -R --include='src/ledgerly/services/refunds.py' --include='src/ledgerly/api/routes_refunds.py' ../exercises/ex05-tests/partial-refunds.patch",
+      "why": "The task was tests. Changing the code under test to fit them hides what the tests miss."
+    },
+    {
+      "id": "mutants-killed",
+      "type": "probe",
+      "script": "../led-150-refund-tests/probe_mutants.py",
+      "why": "Green tests that let real bugs through. Each surviving mutant is an ADR-0003 rule nobody checks."
+    }
+  ]
+}

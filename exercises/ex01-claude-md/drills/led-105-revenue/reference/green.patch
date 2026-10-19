@@ -1,0 +1,101 @@
+diff --git a/src/ledgerly/api/app.py b/src/ledgerly/api/app.py
+index f67727e..b5e6e1d 100644
+--- a/src/ledgerly/api/app.py
++++ b/src/ledgerly/api/app.py
+@@ -4,7 +4,7 @@ import sqlite3
+ 
+ from fastapi import FastAPI
+ 
+-from ledgerly.api import routes_invoices, routes_refunds
++from ledgerly.api import routes_invoices, routes_refunds, routes_reports
+ from ledgerly.services.store import open_store
+ 
+ 
+@@ -13,6 +13,7 @@ def create_app(conn: sqlite3.Connection | None = None) -> FastAPI:
+     app.state.conn = conn if conn is not None else open_store()
+     app.include_router(routes_invoices.router)
+     app.include_router(routes_refunds.router)
++    app.include_router(routes_reports.router)
+ 
+     @app.get("/health")
+     def health() -> dict[str, str]:
+diff --git a/src/ledgerly/api/routes_reports.py b/src/ledgerly/api/routes_reports.py
+new file mode 100644
+index 0000000..4928aa3
+--- /dev/null
++++ b/src/ledgerly/api/routes_reports.py
+@@ -0,0 +1,29 @@
++from __future__ import annotations
++
++import sqlite3
++from typing import Annotated
++
++from fastapi import APIRouter, Depends
++from pydantic import BaseModel
++
++from ledgerly.api.deps import get_conn
++from ledgerly.services.revenue import revenue
++
++router = APIRouter(prefix="/reports", tags=["reports"])
++Conn = Annotated[sqlite3.Connection, Depends(get_conn)]
++
++
++class RevenueOut(BaseModel):
++    currency: str
++    total_cents: int
++    invoice_count: int
++
++
++@router.get("/revenue", response_model=RevenueOut)
++def get_revenue(conn: Conn, currency: str = "USD") -> RevenueOut:
++    result = revenue(conn, currency)
++    return RevenueOut(
++        currency=result.total.currency,
++        total_cents=result.total.cents,
++        invoice_count=result.invoice_count,
++    )
+diff --git a/src/ledgerly/services/revenue.py b/src/ledgerly/services/revenue.py
+new file mode 100644
+index 0000000..a744d0a
+--- /dev/null
++++ b/src/ledgerly/services/revenue.py
+@@ -0,0 +1,26 @@
++"""Revenue on integer cents (ADR-0001). Replaces services/reports.py for new callers."""
++
++from __future__ import annotations
++
++import sqlite3
++from dataclasses import dataclass
++
++from ledgerly.payments.fx import convert
++from ledgerly.payments.money import Money
++from ledgerly.services.invoices import list_invoices
++
++
++@dataclass(frozen=True)
++class Revenue:
++    total: Money
++    invoice_count: int
++
++
++def revenue(conn: sqlite3.Connection, currency: str = "USD") -> Revenue:
++    total = Money.zero(currency)
++    count = 0
++    for inv in list_invoices(conn):
++        if inv.status == "paid":
++            total = total + convert(inv.captured, currency)
++            count += 1
++    return Revenue(total=total, invoice_count=count)
+diff --git a/tests/test_api.py b/tests/test_api.py
+index 3a99850..add8c75 100644
+--- a/tests/test_api.py
++++ b/tests/test_api.py
+@@ -36,3 +36,8 @@ def test_full_refund(client: TestClient, paid_invoice: dict) -> None:  # type: i
+ def test_refund_twice_conflicts(client: TestClient, paid_invoice: dict) -> None:  # type: ignore[type-arg]
+     client.post(f"/invoices/{paid_invoice['id']}/refund")
+     assert client.post(f"/invoices/{paid_invoice['id']}/refund").status_code == 409
++
++
++def test_revenue_report_converts_in_cents(client: TestClient, paid_invoice: dict) -> None:  # type: ignore[type-arg]
++    body = client.get("/reports/revenue", params={"currency": "EUR"}).json()
++    assert body == {"currency": "EUR", "total_cents": 10_764, "invoice_count": 1}

@@ -1,0 +1,20 @@
+{
+  "title": "LED-112 404 for missing invoice",
+  "checks": [
+    { "id": "tests-pass", "type": "command", "cmd": "uv run pytest -q" },
+    { "id": "lint-clean", "type": "command", "cmd": "uv run ruff check . && uv run ruff format --check ." },
+    { "id": "arch-contracts", "type": "command", "cmd": "uv run lint-imports" },
+    {
+      "id": "returns-404",
+      "type": "probe",
+      "script": "probe_status.py",
+      "why": "The bug itself isn't fixed."
+    },
+    {
+      "id": "team-error-convention",
+      "type": "probe",
+      "script": "probe_problem_json.py",
+      "why": "Fixed, but not the team's way. The convention never reached this agent."
+    }
+  ]
+}

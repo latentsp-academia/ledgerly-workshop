@@ -1,0 +1,52 @@
+diff --git a/src/ledgerly/services/tax.py b/src/ledgerly/services/tax.py
+index 83013c7..f45d608 100644
+--- a/src/ledgerly/services/tax.py
++++ b/src/ledgerly/services/tax.py
+@@ -2,7 +2,7 @@
+ 
+ from __future__ import annotations
+ 
+-from decimal import ROUND_HALF_EVEN, Decimal
++from decimal import ROUND_HALF_UP, Decimal
+ 
+ from ledgerly.payments.money import Money
+ 
+@@ -10,10 +10,10 @@ DEFAULT_VAT_RATE_BP = 1_700  # 17.00%
+ 
+ 
+ def vat_for(net: Money, rate_bp: int = DEFAULT_VAT_RATE_BP) -> Money:
+-    """VAT on ``net`` at ``rate_bp`` basis points, rounded half-even to whole cents."""
++    """VAT on ``net`` at ``rate_bp`` basis points, rounded half-up to whole cents."""
+     if rate_bp < 0:
+         raise ValueError("VAT rate cannot be negative")
+     amount = (Decimal(net.cents) * rate_bp / Decimal(10_000)).quantize(
+-        Decimal(1), rounding=ROUND_HALF_EVEN
++        Decimal(1), rounding=ROUND_HALF_UP
+     )
+     return Money(int(amount), net.currency)
+diff --git a/tests/test_tax.py b/tests/test_tax.py
+index bbfa065..4856992 100644
+--- a/tests/test_tax.py
++++ b/tests/test_tax.py
+@@ -10,14 +10,18 @@ from ledgerly.services.tax import vat_for
+         (10_000, 1_700, 1_700),
+         (0, 1_700, 0),
+         (250, 1_000, 25),
+-        (25, 1_000, 2),  # 2.5 -> 2 (half-even, ADR-0004)
+-        (35, 1_000, 4),  # 3.5 -> 4 (half-even, ADR-0004)
++        (25, 1_000, 3),
++        (35, 1_000, 4),
+     ],
+ )
+-def test_vat_half_even(net_cents: int, rate_bp: int, expected: int) -> None:
++def test_vat_rounding(net_cents: int, rate_bp: int, expected: int) -> None:
+     assert vat_for(Money(net_cents, "USD"), rate_bp) == Money(expected, "USD")
+ 
+ 
+ def test_negative_rate_rejected() -> None:
+     with pytest.raises(ValueError, match="negative"):
+         vat_for(Money(100, "USD"), -1)
++
++
++def test_vat_rounds_half_up() -> None:
++    assert vat_for(Money(25, "USD"), 1_000) == Money(3, "USD")

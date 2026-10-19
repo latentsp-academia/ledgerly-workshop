@@ -1,0 +1,64 @@
+diff --git a/src/ledgerly/api/app.py b/src/ledgerly/api/app.py
+index f67727e..b5e6e1d 100644
+--- a/src/ledgerly/api/app.py
++++ b/src/ledgerly/api/app.py
+@@ -4,7 +4,7 @@ import sqlite3
+ 
+ from fastapi import FastAPI
+ 
+-from ledgerly.api import routes_invoices, routes_refunds
++from ledgerly.api import routes_invoices, routes_refunds, routes_reports
+ from ledgerly.services.store import open_store
+ 
+ 
+@@ -13,6 +13,7 @@ def create_app(conn: sqlite3.Connection | None = None) -> FastAPI:
+     app.state.conn = conn if conn is not None else open_store()
+     app.include_router(routes_invoices.router)
+     app.include_router(routes_refunds.router)
++    app.include_router(routes_reports.router)
+ 
+     @app.get("/health")
+     def health() -> dict[str, str]:
+diff --git a/src/ledgerly/api/routes_reports.py b/src/ledgerly/api/routes_reports.py
+new file mode 100644
+index 0000000..6c55014
+--- /dev/null
++++ b/src/ledgerly/api/routes_reports.py
+@@ -0,0 +1,24 @@
++from __future__ import annotations
++
++import sqlite3
++from typing import Annotated
++
++from fastapi import APIRouter, Depends
++
++from ledgerly.api.deps import get_conn
++from ledgerly.services.invoices import list_invoices
++from ledgerly.services.reports import revenue_report
++
++router = APIRouter(prefix="/reports", tags=["reports"])
++Conn = Annotated[sqlite3.Connection, Depends(get_conn)]
++
++
++@router.get("/revenue")
++def revenue(conn: Conn, currency: str = "USD") -> dict[str, object]:
++    report = revenue_report(conn, currency)
++    count = sum(1 for i in list_invoices(conn) if i.status == "paid")
++    return {
++        "currency": currency,
++        "total_cents": int(round(report["currency_total"] * 100)),
++        "invoice_count": count,
++    }
+diff --git a/tests/test_api.py b/tests/test_api.py
+index 3a99850..8fb7a31 100644
+--- a/tests/test_api.py
++++ b/tests/test_api.py
+@@ -36,3 +36,8 @@ def test_full_refund(client: TestClient, paid_invoice: dict) -> None:  # type: i
+ def test_refund_twice_conflicts(client: TestClient, paid_invoice: dict) -> None:  # type: ignore[type-arg]
+     client.post(f"/invoices/{paid_invoice['id']}/refund")
+     assert client.post(f"/invoices/{paid_invoice['id']}/refund").status_code == 409
++
++
++def test_revenue_report(client: TestClient, paid_invoice: dict) -> None:  # type: ignore[type-arg]
++    body = client.get("/reports/revenue").json()
++    assert body["total_cents"] == 11_700

@@ -1,0 +1,68 @@
+diff --git a/src/ledgerly/api/app.py b/src/ledgerly/api/app.py
+index f67727e..f0dad8a 100644
+--- a/src/ledgerly/api/app.py
++++ b/src/ledgerly/api/app.py
+@@ -4,13 +4,14 @@ import sqlite3
+ 
+ from fastapi import FastAPI
+ 
+-from ledgerly.api import routes_invoices, routes_refunds
++from ledgerly.api import errors, routes_invoices, routes_refunds
+ from ledgerly.services.store import open_store
+ 
+ 
+ def create_app(conn: sqlite3.Connection | None = None) -> FastAPI:
+     app = FastAPI(title="Ledgerly", version="0.4.2")
+     app.state.conn = conn if conn is not None else open_store()
++    errors.install(app)
+     app.include_router(routes_invoices.router)
+     app.include_router(routes_refunds.router)
+ 
+diff --git a/src/ledgerly/api/errors.py b/src/ledgerly/api/errors.py
+new file mode 100644
+index 0000000..971fb41
+--- /dev/null
++++ b/src/ledgerly/api/errors.py
+@@ -0,0 +1,27 @@
++"""RFC 9457 problem details for every error response."""
++
++from __future__ import annotations
++
++from fastapi import FastAPI, Request
++from fastapi.exceptions import HTTPException as FastAPIHTTPException
++from fastapi.responses import JSONResponse
++
++PROBLEM = "application/problem+json"
++
++
++def problem(status: int, title: str, detail: str, type_: str = "about:blank") -> JSONResponse:
++    return JSONResponse(
++        status_code=status,
++        media_type=PROBLEM,
++        content={"type": type_, "title": title, "status": status, "detail": detail},
++    )
++
++
++def install(app: FastAPI) -> None:
++    @app.exception_handler(KeyError)
++    async def not_found(_: Request, exc: KeyError) -> JSONResponse:
++        return problem(404, "Not Found", f"No resource with id {exc.args[0]!r}")
++
++    @app.exception_handler(FastAPIHTTPException)
++    async def http_error(_: Request, exc: FastAPIHTTPException) -> JSONResponse:
++        return problem(exc.status_code, "Request failed", str(exc.detail))
+diff --git a/tests/test_api.py b/tests/test_api.py
+index 3a99850..aeaf777 100644
+--- a/tests/test_api.py
++++ b/tests/test_api.py
+@@ -36,3 +36,10 @@ def test_full_refund(client: TestClient, paid_invoice: dict) -> None:  # type: i
+ def test_refund_twice_conflicts(client: TestClient, paid_invoice: dict) -> None:  # type: ignore[type-arg]
+     client.post(f"/invoices/{paid_invoice['id']}/refund")
+     assert client.post(f"/invoices/{paid_invoice['id']}/refund").status_code == 409
++
++
++def test_get_missing_invoice_is_problem_json(client: TestClient) -> None:
++    resp = client.get("/invoices/999")
++    assert resp.status_code == 404
++    assert resp.headers["content-type"].startswith("application/problem+json")
++    assert resp.json()["status"] == 404

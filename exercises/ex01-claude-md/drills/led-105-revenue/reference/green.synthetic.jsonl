@@ -1,0 +1,5 @@
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"g1","name":"Read","input":{"file_path":"docs/decisions/ADR-0001-money-as-integer-cents.md"}}]}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"g2","name":"Bash","input":{"command":"uv run pytest -q"}}]}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"g3","name":"Bash","input":{"command":"uv run ruff check . && uv run ruff format --check ."}}]}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"g4","name":"Bash","input":{"command":"uv run lint-imports"}}]}}
+{"type":"result","num_turns":7,"total_cost_usd":0.29,"result":"Done. pytest, ruff, lint-imports all green.","usage":{"input_tokens":900,"output_tokens":700,"cache_read_input_tokens":30000}}

@@ -1,0 +1,50 @@
+{
+  "title": "LED-105 revenue endpoint",
+  "checks": [
+    {
+      "id": "no-stale-commands",
+      "type": "transcript_absent",
+      "patterns": ["make test", "requirements\\.txt", "python3? app\\.py", "flask"],
+      "why": "The agent followed the stale README instead of the real toolchain."
+    },
+    {
+      "id": "ran-full-verification",
+      "type": "transcript_present_all",
+      "patterns": ["pytest", "ruff check", "ruff format", "lint-imports"],
+      "why": "'Done' was self-declared. Nobody told it what the finish line is."
+    },
+    {
+      "id": "tests-pass",
+      "type": "command",
+      "cmd": "uv run pytest -q"
+    },
+    {
+      "id": "lint-clean",
+      "type": "command",
+      "cmd": "uv run ruff check . && uv run ruff format --check ."
+    },
+    {
+      "id": "arch-contracts",
+      "type": "command",
+      "cmd": "uv run lint-imports"
+    },
+    {
+      "id": "no-float-money",
+      "type": "diff_absent",
+      "paths": ["src"],
+      "patterns": ["legacy_fx", "\\bfloat\\b", "revenue_report\\(", "/ ?100\\b", "\\* ?100\\b", "round\\("],
+      "why": "New code reused the float-based legacy report (ADR-0001). Tests can still be green."
+    },
+    {
+      "id": "new-behaviour-tested",
+      "type": "diff_present",
+      "paths": ["tests"],
+      "patterns": ["reports/revenue"]
+    },
+    {
+      "id": "endpoint-works",
+      "type": "probe",
+      "script": "probe.py"
+    }
+  ]
+}

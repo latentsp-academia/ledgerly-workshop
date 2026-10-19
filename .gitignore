@@ -5,3 +5,15 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .ex0*-update.*
+
+# Your memory files and local state inside the sample app: never part of the workshop repo
+# (ledgerly/.git is created locally by tools/setup.sh; git never commits a nested .git)
+ledgerly/CLAUDE.md
+ledgerly/CLAUDE.local.md
+ledgerly/AGENTS.md
+ledgerly/.claude/
+ledgerly/.cursor/
+ledgerly/.mcp.json
+ledgerly/docs/standards/
+ledgerly/docs/pr/
+ledgerly/src/**/CLAUDE.md

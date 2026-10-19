@@ -37,18 +37,18 @@ if command -v cursor >/dev/null 2>&1; then ok cursor "optional, for the Cursor s
 else warn cursor "optional. Only needed for the Cursor sidebars"; fi
 
 echo "Sample app"
-if git -C "$APP" rev-parse --git-dir >/dev/null 2>&1; then
-  ok ledgerly-repo "ledgerly/ is its own git repo"
+if [ -e "$APP/.git" ] && git -C "$APP" rev-parse --git-dir >/dev/null 2>&1; then
+  ok ledgerly-repo "ledgerly/ is a local repo (made by tools/setup.sh)"
   if git -C "$APP" rev-parse -q --verify refs/tags/baseline >/dev/null; then
     ok baseline-tag "tools/reset.sh returns here"
   else
-    bad baseline-tag "tag 'baseline' missing in ledgerly/. Re-copy the workshop folder"
+    bad baseline-tag "tag 'baseline' missing in ledgerly/. Remove ledgerly/.git, then run tools/setup.sh"
   fi
   CHANGED="$(git -C "$APP" status --porcelain | grep -c . || true)"
   if [ "$CHANGED" = "0" ]; then ok clean-start "ledgerly/ matches baseline"
   else warn clean-start "$CHANGED changed/untracked file(s) in ledgerly/. Fine mid-workshop; tools/reset.sh before Ex 1"; fi
 else
-  bad ledgerly-repo "ledgerly/ isn't a git repo. Re-copy the workshop folder"
+  bad ledgerly-repo "ledgerly/ isn't a git repo. Run tools/setup.sh"
 fi
 if [ -f "$HOME/.claude/CLAUDE.md" ]; then
   warn user-claude-md "~/.claude/CLAUDE.md exists and loads into every session. Drill results may differ from the room's"

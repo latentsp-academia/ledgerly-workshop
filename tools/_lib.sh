@@ -3,6 +3,9 @@
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP="$ROOT/ledgerly"
 
+# ledgerly/ ships as plain files; the first tool run makes it a local repo with a `baseline` tag.
+if [ ! -e "$APP/.git" ]; then "$ROOT/tools/setup.sh" >&2 || exit 1; fi
+
 # resolve_drill led-105  ->  /…/exercises/ex01-claude-md/drills/led-105-revenue
 resolve_drill() {
   local arg="$1"

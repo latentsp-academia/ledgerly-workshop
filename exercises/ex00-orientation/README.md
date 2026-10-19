@@ -41,7 +41,8 @@ Step 3 table (3 min), run Step 4 (5 min). Steps 1–2 hands-on become homework.
 
 ```
 ledgerly-workshop/
-├── 📦 ledgerly/      the sample app. Its own git repo, tag `baseline`. Open Claude Code HERE.
+├── 📦 ledgerly/      the sample app. Open Claude Code HERE. A local git repo with tag `baseline`
+│                    (tools/setup.sh makes it on first run, so the agent never sees exercises/).
 ├── 🧪 exercises/     one folder per exercise. The agent never sees this folder.
 ├── 🧰 tools/         start · check · reset · run_drill · doctor · demo_reference …
 ├── 🖼️ assets/        diagrams for the READMEs
@@ -103,6 +104,7 @@ LED-100 · warm-up: the version endpoint
 
 | tool | what it does | touches |
 |---|---|---|
+| 🧱 `tools/setup.sh` | first run only, automatic: make `ledgerly/` a local repo with tag `baseline` | `ledgerly/.git` |
 | 🩺 `tools/doctor.sh [--quick]` | is this machine ready? | creates `.venv` only |
 | ▶️ `tools/start.sh <drill>` | baseline code, your memory files kept, the drill's `setup.sh` applied | `ledgerly/` |
 | ✅ `tools/check.sh <drill>` | grade the repo + your newest Claude Code session | writes `runs/` |

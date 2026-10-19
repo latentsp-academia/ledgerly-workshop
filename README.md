@@ -62,7 +62,8 @@ Two rules hold throughout:
 ```
 ledgerly-workshop/
 ├── README.md            ← you are here
-├── ledgerly/            ← the sample app (its own git repo, tag `baseline`). Open Claude Code HERE.
+├── ledgerly/            ← the sample app. Open Claude Code HERE. Plain files in this repo; tools/setup.sh
+│                          also makes it a local git repo with tag `baseline` (see below).
 ├── exercises/           ← one folder per exercise
 │   ├── ex00-orientation/  ← start here: the app, the tools, the loop
 │   └── ex01-claude-md/
@@ -90,6 +91,12 @@ where the doer can't see it is itself a lesson (LED-103, Ex 3).
 
 Requirements: [Claude Code](https://code.claude.com), [uv](https://docs.astral.sh/uv/), git,
 python3. Optional: Cursor.
+
+**First run:** any tool (or `tools/setup.sh`) turns `ledgerly/` into a local git repo with a
+`baseline` tag. It's tracked here as plain files, so it's on GitHub; the local `.git` inside it
+makes the agent see `ledgerly/` as its own project, so `git status`, `git log` and `git ls-files`
+never reveal `exercises/`. Your memory files in `ledgerly/` (CLAUDE.md, `.claude/`…) are
+git-ignored by the workshop repo.
 
 Run everything from the **workshop root** (`ledgerly-workshop/`). The Python project lives in
 `ledgerly/`, so point uv at it with `--directory` instead of `cd`-ing back and forth:
@@ -135,6 +142,7 @@ It also contains what real repos contain:
 
 | command | what it does |
 |---|---|
+| `tools/setup.sh` | first run only (automatic): make `ledgerly/` a local repo with tag `baseline` |
 | `tools/doctor.sh [--quick]` | is this machine ready? tools, the `baseline` tag, `uv sync`, and green gates (Ex 0) |
 | `tools/reset.sh [--keep-memory]` | `ledgerly/` → `baseline`. `--keep-memory` undoes the agent's code but keeps your CLAUDE.md files |
 | `tools/start.sh <drill>` | ready `ledgerly/` for a drill: keep your memory files, apply the drill's start state (e.g. LED-105 already implemented for `led-120`) |

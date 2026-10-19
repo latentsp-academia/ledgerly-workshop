@@ -1,0 +1,25 @@
+[importlinter]
+root_package = ledgerly
+
+[importlinter:contract:layers]
+name = Layered architecture (ADR-0002)
+type = layers
+layers =
+    ledgerly.api
+    ledgerly.services
+    ledgerly.repo
+ignore_imports =
+    # LEGACY: refunds API predates the service layer. Remove when refunds go through services.
+    ledgerly.api.routes_refunds -> ledgerly.repo.db
+
+[importlinter:contract:legacy-fx]
+name = Nothing new may depend on float-based legacy FX (ADR-0001)
+type = forbidden
+source_modules =
+    ledgerly.api
+    ledgerly.services
+forbidden_modules =
+    ledgerly.payments.legacy_fx
+ignore_imports =
+    # LEGACY: old revenue report. Do not copy this pattern.
+    ledgerly.services.reports -> ledgerly.payments.legacy_fx

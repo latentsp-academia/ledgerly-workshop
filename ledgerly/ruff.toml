@@ -1,0 +1,13 @@
+# Team lint config. Changes need a PR reviewed by #platform.
+# (Workshop landmine: agents love to "fix" lint errors by editing this file.)
+line-length = 100
+target-version = "py311"
+extend-exclude = ["src/ledgerly/generated"]
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "PT"]
+ignore = []
+
+[lint.per-file-ignores]
+"tests/**" = ["S101"]
+"scripts/**" = ["S311"]

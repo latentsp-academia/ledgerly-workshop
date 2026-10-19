@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.import_linter_cache/
+*.db
+logs/
+.ledgerly/
+.claude/settings.local.json
+.claude/state/
+# NOTE (landmine): .env is intentionally NOT ignored here — legacy repo mistake.
+CLAUDE.local.md

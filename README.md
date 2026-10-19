@@ -9,7 +9,17 @@ in isolation, and the tests are often green.
 This workshop teaches students to **see drift, measure it, and close it**, one mechanism at a
 time, on a sample codebase built to drift.
 
-## The method: TDD for agent behavior
+| | |
+|---|---|
+| 🎯 **Goal** | students leave able to protect an agent's work from drift: they can name the drift, measure it as a rate, and close it with the right mechanism |
+| 👥 **Who** | developers who already use a coding agent (Claude Code primary, Cursor sidebars) |
+| 📅 **Format** | 2 days · Day 1 the harness (Ex 0–5) · Day 2 process on top (Ex 6–8) |
+| 🧪 **Sample app** | [Ledgerly](#-ledgerly-the-sample-app-and-its-landmines): Python, FastAPI, uv |
+| 🚀 **Start here** | [Ex 0 · Orientation](exercises/ex00-orientation/): the app, the tools, the drill loop |
+
+## 🔁 The method: TDD for agent behaviour
+
+![See the drift fail, add one mechanism, watch it go green](assets/method.png)
 
 Every exercise is a **drill** (a fixed prompt) plus a **drift check** (a deterministic script
 that grades what the agent did and left behind).
@@ -29,11 +39,9 @@ Two rules hold throughout:
    "2/3" counts as a result. The course's through-line is moving rules from *advisory*
    (a rate) to *enforced* (always):
 
-```
-◀ DETERMINISTIC ─ hooks · permissions · settings ─── CLAUDE.md · rules · skills ─ ADVISORY ▶
-```
+![From advisory (a rate) to deterministic (always)](assets/spectrum.png)
 
-## What we protect against
+## 🛡️ What we protect against
 
 | drift | example in Ledgerly | first caught by |
 |---|---|---|
@@ -49,7 +57,7 @@ Two rules hold throughout:
 | Security | reads `.env`, edits `generated/`, destructive migrations | Ex 3 PreToolUse |
 | Spec drift | builds what it *thought* you meant | Day 2 · Ex 8 Spec Kit |
 
-## Repo map
+## 🗂️ Repo map
 
 ```
 ledgerly-workshop/
@@ -59,22 +67,26 @@ ledgerly-workshop/
 │   ├── ex00-orientation/  ← start here: the app, the tools, the loop
 │   └── ex01-claude-md/
 │       ├── exercise.html  ← the student page: steps, prompts, hints, timer, reference
-│       ├── README.md      ← facilitator notes + timing
+│       ├── README.md      ← goal, flow, how it's judged, facilitator notes
 │       ├── LESSONS.md     ← takeaways + a table for your own numbers
+│       ├── img/           ← the exercise's diagram
 │       ├── drills/        ← tickets the agent runs + what the drift checker looks for
 │       └── reference/     ← reference implementation as real files (mirrors ledgerly/)
-├── tools/               ← drill runner, drift checker, observers
+├── tools/               ← drill runner, drift checker, observers, doctor
+├── assets/              ← diagrams for the READMEs
 ├── runs/                ← created by the tools: transcripts + results (git-ignored)
 └── my-variants/         ← your saved CLAUDE.md attempts (tools/snapshot.sh)
 ```
+
+![The doer never sees the judge](assets/drill-loop.png)
 
 **Why are the exercises outside the app?** Because the agent runs inside `ledgerly/` and reads
 whatever it finds. Answer keys next to the code would leak into its context. Keeping the grader
 where the doer can't see it is itself a lesson (LED-103, Ex 3).
 
-## Setup (10 min, before class)
+## ⚙️ Setup (10 min, before class)
 
-Shortcut: `tools/doctor.sh` checks all of this and tells you what's missing. [Ex 0](exercises/ex00-orientation/exercise.html) walks through it.
+🩺 Shortcut: `tools/doctor.sh` checks all of this and tells you what's missing. [Ex 0](exercises/ex00-orientation/exercise.html) walks through it.
 
 Requirements: [Claude Code](https://code.claude.com), [uv](https://docs.astral.sh/uv/), git,
 python3. Optional: Cursor.
@@ -98,7 +110,9 @@ project's CLAUDE.md says).
 > ⚠️ `tools/reset.sh` deletes untracked files in `ledgerly/`, including your CLAUDE.md.
 > Save attempts first with `tools/snapshot.sh <name>`.
 
-## Ledgerly: the sample app and its landmines
+## 💣 Ledgerly: the sample app and its landmines
+
+![Ledgerly: it works, its tests pass, and it's built to drift](assets/ledgerly.png)
 
 An invoicing & refunds API: FastAPI, SQLite, integer-cent `Money`, three layers
 (`api → services → repo`, enforced by import-linter), four ADRs. It works and its tests pass.
@@ -117,7 +131,7 @@ It also contains what real repos contain:
 | Lint & architecture config an agent could "relax" | `ruff.toml`, `.importlinter` | Ex 3 |
 | Flaky test (~10%: random invoice numbers collide) | `tests/test_invoices.py` `-m landmine` | Ex 5 (LED-118 trap) |
 
-## Tools
+## 🧰 Tools
 
 | command | what it does |
 |---|---|
@@ -143,11 +157,13 @@ deprecated APIs), `led-150` / `led-151` (refund tests, weak vs contract), `led-1
 `run_drill.sh` runs Claude Code headless with `--permission-mode acceptEdits` and an allowlist of
 project commands (`uv run`, `git diff`, …). Everything else is denied. Set `MODEL=…` to pin a model.
 
-## Exercise map
+## 🗺️ Exercise map
+
+![Two days, one gated repo](assets/path.png)
 
 Timings and agenda slots for every exercise: [PLAN.md](PLAN.md).
 
-### Day 1: the harness, one building block at a time (Fundamentals deck)
+### 📅 Day 1: the harness, one building block at a time (Fundamentals deck)
 
 | # | exercise | 🔴 red that opens it | time | status |
 |---|---|---|---|---|
@@ -158,7 +174,7 @@ Timings and agenda slots for every exercise: [PLAN.md](PLAN.md).
 | 4 | [MCP + Context7](exercises/ex04-mcp/) · [open the page](exercises/ex04-mcp/exercise.html) | LED-141: green tests on a deprecated FastAPI API (`on_event`) → Context7 + a rule → `lifespan`; then deprecations become failing tests; MCP cost in `/context` | 4 demo · 20 homework | ✅ ready |
 | 5 | [Tests: green is not correct](exercises/ex05-tests/) · [open the page](exercises/ex05-tests/exercise.html) | LED-150 weak tests survive a hidden mutation judge (7 mutants); LED-151 contract tests from ADR-0003 kill them; LED-118 trap: skip the flaky test or fix the bug? | 25 | ✅ ready |
 
-### Day 2: process on top of the gates (Advanced decks)
+### 📅 Day 2: process on top of the gates (Advanced decks)
 
 | # | exercise | idea | time | status |
 |---|---|---|---|---|
@@ -166,7 +182,7 @@ Timings and agenda slots for every exercise: [PLAN.md](PLAN.md).
 | 7 | Parallel tickets in worktrees | LED-101 + LED-112 at once; the Day 1 gates run in both | 30 | planned |
 | 8 | Spec Kit capstone | LED-201 multi-currency refunds; constitution from Ex 1's rules + ADRs; `/analyze` gates `/implement`; FR-IDs ↔ tagged tests; holdout tests | 40 | planned |
 
-## Cursor
+## 🖱️ Cursor
 
 Every exercise has a short **Cursor sidebar** mapping the mechanism (`AGENTS.md`,
 `.cursor/rules/*.mdc`, `.cursor/hooks.json`, `.cursor/mcp.json`). The drift checker is
@@ -174,7 +190,7 @@ tool-agnostic: it grades the repo state and works with any agent. Only the trans
 checks need a Claude Code session file. Mechanism details differ between Cursor versions, so
 check your version's docs.
 
-## A note on honesty
+## 🤝 A note on honesty
 
 Agents are nondeterministic, and a live demo can come back green when you wanted red. Don't fake
 it: show the multi-run rate you recorded before class, or the clearly labelled hand-written

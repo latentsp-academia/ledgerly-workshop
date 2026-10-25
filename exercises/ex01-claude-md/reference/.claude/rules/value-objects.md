@@ -7,7 +7,8 @@
   - `kw_only`: two int fields (e.g. `amount_cents`, `invoice_id`) can't be swapped positionally.
     That exact bug shipped once (LED-077).
   - `slots`: no stray attributes.
-- Services return value objects, **never dicts** (no `dict`, `Mapping`, `TypedDict`, `NamedTuple`).
+- Services return value objects, **never dicts or tuples** (no `dict`, `Mapping`, `TypedDict`,
+  `NamedTuple`, `tuple[Money, int]`). Two results? Make a value object with two named fields.
   The API maps value objects to pydantic response models.
 - Exceptions are exempt. Older classes (`Invoice`, `Line`) predate this rule; don't copy them,
   and don't rewrite them unless the ticket asks.

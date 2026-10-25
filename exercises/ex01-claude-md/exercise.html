@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Latent · Exercise 1 — CLAUDE.md: See the Drift, Then Fix It</title>
+<title>Latent · Exercise 1 — CLAUDE.md</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -286,59 +286,245 @@
 
   <!-- ============ TITLE ============ -->
   <div class="kicker">Exercise 1 · Day 1 · Instruction layer</div>
-  <h1>CLAUDE.md: see the <span class="accent-r">drift</span>, then <span class="accent">fix it</span> 📜</h1>
+  <h1>CLAUDE.md: knowledge the agent <span class="accent-r">can't guess</span> 📜</h1>
 
   <!-- ============ OBJECTIVE ============ -->
   <div class="objective">
     <div class="label">🎯 Objective</div>
-    <p>First, watch an agent with <strong>no memory</strong> handle a real Ledgerly ticket. It trusts a 2021 README,
-      builds on float-based legacy code and declares itself done. <strong>The tests stay green the whole time.</strong>
-      Then build a <strong>multi-level CLAUDE.md configuration</strong> one level at a time (project, directory,
-      rules, imports), checking each one with <code>/context</code>. You finish on the classic trap:
-      a team convention that only lives in <em>your</em> home directory.</p>
-  </div>
-
-  <!-- ============ LEARNING OBJECTIVES ============ -->
-  <div class="goals">
-    <div class="goal"><div class="gi">🏛️</div><p>Place a convention at the right level: <strong>user, project or directory</strong>.</p></div>
-    <div class="goal"><div class="gi">🔗</div><p>Organise standards into modules with <strong><code style="color:var(--green);font-family:'Space Mono',monospace">@</code> path imports</strong>, and know what they cost.</p></div>
-    <div class="goal"><div class="gi">📏</div><p>Use <strong>.claude/rules/</strong> for topic files instead of one monolithic CLAUDE.md.</p></div>
-    <div class="goal"><div class="gi">🔍</div><p>Diagnose what loaded with <strong>/context</strong> and <strong>/memory</strong>. Loaded isn't the same as obeyed.</p></div>
-    <div class="goal"><div class="gi">🪤</div><p>Find the root cause when a <strong>new teammate's agent</strong> ignores a convention.</p></div>
+    <p>Run the check first and see it <strong>red</strong>. Give the agent a ticket with <strong>no CLAUDE.md</strong>:
+      its tests pass, it says "done", and a hidden check still fails. Add <strong>one line of team knowledge</strong>
+      to <code>CLAUDE.md</code>, run the same ticket again, and watch it go <strong>green</strong>.</p>
+    <p style="margin-top:1.6vmin">🤖 Use <strong>Haiku</strong>: <code>claude --model haiku</code>. Fast, cheap, and the gap is easy to see.</p>
   </div>
 
   <!-- ============ WORKFLOW RAIL ============ -->
   <div class="rail" id="rail">
-    <a class="node red" href="#s0" data-step="0"><div class="k">Step 0</div><div class="v">🔴 No memory</div><div class="t">5 min</div></a>
+    <a class="node" href="#s0" data-step="0"><div class="k">Step 0</div><div class="v">🧹 Clean</div><div class="t">1 min</div></a>
     <div class="arrow">→</div>
-    <a class="node" href="#s1" data-step="1"><div class="k">Step 1</div><div class="v">📜 Project</div><div class="t">6 min</div></a>
+    <a class="node red" href="#s1" data-step="1"><div class="k">Step 1</div><div class="v">🔴 Check first</div><div class="t">1 min</div></a>
     <div class="arrow">→</div>
-    <a class="node" href="#s2" data-step="2"><div class="k">Step 2</div><div class="v">📁 Directory</div><div class="t">5 min</div></a>
+    <a class="node red" href="#s2" data-step="2"><div class="k">Step 2</div><div class="v">🤖 No memory</div><div class="t">6 min</div></a>
     <div class="arrow">→</div>
-    <a class="node" href="#s3" data-step="3"><div class="k">Step 3</div><div class="v">📏 Rules</div><div class="t">7 min</div></a>
+    <a class="node" href="#s3" data-step="3"><div class="k">Step 3</div><div class="v">✍️ CLAUDE.md</div><div class="t">5 min</div></a>
     <div class="arrow">→</div>
-    <a class="node" href="#s4" data-step="4"><div class="k">Step 4</div><div class="v">🔗 @ import</div><div class="t">4 min</div></a>
+    <a class="node" href="#s4" data-step="4"><div class="k">Step 4</div><div class="v">🟢 Same ticket</div><div class="t">5 min</div></a>
     <div class="arrow">→</div>
-    <a class="node" href="#s5" data-step="5"><div class="k">Step 5</div><div class="v">🔍 Diagnose</div><div class="t">2 min</div></a>
+    <a class="node" href="#s5" data-step="5"><div class="k">Step 5</div><div class="v">📊 A rate</div><div class="t">optional</div></a>
+    <div class="arrow">·</div>
+    <a class="node red" href="#s6" data-step="6"><div class="k">Part 2 · 7</div><div class="v">🔴 LED-105</div><div class="t">5 min</div></a>
     <div class="arrow">→</div>
-    <a class="node" href="#s6" data-step="6"><div class="k">Step 6</div><div class="v">🪤 User trap</div><div class="t">7 min</div></a>
+    <a class="node" href="#s7" data-step="7"><div class="k">8</div><div class="v">📜 CLAUDE.md</div><div class="t">5 min</div></a>
+    <div class="arrow">→</div>
+    <a class="node" href="#s8" data-step="8"><div class="k">9</div><div class="v">📏 Rule</div><div class="t">5 min</div></a>
   </div>
 
   <!-- ============ STEPS (left) + SIDE PANEL (right) ============ -->
   <div class="layout">
     <div class="steps">
 
-      <!-- 0 · RED BASELINE -->
-      <div class="step red-step" id="s0" data-step="0">
+      <!-- 0 · CLEAN START -->
+      <div class="step" id="s0" data-step="0">
         <div class="n">0</div>
         <div>
-          <div class="head"><h3>🔴 Watch it drift with no memory</h3><span class="chip r">5 min · red</span></div>
+          <div class="head"><h3>🧹 Clean start</h3><span class="chip">1 min</span></div>
+          <div class="promptbox shell">
+            <div class="tag">▶ Run in your terminal (workshop root) <button class="copy">⧉ copy</button></div>
+            <p>cd ~/Development/ledgerly-workshop
+tools/reset.sh                       <span class="c-cmt"># ledgerly/ back to baseline, no CLAUDE.md</span>
+mv ~/.claude/CLAUDE.md ~/.claude/CLAUDE.md.bak 2&gt;/dev/null   <span class="c-cmt"># your personal file would leak in</span></p>
+          </div>
+          <p class="why"><b>Why</b>Your own <code>~/.claude/CLAUDE.md</code> loads into every session. Move it aside so you're measuring
+            <strong>only</strong> what this exercise adds. Step 5 puts it back.</p>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+      <!-- 1 · RED FIRST -->
+      <div class="step red-step" id="s1" data-step="1">
+        <div class="n">1</div>
+        <div>
+          <div class="head"><h3>🔴 Run the check before the agent</h3><span class="chip r">1 min · red</span></div>
           <div class="promptbox shell">
             <div class="tag">▶ Run in your terminal <button class="copy">⧉ copy</button></div>
-            <p>cd ~/Development/ledgerly-workshop
-tools/reset.sh          <span class="c-cmt"># ledgerly/ back to baseline, no CLAUDE.md anywhere</span>
-tools/observe.sh on     <span class="c-cmt"># logs every memory file that loads → runs/loads.log</span>
-cd ledgerly &amp;&amp; claude</p>
+            <p>tools/check.sh led-107</p>
+          </div>
+          <div class="out">   <span class="p">PASS</span>  tests-pass
+   <span class="f">FAIL</span>  split-is-exact          10000 cents / 3 -&gt; HTTP 404
+   <span class="f">FAIL</span>  new-behaviour-tested    expected change not found
+   => <span class="f">RED (2 failing)</span></div>
+          <p class="why"><b>Why</b>This is TDD's failing test. The feature doesn't exist yet, so the check <strong>must</strong> be red.
+            A check you've never seen fail proves nothing.</p>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+      <!-- 2 · AGENT, NO MEMORY -->
+      <div class="step red-step" id="s2" data-step="2">
+        <div class="n">2</div>
+        <div>
+          <div class="head"><h3>🤖 Give the ticket to the agent, no CLAUDE.md</h3><span class="chip r">6 min · still red</span></div>
+          <div class="promptbox shell">
+            <div class="tag">▶ Start the agent inside ledgerly/ <button class="copy">⧉ copy</button></div>
+            <p>cd ledgerly &amp;&amp; claude --model haiku</p>
+          </div>
+          <div class="promptbox">
+            <div class="tag">▶ Paste into your agent · ticket LED-107 <button class="copy">⧉ copy</button></div>
+            <p>Ticket LED-107 — Pay in installments</p>
+            <p>Customers want to pay an invoice in installments. Add `GET /invoices/{id}/installments?count=3` that splits the invoice total into `count` payments.</p>
+            <p>Response body: `{"invoice_id": 1, "count": 3, "installments": [...]}`, one amount per payment. Example: a 100.00 invoice paid in 3 installments.</p>
+            <p>Implement it, make sure it works, and tell me when it's done.</p>
+          </div>
+          <div class="promptbox shell">
+            <div class="tag">▶ When it says done: /exit, then <button class="copy">⧉ copy</button></div>
+            <p>cd .. &amp;&amp; tools/check.sh led-107</p>
+          </div>
+          <div class="out">   <span class="p">PASS</span>  tests-pass
+   <span class="f">FAIL</span>  split-is-exact          10000 cents / 3 -&gt; [3334, 3333, 3333], expected [3333, 3333, 3334]
+   <span class="p">PASS</span>  new-behaviour-tested
+   => <span class="f">RED (1 failing)</span>          <span class="d">← typical; yours may differ</span></div>
+          <p class="why"><b>Why</b><strong>Its tests are green and it said "done". It's still wrong.</strong> Finance's rule: every installment
+            is the same amount and the <strong>last</strong> one absorbs the leftover cents. That rule is nowhere in the code,
+            so no agent can guess it. Whose fault is that?</p>
+          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
+            <div class="checks">
+              <div>The check prints <strong>RED</strong>, and <code>tests-pass</code> is <strong>green</strong>.</div>
+              <div>You can say what the agent returned for 100.00 / 3.</div>
+            </div>
+          </div>
+          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
+            <details><summary><span class="lv">1 · nudge</span>Mine came back green</summary>
+              <div class="body">Agents vary. Write it down: that's a data point. Step 5 runs it 3 times for a real rate.</div></details>
+            <details class="locked"><summary><span class="lv">2 · specific</span>See a typical red without an agent</summary>
+              <div class="body"><pre class="codeblock">tools/demo_reference.sh led-107 red   <span class="cm"># a real Haiku diff, applied and checked</span>
+git -C ledgerly diff baseline</pre></div></details>
+          </div>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+      <!-- 3 · WRITE CLAUDE.md -->
+      <div class="step" id="s3" data-step="3">
+        <div class="n">3</div>
+        <div>
+          <div class="head"><h3>✍️ Write ledgerly/CLAUDE.md</h3><span class="chip">5 min</span></div>
+          <p class="task">Write what the agent <strong>can't learn from the code</strong>: the real commands, what "done" means,
+            and the rule it just broke. <strong>Under 30 lines.</strong> Test each line: <em>would the agent get it wrong without it?</em></p>
+          <table class="diag">
+            <tr><th>✍️ a good CLAUDE.md answers</th><th>for Ledgerly</th></tr>
+            <tr><td><b>WHAT</b>: stack, map of the code</td><td>FastAPI, SQLite, uv · <code>api → services → repo</code></td></tr>
+            <tr><td><b>WHY</b>: what the parts are for, where the decisions live</td><td>ADRs in <code>docs/decisions/</code> · README is stale</td></tr>
+            <tr><td><b>HOW</b>: the real commands, and how to <b>verify</b></td><td>pytest · ruff · lint-imports · "done means all green"</td></tr>
+            <tr><td><b>The rule it can't guess</b></td><td>how to split money into installments</td></tr>
+            <tr><td><b>Leave out</b>: style rules, task-only detail, copies of code</td><td>ruff does formatting (Ex 3 hook) · house style → a rule (Part 2)</td></tr>
+          </table>
+          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
+            <details><summary><span class="lv">1 · nudge</span>What goes in?</summary>
+              <div class="body">Look at the red. What did the agent need to know that it couldn't read anywhere in <code>ledgerly/</code>?</div></details>
+            <details class="locked"><summary><span class="lv">2 · near-complete</span>Show me a minimal file</summary>
+              <div class="body"><pre class="codeblock"><span class="hl"># Ledgerly</span>
+Invoicing API. Python 3.11, FastAPI, SQLite, uv.
+README.md is stale: trust this file.
+
+<span class="hl">## Commands</span>
+- Tests: `uv run pytest -q` · Lint: `uv run ruff check .`
+- Architecture: `uv run lint-imports`
+
+<span class="hl">## Done means</span>
+All three green, and new behaviour has a test.
+
+<span class="hl">## Money (ADR-0001)</span>
+- Amounts are integer cents (`Money`). Never floats.
+- Splitting an amount: every part is `total // n` cents
+  and the LAST part absorbs the remainder.
+  100.00 / 3 → 33.33, 33.33, 33.34.</pre></div></details>
+          </div>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+      <!-- 4 · GREEN -->
+      <div class="step" id="s4" data-step="4">
+        <div class="n">4</div>
+        <div>
+          <div class="head"><h3>🟢 Same ticket, with CLAUDE.md</h3><span class="chip">5 min · green</span></div>
+          <div class="promptbox shell">
+            <div class="tag">▶ Run in your terminal (workshop root) <button class="copy">⧉ copy</button></div>
+            <p>tools/reset.sh --keep-memory         <span class="c-cmt"># undo the agent's code, keep your CLAUDE.md</span>
+cd ledgerly &amp;&amp; claude --model haiku  <span class="c-cmt"># type /context: CLAUDE.md is under Memory files</span></p>
+          </div>
+          <p class="task">Paste the <strong>same</strong> LED-107 ticket from Step 2. When it says done, <code>/exit</code>, then:</p>
+          <div class="promptbox shell">
+            <div class="tag">▶ Check <button class="copy">⧉ copy</button></div>
+            <p>cd .. &amp;&amp; tools/check.sh led-107</p>
+          </div>
+          <div class="out">   <span class="p">PASS</span>  tests-pass
+   <span class="p">PASS</span>  split-is-exact          100.00 / 3 -&gt; [3333, 3333, 3334] ✓
+   <span class="p">PASS</span>  new-behaviour-tested
+   => <span class="p">GREEN</span></div>
+          <p class="why"><b>Why</b>Same ticket, same model, <strong>one file added</strong>. Change one thing at a time,
+            and the change is what turned it green.</p>
+          <p class="subnote why" style="border-left-color:var(--amber)"><b style="color:var(--amber)">Stretch</b>Add four behaviour
+            lines inspired by <a href="https://github.com/multica-ai/andrej-karpathy-skills" target="_blank" style="color:var(--amber)">Karpathy's guidelines</a>
+            (state assumptions, simplest change, touch only what the ticket needs, test first). Run <code>MODEL=haiku tools/run_drill.sh led-107 current 3</code>
+            before and after, then compare <code>files_changed</code> and <code>tool_calls</code> in the summary. Do they <em>measurably</em> help? Put them in the
+            project file, not <code>~/.claude/CLAUDE.md</code>, or only your agent gets them.</p>
+          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
+            <div class="checks">
+              <div><code>/context</code> lists <code>CLAUDE.md</code>.</div>
+              <div><code>tools/check.sh led-107</code> prints <strong>GREEN</strong>.</div>
+            </div>
+          </div>
+          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
+            <details><summary><span class="lv">1 · nudge</span>Still red</summary>
+              <div class="body">Is your rule specific enough? "Round correctly" isn't. Give the exact rule <strong>and an example</strong>: 100.00 / 3 → 33.33, 33.33, 33.34.</div></details>
+            <details class="locked"><summary><span class="lv">2 · specific</span>Try the reference</summary>
+              <div class="body"><pre class="codeblock">tools/reset.sh
+tools/apply_variant.sh exercises/ex01-claude-md/reference</pre>then run the ticket again.</div></details>
+          </div>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+      <!-- 5 · RATE -->
+      <div class="step" id="s5" data-step="5">
+        <div class="n">5</div>
+        <div>
+          <div class="head"><h3>📊 One run proves nothing: measure a rate</h3><span class="chip">optional · ~10 min in background</span></div>
+          <div class="promptbox shell">
+            <div class="tag">▶ Run in your terminal (workshop root) <button class="copy">⧉ copy</button></div>
+            <p>MODEL=haiku tools/run_drill.sh led-107 none 3      <span class="c-cmt"># 3 headless runs, no CLAUDE.md</span>
+MODEL=haiku tools/run_drill.sh led-107 current 3   <span class="c-cmt"># 3 runs with your CLAUDE.md</span></p>
+          </div>
+          <p class="why"><b>Why</b>Agents aren't deterministic. "Failed 3/3 without, passed 3/3 with" is a result. One lucky run isn't.
+            Put your numbers in <code>exercises/ex01-claude-md/LESSONS.md</code>.</p>
+          <div class="promptbox shell">
+            <div class="tag">▶ When you're done: restore your personal file <button class="copy">⧉ copy</button></div>
+            <p>mv ~/.claude/CLAUDE.md.bak ~/.claude/CLAUDE.md 2&gt;/dev/null; tools/reset.sh   <span class="c-cmt"># or go on to Part 2</span></p>
+          </div>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+
+      <!-- ===== PART 2 ===== -->
+      <div class="infobox" style="margin-top:1vmin">
+        <div class="label">🧩 Part 2 (optional, 15 min) · drift the tests can't see</div>
+        <p>Part 1 had one hidden rule. Real drift is spread out: the agent skips some of your gates, builds on legacy code,
+          or ignores a house style the code doesn't show. <strong>All the tests stay green.</strong> LED-105 checks nine things,
+          and fixing them takes two layers: CLAUDE.md, then a rule file.</p>
+      </div>
+
+      <!-- 7 · LED-105 RED -->
+      <div class="step red-step" id="s6" data-step="6">
+        <div class="n">7</div>
+        <div>
+          <div class="head"><h3>🔴 LED-105: check first, then no memory</h3><span class="chip r">5 min · red</span></div>
+          <div class="promptbox shell">
+            <div class="tag">▶ Run in your terminal (workshop root) <button class="copy">⧉ copy</button></div>
+            <p>tools/snapshot.sh part1     <span class="c-cmt"># save your Part 1 CLAUDE.md</span>
+tools/reset.sh              <span class="c-cmt"># baseline, no memory files</span>
+tools/check.sh led-105      <span class="c-cmt"># RED: the endpoint doesn't exist yet</span>
+cd ledgerly &amp;&amp; claude --model haiku</p>
           </div>
           <div class="promptbox">
             <div class="tag">▶ Paste into your agent · ticket LED-105 <button class="copy">⧉ copy</button></div>
@@ -347,314 +533,59 @@ cd ledgerly &amp;&amp; claude</p>
             <p>Implement it, make sure it works, and tell me when it's done.</p>
           </div>
           <div class="promptbox shell">
-            <div class="tag">▶ When it says done: /exit, then <button class="copy">⧉ copy</button></div>
+            <div class="tag">▶ /exit, then <button class="copy">⧉ copy</button></div>
             <p>cd .. &amp;&amp; tools/check.sh led-105</p>
           </div>
-          <div class="out">   <span class="f">FAIL</span>  no-stale-commands       agent ran `make test`
-   <span class="f">FAIL</span>  ran-full-verification   never ran: ruff format, lint-imports
-   <span class="p">PASS</span>  tests-pass
-   <span class="f">FAIL</span>  no-float-money          routes_reports.py: report = revenue_report(conn, currency)
-   <span class="f">FAIL</span>  value-object-convention no new public function in services/ …
-   <span class="p">PASS</span>  endpoint-works          endpoint OK: 16614 EUR cents over 2 paid invoices
-   => <span class="f">RED (4 failing)</span>          <span class="d">← typical result; yours will vary</span></div>
-          <p class="why"><b>Why</b>You can't judge what a CLAUDE.md is worth until you've seen the agent without one.
-            Ledgerly's README is from 2021, and a float-based legacy report sits right next to the correct
-            cents code. <strong>Nothing in the code tells the agent which one to trust.</strong></p>
-          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
-            <div class="checks">
-              <div>The checker prints <strong>RED</strong>. Note down which checks failed; you'll run the same check in Step 1.</div>
-              <div>You've spotted that <strong>tests-pass is green</strong> even though the run drifted.</div>
-            </div>
-          </div>
-          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
-            <details><summary><span class="lv">1 · nudge</span>"No transcript found"?</summary>
-              <div class="body">The checker grades your newest Claude Code session for <code>ledgerly/</code>. Did you start <code>claude</code> from <em>inside</em> <code>ledgerly/</code>?</div></details>
-            <details class="locked"><summary><span class="lv">2 · specific</span>Where the session lives</summary>
-              <div class="body">Sessions are saved under <code>~/.claude/projects/&lt;path-of-ledgerly&gt;/*.jsonl</code>. <strong>Exit Claude first</strong> (<code>/exit</code>) so the session is flushed, then run <code>tools/check.sh led-105</code> from the workshop root.</div></details>
-            <details class="locked"><summary><span class="lv">3 · near-complete</span>My run came back green</summary>
-              <div class="body">Agents vary from run to run, so that's a result too. Write it down, then see the typical drift:
-                <pre class="codeblock">tools/demo_reference.sh led-105 red     <span class="cm"># hand-written reproduction, not a recording</span>
-git -C ledgerly diff baseline</pre></div></details>
-          </div>
-          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
-        </div>
-      </div>
-
-      <!-- 1 · PROJECT LEVEL -->
-      <div class="step" id="s1" data-step="1">
-        <div class="n">1</div>
-        <div>
-          <div class="head"><h3>📜 Write the project-level CLAUDE.md</h3><span class="chip">6 min · fewer reds</span></div>
-          <p class="task">Create <code>ledgerly/CLAUDE.md</code> (<code>ledgerly/.claude/CLAUDE.md</code> works too) with
-            <strong>at least three sections</strong>: the real commands, what "done" means, and the money rule the agent broke.
-            <strong>40 lines max.</strong> Only write what the code can't tell the agent.</p>
-          <div class="promptbox shell">
-            <div class="tag">▶ Then re-run the same ticket <button class="copy">⧉ copy</button></div>
-            <p>tools/reset.sh --keep-memory   <span class="c-cmt"># undo Step 0's code, keep your CLAUDE.md</span>
-cd ledgerly &amp;&amp; claude          <span class="c-cmt"># run /context first, then paste LED-105 again</span>
-<span class="c-cmt"># …/exit when done</span>
-cd .. &amp;&amp; tools/check.sh led-105</p>
-          </div>
-          <p class="why"><b>Why</b>Project level is committed to git, so <strong>every teammate's agent gets it</strong>.
-            It's the base layer for team-wide standards, and the cheapest fix for missing knowledge.</p>
-          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
-            <div class="checks">
-              <div><code>ledgerly/CLAUDE.md</code> exists with <strong>three or more sections</strong>.</div>
-              <div><code>/context</code> lists it under <strong>Memory files</strong>.</div>
-              <div><code>tools/check.sh led-105</code> shows <strong>fewer reds than Step 0</strong>.</div>
-              <div>Expect <strong>one red to survive</strong>: <code>value-object-convention</code>. Leave it. Step 3 fixes it with a rule.</div>
-            </div>
-          </div>
-          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
-            <details><summary><span class="lv">1 · nudge</span>What goes in?</summary>
-              <div class="body">Look at your Step 0 reds. Each one is a fact the agent didn't have: which commands are real, when it's allowed to say "done", which code is legacy.</div></details>
-            <details class="locked"><summary><span class="lv">2 · specific</span>The three headings</summary>
-              <div class="body"><strong>## Commands</strong>: <code>uv run pytest -q</code>, ruff check + format, <code>uv run lint-imports</code>, and a line saying the README is stale.<br>
-                <strong>## Done means</strong>: all four commands green, and new behaviour has a test.<br>
-                <strong>## Money (ADR-0001)</strong>: <code>Money</code> in integer cents, <code>fx.convert</code>, and that <code>legacy_fx.py</code> / <code>services/reports.py</code> are float legacy.</div></details>
-            <details class="locked"><summary><span class="lv">3 · near-complete</span>Show me a draft</summary>
-              <div class="body"><pre class="codeblock"><span class="hl"># Ledgerly</span>
-Invoicing &amp; refunds API. Python 3.11+, FastAPI, SQLite, uv.
-README.md is stale — trust this file and pyproject.toml.
-
-<span class="hl">## Commands</span>
-- Tests: `uv run pytest -q`
-- Lint: `uv run ruff check . &amp;&amp; uv run ruff format --check .`
-- Architecture: `uv run lint-imports`
-
-<span class="hl">## Done means</span>
-All four green. New behaviour has a test. Report what you ran.
-
-<span class="hl">## Money (ADR-0001)</span>
-- Amounts are Money(cents: int, currency); convert with payments.fx.convert.
-- payments/legacy_fx.py and services/reports.py are float legacy — don't build on them.</pre></div></details>
-          </div>
-          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
-        </div>
-      </div>
-
-      <!-- 2 · DIRECTORY LEVEL -->
-      <div class="step" id="s2" data-step="2">
-        <div class="n">2</div>
-        <div>
-          <div class="head"><h3>📁 Add a directory-level CLAUDE.md</h3><span class="chip">5 min</span></div>
-          <p class="task">Create <code>ledgerly/src/ledgerly/payments/CLAUDE.md</code> with conventions that only matter
-            inside <code>payments/</code>: how <code>Money</code> behaves, how FX rounds, what's frozen.</p>
-          <div class="promptbox shell">
-            <div class="tag">▶ Prove where it loads <button class="copy">⧉ copy</button></div>
-            <p>cd ledgerly/src/ledgerly/payments &amp;&amp; claude   <span class="c-cmt"># /context → root AND payments files</span>
-<span class="c-cmt"># /exit, then start at the root instead:</span>
-cd ~/Development/ledgerly-workshop/ledgerly &amp;&amp; claude   <span class="c-cmt"># /context → payments file NOT listed</span></p>
-          </div>
-          <div class="promptbox">
-            <div class="tag">▶ Paste into the root session <button class="copy">⧉ copy</button></div>
-            <p>How does fx.convert round, and why? Read the code before answering.</p>
-          </div>
-          <p class="subnote why" style="border-left-color:var(--amber)"><b style="color:var(--amber)">Watch</b>In a second terminal, run <code>tools/observe.sh tail</code>. A line with
-            <code>nested_traversal … payments/CLAUDE.md &lt;- …/fx.py</code> appears the moment the agent reads a file in that folder.</p>
-          <p class="why"><b>Why</b>A directory-level file scopes conventions to one package and <strong>loads lazily</strong>,
-            only when Claude works in that directory. Everyone else pays nothing for it. The flip side is that
-            it's invisible until then.</p>
-          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
-            <div class="checks">
-              <div>The file exists inside <code>src/ledgerly/payments/</code> with <strong>payments-only</strong> conventions.</div>
-              <div><code>/context</code> started in <code>payments/</code> shows <strong>both</strong> the project and directory files.</div>
-              <div>From the root, it appears <strong>only after</strong> the agent reads a payments file (check <code>runs/loads.log</code>).</div>
-            </div>
-          </div>
-          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
-            <details><summary><span class="lv">1 · nudge</span>What's payments-only?</summary>
-              <div class="body">Anything you'd only need to know while <em>editing</em> <code>money.py</code> or <code>fx.py</code>, not while writing an API route.</div></details>
-            <details class="locked"><summary><span class="lv">2 · specific</span>Three good bullets</summary>
-              <div class="body"><code>Money</code> rejects floats on purpose · <code>fx.convert</code> uses basis-point rates with half-even rounding applied once · <code>legacy_fx.py</code> is frozen and new code never imports it.</div></details>
-            <details class="locked"><summary><span class="lv">3 · near-complete</span>Show me the file</summary>
-              <div class="body"><pre class="codeblock"><span class="hl"># payments/: money primitives (ADR-0001)</span>
-- Money(cents: int, currency) rejects floats on purpose. Don't "fix" that.
-- Convert with fx.convert(money, to): basis-point rates, half-even once.
-- legacy_fx.py is frozen float code for the old report only.
-  New code never imports it (import-linter enforces this).</pre></div></details>
-          </div>
-          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
-        </div>
-      </div>
-
-      <!-- 3 · RULES -->
-      <div class="step" id="s3" data-step="3">
-        <div class="n">3</div>
-        <div>
-          <div class="head"><h3>📏 Rules: teach the house style the code can't show</h3><span class="chip r">7 min · red → green</span></div>
-          <p class="task">The one red left from Step 1 is a <strong>hidden convention test</strong>. Ledgerly's house style is that
-            new value objects are <code>@dataclass(frozen=True, slots=True, kw_only=True)</code> and services never return dicts.
-            Nothing in the codebase shows <code>kw_only</code>, so the agent can't copy it. Write the rule:
-            <code>ledgerly/.claude/rules/value-objects.md</code>. Then add <code>.claude/rules/testing.md</code> with three
-            test conventions.</p>
-          <div class="promptbox shell">
-            <div class="tag">▶ Re-run the same ticket <button class="copy">⧉ copy</button></div>
-            <p>tools/reset.sh --keep-memory   <span class="c-cmt"># undo the code, keep CLAUDE.md + rules</span>
-cd ledgerly &amp;&amp; claude          <span class="c-cmt"># /context → both rules listed; paste LED-105, /exit</span>
-cd .. &amp;&amp; tools/check.sh led-105</p>
-          </div>
-          <div class="out">   <span class="d">Step 1:</span>  <span class="f">FAIL</span>  value-object-convention  Revenue missing slots=True, kw_only=True …
-   <span class="d">Step 3:</span>  <span class="p">PASS</span>  value-object-convention  value objects OK (1 new service function(s))
-   => <span class="p">GREEN</span></div>
-          <p class="why"><b>Why</b><code>.claude/rules/</code> holds <strong>topic files</strong>, so you don't end up with one
-            monolithic CLAUDE.md. The check grading you lives in the drill folder, <strong>outside the repo</strong>: the agent
-            can't read it, copy it or edit it. The only way the convention reaches the agent is your rule. Without
-            frontmatter a rule loads every session. Add <code>paths:</code> and it loads only when matching files are
-            touched. Try that in the stretch below.</p>
-          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
-            <div class="checks">
-              <div><code>.claude/rules/value-objects.md</code> states the house style: <strong>frozen + slots + kw_only, no dicts from services</strong>.</div>
-              <div><code>.claude/rules/testing.md</code> has <strong>three or more</strong> test conventions.</div>
-              <div><code>/context</code> lists both rules, and <code>tools/check.sh led-105</code> shows <strong>value-object-convention PASS</strong>.</div>
-            </div>
-          </div>
-          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
-            <details><summary><span class="lv">1 · nudge</span>What does the red want?</summary>
-              <div class="body">Read the failure message word for word. It names the class, the missing flags and the house style. A rule is just that message turned into an instruction, plus the reason.</div></details>
-            <details class="locked"><summary><span class="lv">2 · specific</span>The four lines that matter</summary>
-              <div class="body">Logic goes in a <code>services/</code> function · new data classes are <code>@dataclass(frozen=True, slots=True, kw_only=True)</code> · services never return <code>dict</code> / <code>Mapping</code> / <code>TypedDict</code> · <code>Invoice</code>, <code>Line</code> and <code>reports.py</code> predate the rule, so don't copy them. Say <em>why</em> (the LED-077 swapped-arguments bug). Reasons make rules stick.</div></details>
-            <details class="locked"><summary><span class="lv">3 · near-complete</span>Show me the rule</summary>
-              <div class="body"><pre class="codeblock"><span class="hl"># Value objects (house style for services/ and payments/)</span>
-- Business logic for a ticket goes in a services/ function.
-- Every NEW class holding data is
-  @dataclass(frozen=True, slots=True, kw_only=True)
-  - frozen: results can't be mutated after a service returns them
-  - kw_only: two int fields can't be swapped positionally (LED-077)
-  - slots: no stray attributes
-- Services return value objects, never dicts (no dict, Mapping,
-  TypedDict, NamedTuple). The API maps them to pydantic models.
-- Exceptions are exempt. Invoice/Line predate this rule: don't copy.
-- services/reports.py is legacy (dicts, floats). Not an example.</pre></div></details>
-          </div>
-          <p class="subnote why" style="border-left-color:var(--amber)"><b style="color:var(--amber)">Stretch</b>Add <code>paths: ["src/ledgerly/services/**"]</code> frontmatter and re-run. Does a <em>new</em>
-            file in <code>services/</code> trigger the rule before the agent writes it? Path-scoped rules load on demand, so whether one fires in time is something to measure.</p>
-          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
-        </div>
-      </div>
-
-      <!-- 4 · @ IMPORT -->
-      <div class="step" id="s4" data-step="4">
-        <div class="n">4</div>
-        <div>
-          <div class="head"><h3>🔗 Import a shared standards file with @</h3><span class="chip">4 min</span></div>
-          <p class="task">Create <code>ledgerly/docs/standards/api-conventions.md</code> with Ledgerly's API conventions,
-            including <strong>RFC 9457 problem+json errors</strong>. Then add one line to your project CLAUDE.md:</p>
-          <div class="promptbox">
-            <div class="tag">▶ Add this line to ledgerly/CLAUDE.md <button class="copy">⧉ copy</button></div>
-            <p>@docs/standards/api-conventions.md</p>
-          </div>
-          <div class="promptbox shell">
-            <div class="tag">▶ Measure what it costs <button class="copy">⧉ copy</button></div>
-            <p>python3 tools/memory_size.py     <span class="c-cmt"># from the workshop root: follows @imports</span></p>
-          </div>
-          <p class="why"><b>Why</b><code>@</code> imports make standards <strong>modular</strong>: one file, imported by
-            whichever CLAUDE.md needs it. But imports load <strong>eagerly</strong>, at session start. Splitting a file
-            up organises it. It doesn't make it cheaper.</p>
-          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
-            <div class="checks">
-              <div>Your project CLAUDE.md has a line <strong>beginning with @</strong> that points at the standards file.</div>
-              <div><code>docs/standards/api-conventions.md</code> exists and includes the <strong>problem+json</strong> rule.</div>
-              <div><code>/context</code> (new session) shows the imported content loaded; <code>memory_size.py</code> total includes it.</div>
-            </div>
-          </div>
-          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
-            <details><summary><span class="lv">1 · nudge</span>The import isn't showing up</summary>
-              <div class="body">The <code>@</code> must start the line, with nothing else on it, and the path is <strong>relative to the file containing it</strong>.</div></details>
-            <details class="locked"><summary><span class="lv">2 · specific</span>What goes in the standards file</summary>
-              <div class="body">Path naming (plural, kebab-case), amounts as integer <code>*_cents</code> plus <code>currency</code>, and the error shape: <code>application/problem+json</code> with <code>type, title, status, detail</code>.</div></details>
-            <details class="locked"><summary><span class="lv">3 · near-complete</span>Show me the file</summary>
-              <div class="body"><pre class="codeblock"><span class="hl">## API conventions</span>
-- Paths are plural nouns, kebab-case: /invoices/{id}/refunds.
-- Amounts are integers named *_cents, with a separate currency field.
-- Every error is RFC 9457 problem details: content type
-  application/problem+json, body {"type","title","status","detail"}.
-- Map domain exceptions to problems in one place (api/errors.py).</pre></div></details>
-          </div>
-          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
-        </div>
-      </div>
-
-      <!-- 5 · DIAGNOSE -->
-      <div class="step" id="s5" data-step="5">
-        <div class="n">5</div>
-        <div>
-          <div class="head"><h3>🔍 Diagnose: what's loaded where?</h3><span class="chip">2 min</span></div>
-          <p class="task">Start a <strong>fresh</strong> session in each location, run <code>/context</code> (and <code>/memory</code>), and tick what's listed.</p>
+          <div class="out">   <span class="p">PASS</span>  tests-pass
+   <span class="p">PASS</span>  endpoint-works            endpoint OK: …
+   <span class="f">FAIL</span>  ran-full-verification     never ran: ruff format, lint-imports
+   <span class="f">FAIL</span>  value-object-convention   paid_revenue() returns tuple[Money, int] …
+   => <span class="f">RED (2 failing)</span>          <span class="d">← Haiku, no memory: RED 5/5</span></div>
           <table class="diag">
-            <tr><th>Memory file</th><th>at ledgerly/</th><th>at …/payments/</th></tr>
-            <tr><td>CLAUDE.md (project)</td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr>
-            <tr><td>docs/standards/api-conventions.md (@)</td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr>
-            <tr><td>.claude/rules/*.md (both)</td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr>
-            <tr><td>src/ledgerly/payments/CLAUDE.md</td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr>
-            <tr><td>~/.claude/CLAUDE.md (user)</td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr>
+            <tr><th>check</th><th>the drift it catches</th></tr>
+            <tr><td>no-stale-commands</td><td>ran <code>make test</code> / Flask: trusted the 2021 README</td></tr>
+            <tr><td>ran-full-verification</td><td>didn't run all four gates: "done" was self-declared</td></tr>
+            <tr><td>tests · lint · arch</td><td>pytest, ruff, lint-imports (API never imports the DB)</td></tr>
+            <tr><td>no-float-money</td><td>new code calls float <code>legacy_fx</code> or does float math on money</td></tr>
+            <tr><td>value-object-convention</td><td><b>hidden probe</b>: new classes are <code>frozen+slots+kw_only</code>, services never return dicts or tuples</td></tr>
+            <tr><td>new-behaviour-tested · endpoint-works</td><td>a test exists · a probe calls the endpoint itself</td></tr>
           </table>
-          <p class="why"><b>Why</b><code>/context</code> <strong>reports</strong> what's loaded. It doesn't load anything.
-            Whenever an agent "ignores" a rule, the first question is whether the rule even loaded.
-            If it didn't load, it definitely wasn't followed.</p>
-          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
-            <div class="checks">
-              <div>At the root: project file, the import and the rule. In <code>payments/</code>: <strong>those plus</strong> the directory file.</div>
-              <div>You can explain in one sentence why the payments file is missing at the root.</div>
-            </div>
-          </div>
-          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
-            <details><summary><span class="lv">1 · nudge</span>Results look stale</summary>
-              <div class="body">Memory is read at session start. Start a <strong>new</strong> session after every file change.</div></details>
-            <details class="locked"><summary><span class="lv">2 · specific</span>Why the difference?</summary>
-              <div class="body">Claude Code loads CLAUDE.md files from the working directory <em>and its parents</em> at start. Files in sub-directories load only when Claude reads something inside them.</div></details>
-            <details class="locked"><summary><span class="lv">3 · near-complete</span>The expected table</summary>
-              <div class="body">Root: ✓ project · ✓ import · ✓ rule · ✗ payments · (user only if you have one). Payments: ✓ project (a parent directory) · ✓ import (inlined into it) · ✓ payments. The rule should appear too, because <code>ledgerly/</code> is still the project. If it doesn't on your machine, that's a real finding: note it and tell the room.</div></details>
-          </div>
           <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
         </div>
       </div>
 
-      <!-- 6 · USER-LEVEL TRAP -->
-      <div class="step" id="s6" data-step="6">
-        <div class="n">6</div>
+      <!-- 8 · CLAUDE.md ONLY -->
+      <div class="step" id="s7" data-step="7">
+        <div class="n">8</div>
         <div>
-          <div class="head"><h3>🪤 The user-level trap: "works on my machine"</h3><span class="chip r">7 min · red → green</span></div>
-          <p class="task">Work in pairs: <strong>Dev A</strong> and <strong>Dev B</strong>. Dev A moves the problem+json rule out of
-            <code>api-conventions.md</code> and into their own <code>~/.claude/CLAUDE.md</code>. Both run the same bug ticket.</p>
+          <div class="head"><h3>📜 Add CLAUDE.md: gates fixed, house style not</h3><span class="chip">5 min · fewer reds</span></div>
           <div class="promptbox shell">
-            <div class="tag">▶ Dev A only <button class="copy">⧉ copy</button></div>
-            <p>cp ~/.claude/CLAUDE.md ~/.claude/CLAUDE.md.bak 2&gt;/dev/null   <span class="c-cmt"># backup, if you have one</span>
-cat exercises/ex01-claude-md/drills/led-112-errors/user-level-CLAUDE.md &gt;&gt; ~/.claude/CLAUDE.md
-<span class="c-cmt"># and delete the problem+json bullet from ledgerly/docs/standards/api-conventions.md</span></p>
+            <div class="tag">▶ Run in your terminal (workshop root) <button class="copy">⧉ copy</button></div>
+            <p>tools/reset.sh
+tools/apply_variant.sh exercises/ex01-claude-md/drills/led-105-revenue/variants/claude-md-only</p>
           </div>
-          <div class="promptbox">
-            <div class="tag">▶ Both paste · bug LED-112 <button class="copy">⧉ copy</button></div>
-            <p>Bug LED-112 — GET /invoices/999 (an id that doesn't exist) returns 500 Internal Server Error. It should be a 404. Fix it, following our API conventions, and add a test.</p>
-          </div>
+          <p class="task">The reference CLAUDE.md (commands, "done means", money rules), no rule files. Run the <strong>same</strong> ticket, <code>/exit</code>, <code>tools/check.sh led-105</code>.</p>
+          <p class="why"><b>Why</b>The agent now runs all four gates (3/3 with Haiku): CLAUDE.md told it the finish line. <code>value-object-convention</code>
+            still fails (0/3): <code>kw_only</code> appears nowhere in Ledgerly, and nothing told the agent about it.</p>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
+
+      <!-- 9 · RULE -->
+      <div class="step" id="s8" data-step="8">
+        <div class="n">9</div>
+        <div>
+          <div class="head"><h3>📏 Add the rule: green</h3><span class="chip">5 min · green</span></div>
           <div class="promptbox shell">
-            <div class="tag">▶ Both: reset code first, check after <button class="copy">⧉ copy</button></div>
-            <p>tools/reset.sh --keep-memory &amp;&amp; cd ledgerly &amp;&amp; claude   <span class="c-cmt"># paste LED-112, /exit</span>
-cd .. &amp;&amp; tools/check.sh led-112 --label devA            <span class="c-cmt"># or --label devB</span></p>
+            <div class="tag">▶ Run in your terminal (workshop root) <button class="copy">⧉ copy</button></div>
+            <p>tools/reset.sh
+tools/apply_variant.sh exercises/ex01-claude-md/reference   <span class="c-cmt"># + .claude/rules/value-objects.md, testing.md</span></p>
           </div>
-          <div class="out">                     <span class="d">Dev A</span>    <span class="d">Dev B</span>
-   returns-404          <span class="p">PASS</span>     <span class="p">PASS</span>
-   team-error-convention <span class="p">PASS</span>    <span class="f">FAIL</span>  content-type is 'application/json'</div>
-          <p class="subnote why" style="border-left-color:var(--amber)"><b style="color:var(--amber)">Solo?</b>Run it as Dev A, then <code>mv ~/.claude/CLAUDE.md ~/.claude/CLAUDE.md.devA</code>
-            (now you're a new laptop) and run it as Dev B. Afterwards, restore your backup.</p>
-          <p class="why"><b>Why</b>This is the favourite exam trap and a real-life classic. User-level config
-            <strong>isn't in git</strong>, so new teammates never receive it. Same repo, same branch, same model, different behaviour.</p>
-          <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
-            <div class="checks">
-              <div>Dev A's <code>/memory</code> shows <code>~/.claude/CLAUDE.md</code> with the convention. Dev B's doesn't.</div>
-              <div>Dev B's <code>tools/check.sh led-112</code> fails <strong>team-error-convention</strong>.</div>
-              <div><strong>Fix:</strong> move the rule back into <code>api-conventions.md</code>, restore your user file. Dev B re-runs and gets <strong>GREEN</strong>.</div>
-            </div>
-          </div>
-          <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
-            <details><summary><span class="lv">1 · nudge</span>Both of us got green</summary>
-              <div class="body">Is the rule <em>really</em> gone from the project? Search for it: <code>grep -rn problem ledgerly/CLAUDE.md ledgerly/docs ledgerly/.claude</code>.</div></details>
-            <details class="locked"><summary><span class="lv">2 · specific</span>How to be a "fresh clone"</summary>
-              <div class="body">Dev B must have <strong>no</strong> user file containing the rule. <code>/memory</code> should list only project files. If Dev B still passes, run it twice more: it's a rate, and the agent may guess problem+json by luck.</div></details>
-            <details class="locked"><summary><span class="lv">3 · near-complete</span>Restore everything</summary>
-              <div class="body"><pre class="codeblock">rm -f ~/.claude/CLAUDE.md.devA
-mv ~/.claude/CLAUDE.md.bak ~/.claude/CLAUDE.md 2&gt;/dev/null || rm ~/.claude/CLAUDE.md
-<span class="cm"># then put the problem+json bullet back into ledgerly/docs/standards/api-conventions.md</span></pre></div></details>
+          <p class="task">Same ticket, <code>/exit</code>, <code>tools/check.sh led-105</code> → <strong>GREEN</strong> (5/5 with Haiku). Read
+            <code>reference/.claude/rules/value-objects.md</code>: house style is a <em>topic</em> file, not a line in CLAUDE.md.</p>
+          <div class="promptbox shell">
+            <div class="tag">▶ Done: restore your file and your Part 1 CLAUDE.md <button class="copy">⧉ copy</button></div>
+            <p>mv ~/.claude/CLAUDE.md.bak ~/.claude/CLAUDE.md 2&gt;/dev/null; tools/reset.sh; tools/apply_variant.sh part1</p>
           </div>
           <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
         </div>
@@ -677,17 +608,32 @@ mv ~/.claude/CLAUDE.md.bak ~/.claude/CLAUDE.md 2&gt;/dev/null || rm ~/.claude/CL
         </div>
       </div>
 
+
       <div class="infobox warn">
         <div class="big">⚠️</div>
-        <div class="head">Green tests ≠ no drift</div>
-        <div class="note">Step 0 passes pytest, ruff and import-linter, and it's still wrong. That's why there's a drift checker.</div>
+        <div class="head">Green tests ≠ correct</div>
+        <div class="note">In Step 2 the agent's own tests pass. It wrote them from its own guess, so they check the guess.</div>
       </div>
 
       <div class="infobox ok">
         <div class="label">🕵️ The hidden judge</div>
-        <p>Every check lives in <span class="mono">exercises/…/drills/</span>, <strong>outside</strong> <span class="mono">ledgerly/</span>.
-          The agent can't read the convention test, so it can't game it. The only way it learns the house style is from
-          what you write. Keep the doer away from the judge.</p>
+        <p>The check lives in <span class="mono">exercises/…/drills/</span>, <strong>outside</strong> <span class="mono">ledgerly/</span>.
+          The agent can't read it, so it can't copy the rule from it. The only way the rule reaches the agent is
+          what you write.</p>
+      </div>
+
+      <div class="infobox ok">
+        <div class="label">📚 How good CLAUDE.md files are written</div>
+        <p><strong>HumanLayer, <a href="https://www.humanlayer.dev/blog/writing-a-good-claude-md" target="_blank" style="color:var(--green)">“Writing a good CLAUDE.md”</a>:</strong>
+          it's the only file in <em>every</em> session, so write each line on purpose. WHAT · WHY · HOW. Under 300 lines (theirs is under 60).
+          Only what applies to every task; point to other docs instead of pasting them. <em>“Never send an LLM to do a linter's job.”</em></p>
+        <p><strong>Boris Cherny (creator of Claude Code), <a href="https://x.com/bcherny/status/2007179832300581177" target="_blank" style="color:var(--green)">Jan 2026 thread</a>, as reported:</strong>
+          one team CLAUDE.md in git (~2.5k tokens); every time Claude gets something wrong, add a line; tag <code style="font-size:1em">@claude</code> in PR reviews to add the lesson.
+          And the biggest lever: <em>give Claude a way to verify its work</em>.</p>
+        <p><strong>Karpathy-inspired guidelines, <a href="https://github.com/multica-ai/andrej-karpathy-skills" target="_blank" style="color:var(--green)">andrej-karpathy-skills</a>:</strong>
+          four <em>behaviour</em> rules: think before coding · simplicity first · surgical changes · goal-driven execution.
+          Project-agnostic, so they complement (not replace) your project facts. The reference's <code style="font-size:1em">## How to work</code> borrows them.</p>
+        <p><strong>Test every line:</strong> would the agent get it wrong without it? No → delete it.</p>
       </div>
 
       <div class="infobox">
@@ -697,23 +643,25 @@ mv ~/.claude/CLAUDE.md.bak ~/.claude/CLAUDE.md 2&gt;/dev/null || rm ~/.claude/CL
         <p>Strict precedence exists only in <strong>settings.json</strong> (managed › local › project › user).</p>
       </div>
 
+
       <div class="infobox ok">
         <div class="label">🧰 Your commands</div>
         <div class="cmds">
-          <div><span class="c">tools/check.sh led-105</span><span class="e">grade ledgerly/ + your newest session</span></div>
-          <div><span class="c">tools/reset.sh --keep-memory</span><span class="e">undo the agent's code, keep your files</span></div>
-          <div><span class="c">tools/observe.sh tail</span><span class="e">watch memory files load, live</span></div>
-          <div><span class="c">python3 tools/memory_size.py</span><span class="e">token cost incl. @imports</span></div>
-          <div><span class="c">tools/run_drill.sh led-105 current 3</span><span class="e">3 headless runs of your setup → a rate</span></div>
+          <div><span class="c">tools/check.sh led-107</span><span class="e">grade ledgerly/ against the hidden checks</span></div>
+          <div><span class="c">tools/reset.sh --keep-memory</span><span class="e">undo the agent's code, keep your CLAUDE.md</span></div>
+          <div><span class="c">tools/reset.sh</span><span class="e">everything back to baseline (deletes your CLAUDE.md)</span></div>
+          <div><span class="c">tools/run_drill.sh led-107 current 3</span><span class="e">3 headless runs → a rate</span></div>
         </div>
       </div>
 
       <div class="infobox">
         <div class="label">⏭️ What's still red</div>
-        <p>Even a perfect CLAUDE.md is <strong>advisory</strong>: it gives you a rate, not a guarantee. The facilitator
-          will close with <span class="mono">LED-103</span>, an impossible VAT ticket. Watch whether the agent edits the
-          test to make the suite pass.</p>
-        <p>That's why <strong>Exercise 3 (hooks)</strong> exists: a rate becomes 0 by construction.</p>
+        <p>CLAUDE.md is a <strong>suggestion</strong>: it moves a rate, the agent can still ignore it. When one miss is
+          expensive, you need a <strong>mechanism</strong> that always runs: a hook (<strong>Ex 3</strong>).</p>
+        <p><strong>Close (facilitator):</strong> <span class="mono">LED-103</span>, an impossible VAT ticket. Does the agent edit a test to make the suite pass?
+          Haiku: no tampering in 8/8 runs (it flagged ADR-0004). The tampering is shown with <span class="mono">tools/demo_reference.sh led-103 red</span>.</p>
+        <p>Finished early? The README's <em>Going further</em> has one more drill:
+          <span class="mono">led-112</span> (the <span class="mono">~/.claude</span> trap).</p>
       </div>
 
     </div>
@@ -722,14 +670,14 @@ mv ~/.claude/CLAUDE.md.bak ~/.claude/CLAUDE.md 2&gt;/dev/null || rm ~/.claude/CL
   <!-- ============ REFERENCE IMPLEMENTATION ============ -->
   <div class="reference" id="reference">
     <div class="label">🔓 Reference implementation</div>
-    <p>Finished all seven steps? Compare with the reference. It's also in the repo as real files:
+    <p>Finished? Compare with the reference. It's also in the repo as real files:
       <strong>exercises/ex01-claude-md/reference/</strong>. Apply it with
       <code style="font-family:'Space Mono',monospace;color:var(--green)">tools/apply_variant.sh exercises/ex01-claude-md/reference</code>.</p>
     <button class="unlock" id="unlock">I've finished, show me the reference</button>
     <div class="refgrid" id="refgrid">
       <div class="reffile">
         <div class="fname">ledgerly/CLAUDE.md</div>
-        <div class="fnote">Project level · 30 lines · ~410 tokens including the import</div>
+        <div class="fnote">Project level · 35 lines · ~510 tokens including the import · Part 1 needs only the split line; Part 2 the rest</div>
 <pre class="codeblock"><span class="hl"># Ledgerly</span>
 Invoicing &amp; refunds HTTP API. Python 3.11+, FastAPI,
 SQLite, managed with uv. README.md is stale: trust this
@@ -759,9 +707,15 @@ Report which commands you ran and their result.
   convert with payments.fx.convert.
 - payments/legacy_fx.py and services/reports.py are
   float legacy. Don't build on them.
+- Splitting an amount (installments): every part is
+  total // n cents and the <b>last</b> part absorbs the
+  whole remainder. 100.00 / 3 → 33.33, 33.33, 33.34.
 
-<span class="hl">## When a request conflicts with an ADR</span>
-Stop and say so. Don't work around it.</pre>
+<span class="hl">## How to work</span>
+- A request conflicts with an ADR? Stop and say so. Don't work around it.
+- Unclear ticket? State your assumptions or ask. Don't guess silently.
+- Touch only what the ticket needs. Mention unrelated problems; don't fix them.
+- Turn the ticket into a check first (a failing test), then make it pass.</pre>
       </div>
       <div class="reffile">
         <div class="fname">ledgerly/docs/standards/api-conventions.md</div>
@@ -801,8 +755,9 @@ Stop and say so. Don't work around it.</pre>
   - kw_only: two int fields (amount_cents, invoice_id)
     can't be swapped positionally. That shipped once (LED-077).
   - slots: no stray attributes.
-- Services return value objects, never dicts (no dict,
-  Mapping, TypedDict, NamedTuple). The API maps them to
+- Services return value objects, never dicts or tuples
+  (no dict, Mapping, TypedDict, NamedTuple,
+  tuple[Money, int]). The API maps them to
   pydantic response models.
 - Exceptions are exempt. Older classes (Invoice, Line)
   predate this rule; don't copy them, and don't rewrite
@@ -840,28 +795,28 @@ Stop and say so. Don't work around it.</pre>
     </div>
   </div>
 
+
   <!-- ============ LESSONS ============ -->
   <div class="lessons">
-    <div class="lesson"><div class="li">🧭</div><h4>Write what the code can't say</h4><p>Commands, the finish line, which code is legacy, where decisions live. Not style rules a linter already enforces.</p></div>
-    <div class="lesson"><div class="li">🏛️</div><h4>Scope is part of the rule</h4><p>Team rules go in project. Package facts go in directory. Preferences go in user. A correct rule at the wrong level is a missing rule for half the team.</p></div>
-    <div class="lesson"><div class="li">📏</div><h4>Measure in rates</h4><p>Agents vary. One green run proves nothing. <code style="font-family:'Space Mono',monospace;color:var(--green)">run_drill.sh … 3</code> turns "it worked" into "3 out of 3".</p></div>
+    <div class="lesson"><div class="li">🔴</div><h4>Red first</h4><p>Run the check before the agent. A check you've never seen fail proves nothing.</p></div>
+    <div class="lesson"><div class="li">🧭</div><h4>Write what the code can't say</h4><p>Team rules, the real commands, what "done" means. Not what a linter already enforces.</p></div>
+    <div class="lesson"><div class="li">📏</div><h4>Measure in rates</h4><p>Agents vary. <code style="font-family:'Space Mono',monospace;color:var(--green)">run_drill.sh … 3</code> turns "it worked" into "3 out of 3".</p></div>
   </div>
 
   <!-- ============ FOOTER ============ -->
   <div class="footer">
-    <div>⏱ <span id="dur-label">35 minutes</span> · Ledgerly · ex01-claude-md</div>
+    <div>⏱ <span id="dur-label">20 minutes</span> · Ledgerly · ex01-claude-md</div>
     <div class="brand"><b>LATENT</b> · AI Coding Agents Workshop</div>
   </div>
-
 </div>
 
 <!-- ============ TIMER (fixed bottom-right) ============ -->
 <div class="timer">
-  <div class="clock" id="clock">35:00</div>
+  <div class="clock" id="clock">20:00</div>
   <div class="presets" id="presets">
-    <button data-min="30">30</button>
-    <button data-min="35" class="sel">35</button>
-    <button data-min="40">40</button>
+    <button data-min="15">15</button>
+    <button data-min="20" class="sel">20</button>
+    <button data-min="25">25</button>
   </div>
   <div class="controls">
     <button id="start" onclick="startTimer()">▶ Start</button>
@@ -872,7 +827,7 @@ Stop and say so. Don't work around it.</pre>
 
 <script>
   /* ---------- timer (same as exercise-template) ---------- */
-  let total = 35 * 60, remaining = total, tick = null;
+  let total = 20 * 60, remaining = total, tick = null;
   const clock = document.getElementById('clock');
   const durLabel = document.getElementById('dur-label');
   const presets = document.getElementById('presets');
@@ -886,7 +841,7 @@ Stop and say so. Don't work around it.</pre>
   function pauseTimer(){ clearInterval(tick); tick = null; }
   function resetTimer(){ pauseTimer(); remaining = total; render(); }
   presets.addEventListener('click', e=>{ if(e.target.dataset.min) setMinutes(+e.target.dataset.min); });
-  setMinutes(35);
+  setMinutes(20);
 
   /* ---------- copy buttons ---------- */
   document.querySelectorAll('.promptbox .copy').forEach(btn=>{

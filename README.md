@@ -45,11 +45,12 @@ Two rules hold throughout:
 
 | drift | example in Ledgerly | first caught by |
 |---|---|---|
-| Wrong source of truth | trusts the 2021 README: `make test`, Flask, dollars | Ex 1 · CLAUDE.md |
+| Knowledge the code can't show | splits installments its own way: tests green, says "done", wrong by a cent (0/4 → 3/3 with CLAUDE.md) | Ex 1 · CLAUDE.md |
+| Wrong source of truth | trusts the 2021 README: `make test`, Flask, dollars | Ex 1 Part 2 (guard check) |
 | False "done" | stops after pytest; never runs ruff / import-linter | Ex 1 → Ex 3 `Stop` hook |
 | Architecture | builds on float `legacy_fx`; API imports the DB | Ex 1 → import-linter gate |
-| Convention / scope | team rule in one person's `~/.claude` | Ex 1 |
-| House style the code doesn't show | `frozen + slots + kw_only` value objects | Ex 1 · rules |
+| Convention / scope | team rule in one person's `~/.claude` | Ex 1 (going further, LED-112) |
+| House style the code doesn't show | `frozen + slots + kw_only` value objects, no tuples/dicts from services | Ex 1 Part 2 · rules (RED 5/5 → GREEN 5/5) |
 | Grader tampering | edits a test to make the suite pass | Ex 1 (measured) → Ex 3 hook |
 | Outdated libraries | deprecated FastAPI / Pydantic APIs from training data | Ex 4 · MCP (Context7) |
 | Tests that check nothing | mirror tests on refunds; skipping a flaky test | Ex 5 · mutation judge |
@@ -127,11 +128,11 @@ It also contains what real repos contain:
 
 | landmine | where | used in |
 |---|---|---|
-| Stale README (Flask, Postgres, `make test`, decimal dollars) | `README.md` | Ex 1 (step 0), Ex 4 |
-| Float-based legacy FX + a legacy report built on it | `payments/legacy_fx.py`, `services/reports.py` | Ex 1 (step 0) |
+| Stale README (Flask, Postgres, `make test`, decimal dollars) | `README.md` | Ex 1 (Part 2, LED-105), Ex 4 |
+| Float-based legacy FX + a legacy report built on it | `payments/legacy_fx.py`, `services/reports.py` | Ex 1 (Part 2, LED-105) |
 | Legacy route that bypasses the service layer | `api/routes_refunds.py` (+ an `ignore_imports` exception) | Ex 5 (refund mutants), Ex 7 (LED-101) |
-| No error convention in code (it lives in people's heads) | API errors | Ex 1 (step 6) |
-| VAT rounding that surprises customers (by design, ADR-0004) | `services/tax.py` | Ex 1 close (LED-103), Ex 3 |
+| No error convention in code (it lives in people's heads) | API errors | Ex 1 (going further, LED-112) |
+| VAT rounding that surprises customers (by design, ADR-0004) | `services/tax.py` | Ex 1 close (step 10, LED-103), Ex 3 |
 | Fake secrets, not git-ignored | `.env` | Ex 3 |
 | Generated code: "DO NOT EDIT" | `generated/tracker_client.py` | Ex 3 |
 | Applied, destructive migration | `migrations/003_drop_audit_log_old.sql` | Ex 3 |
@@ -158,7 +159,7 @@ It also contains what real repos contain:
 | `python3 tools/hook_test.py [fence\|lint\|finish]` | run the hook test suites (JSON on stdin → expected allow/ask/deny/block) against `ledgerly/.claude/hooks/` (Ex 3) |
 | `tools/demo_reference.sh <drill> red\|green` | facilitator fallback: apply the hand-written reference patch and check it |
 
-Drills can be named by prefix: `led-100` (warm-up, Ex 0), `led-105` (revenue endpoint), `led-112` (404 errors), `led-103` (impossible VAT ticket),
+Drills can be named by prefix: `led-100` (warm-up, Ex 0), `led-107` (installments, Ex 1), `led-105` (revenue endpoint), `led-112` (404 errors), `led-103` (impossible VAT ticket),
 `led-120` (PR note), `trigger-implicit`, `trigger-quiet`, `led-132` (relax the lint), `led-141` (seed data,
 deprecated APIs), `led-150` / `led-151` (refund tests, weak vs contract), `led-118` (the flaky test). An ambiguous prefix is refused, never guessed.
 
@@ -176,7 +177,7 @@ Timings and agenda slots for every exercise: [PLAN.md](PLAN.md).
 | # | exercise | 🔴 red that opens it | time | status |
 |---|---|---|---|---|
 | 0 | [Orientation](exercises/ex00-orientation/) · [open the page](exercises/ex00-orientation/exercise.html) | no red: machine check, a tour of Ledgerly and its landmines, the anatomy of an exercise (drills, checks, judges, reference, LESSONS), the tools, and one warm-up drill (LED-100) through the loop | 10 · 18 full | ✅ ready |
-| 1 | [CLAUDE.md + rules](exercises/ex01-claude-md/) · [open the page](exercises/ex01-claude-md/exercise.html) | no memory → stale README, float legacy, false "done" (tests green); then project · directory · rules (hidden house-style test) · @import · user-level trap | 30–36 | ✅ ready |
+| 1 | [CLAUDE.md](exercises/ex01-claude-md/) · [open the page](exercises/ex01-claude-md/exercise.html) | check red first → LED-107 installments with no CLAUDE.md: tests green, "done", hidden check red (Haiku 0/4) → one team rule in CLAUDE.md → green (3/3). Going further: rules, directory files, the `~/.claude` trap | 20 | ✅ ready |
 | 2 | [Skills](exercises/ex02-skills/) · [open the page](exercises/ex02-skills/exercise.html) | a generic PR note (wrong format, no ADRs, unverified gates); then author `ship-check`, prove it fires implicitly and stays quiet, and build a forked, read-only `adr-audit` worker | 25 | ✅ ready |
 | 3 | [Hooks](exercises/ex03-hooks/) · [open the page](exercises/ex03-hooks/exercise.html) | LED-103 tampering *rate* from Ex 1 → `PreToolUse` fence (tests append-only, protected configs, `.env`), `PostToolUse` lint, `Stop` finish line with a stop rule → **0/3**; LED-132 "relax the lint" | 25 | ✅ ready |
 | 4 | [MCP + Context7](exercises/ex04-mcp/) · [open the page](exercises/ex04-mcp/exercise.html) | LED-141: green tests on a deprecated FastAPI API (`on_event`) → Context7 + a rule → `lifespan`; then deprecations become failing tests; MCP cost in `/context` | 4 demo · 20 homework | ✅ ready |

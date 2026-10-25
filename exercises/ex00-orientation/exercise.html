@@ -472,19 +472,24 @@ ls -R exercises/ex01-claude-md/drills exercises/ex01-claude-md/reference | head 
         <div class="n">4</div>
         <div>
           <div class="head"><h3>🔁 One drill, start to finish</h3><span class="chip">5 min</span></div>
-          <p class="task">Every exercise runs the same loop: <strong>start</strong> a drill, give the agent its ticket, <strong>check</strong> what it did and left behind, <strong>reset</strong>. Learn the tools, then try it on a warm-up ticket.</p>
+          <p class="task">Every exercise runs the same loop: <strong>check first (red)</strong>, give the agent its ticket, <strong>check again</strong>, <strong>reset</strong>. Use <strong>Haiku</strong> all workshop: fast, cheap, and its mistakes are easy to see.</p>
           <div class="promptbox shell">
-            <div class="tag">▶ Run in your terminal (workshop root) <button class="copy">⧉ copy</button></div>
-            <p>tools/start.sh led-100 &amp;&amp; cd ledgerly &amp;&amp; claude</p>
+            <div class="tag">▶ 1 · Check first: it must be red (workshop root) <button class="copy">⧉ copy</button></div>
+            <p>tools/start.sh led-100
+tools/check.sh led-100        <span class="c-cmt"># => RED: GET /version -> 404. A check you never saw fail proves nothing</span></p>
+          </div>
+          <div class="promptbox shell">
+            <div class="tag">▶ 2 · Start the agent <button class="copy">⧉ copy</button></div>
+            <p>cd ledgerly &amp;&amp; claude --model haiku</p>
           </div>
           <div class="promptbox">
-            <div class="tag">▶ Paste into your agent · LED-100 <button class="copy">⧉ copy</button></div>
+            <div class="tag">▶ 3 · Paste into your agent · LED-100 <button class="copy">⧉ copy</button></div>
             <p>LED-100 — Version endpoint</p>
             <p>Ops wants to see which build is running. Add `GET /version` returning
 `{"name": "ledgerly", "version": "&lt;the version in pyproject.toml&gt;"}`.</p>
           </div>
           <div class="promptbox shell">
-            <div class="tag">▶ /exit, then <button class="copy">⧉ copy</button></div>
+            <div class="tag">▶ 4 · /exit, then check again <button class="copy">⧉ copy</button></div>
             <p>cd .. &amp;&amp; tools/check.sh led-100
 tools/reset.sh<span class="c-cmt">                 # back to baseline for Ex 1</span></p>
           </div>

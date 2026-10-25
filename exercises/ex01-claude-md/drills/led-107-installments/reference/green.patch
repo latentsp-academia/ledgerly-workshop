@@ -1,0 +1,196 @@
+diff --git a/src/ledgerly/api/routes_invoices.py b/src/ledgerly/api/routes_invoices.py
+index 214803b..b022a60 100644
+--- a/src/ledgerly/api/routes_invoices.py
++++ b/src/ledgerly/api/routes_invoices.py
+@@ -3,11 +3,12 @@ from __future__ import annotations
+ import sqlite3
+ from typing import Annotated
+ 
+-from fastapi import APIRouter, Depends, HTTPException
++from fastapi import APIRouter, Depends, HTTPException, Query
+ 
+ from ledgerly.api.deps import get_conn
+-from ledgerly.api.schemas import InvoiceIn, InvoiceOut
++from ledgerly.api.schemas import InstallmentOut, InstallmentsOut, InvoiceIn, InvoiceOut
+ from ledgerly.payments.money import Money
++from ledgerly.services import installments as svc_installments
+ from ledgerly.services import invoices as svc
+ 
+ router = APIRouter(prefix="/invoices", tags=["invoices"])
+@@ -51,6 +52,23 @@ def get_invoice(invoice_id: int, conn: Conn) -> InvoiceOut:
+     return to_out(svc.get_invoice(conn, invoice_id))
+ 
+ 
++@router.get("/{invoice_id}/installments", response_model=InstallmentsOut)
++def get_installments(
++    invoice_id: int, conn: Conn, count: Annotated[int, Query(ge=1)]
++) -> InstallmentsOut:
++    try:
++        plan = svc_installments.installment_plan(conn, invoice_id, count)
++    except KeyError as exc:
++        raise HTTPException(status_code=404, detail="invoice not found") from exc
++    return InstallmentsOut(
++        invoice_id=plan.invoice_id,
++        count=plan.count,
++        installments=[
++            InstallmentOut(amount_cents=m.cents, currency=m.currency) for m in plan.installments
++        ],
++    )
++
++
+ @router.post("/{invoice_id}/capture", response_model=InvoiceOut)
+ def capture(invoice_id: int, conn: Conn) -> InvoiceOut:
+     try:
+diff --git a/src/ledgerly/api/schemas.py b/src/ledgerly/api/schemas.py
+index 45f5181..24bc487 100644
+--- a/src/ledgerly/api/schemas.py
++++ b/src/ledgerly/api/schemas.py
+@@ -34,3 +34,14 @@ class RefundOut(BaseModel):
+     invoice_id: int
+     refunded_cents: int
+     currency: str
++
++
++class InstallmentOut(BaseModel):
++    amount_cents: int
++    currency: str
++
++
++class InstallmentsOut(BaseModel):
++    invoice_id: int
++    count: int
++    installments: list[InstallmentOut]
+diff --git a/src/ledgerly/services/installments.py b/src/ledgerly/services/installments.py
+new file mode 100644
+index 0000000..d69cb2d
+--- /dev/null
++++ b/src/ledgerly/services/installments.py
+@@ -0,0 +1,37 @@
++"""Installment plans: split an invoice total into equal payments.
++
++Rounding rule (CLAUDE.md, Money): every part is ``total // count`` cents and the last part
++absorbs the remainder, so the parts always sum to the total. Finance reconciles on this.
++"""
++
++from __future__ import annotations
++
++import sqlite3
++from dataclasses import dataclass
++
++from ledgerly.payments.money import Money
++from ledgerly.services.invoices import get_invoice
++
++
++@dataclass(frozen=True, slots=True, kw_only=True)
++class InstallmentPlan:
++    invoice_id: int
++    count: int
++    installments: tuple[Money, ...]
++
++
++def split(total: Money, count: int) -> tuple[Money, ...]:
++    if count < 1:
++        raise ValueError("Installment count must be at least 1")
++    base = total.cents // count
++    head = (Money(base, total.currency),) * (count - 1)
++    return (*head, Money(total.cents - base * (count - 1), total.currency))
++
++
++def installment_plan(conn: sqlite3.Connection, invoice_id: int, count: int) -> InstallmentPlan:
++    invoice = get_invoice(conn, invoice_id)
++    return InstallmentPlan(
++        invoice_id=invoice.id,
++        count=count,
++        installments=split(invoice.total, count),
++    )
+diff --git a/tests/test_api.py b/tests/test_api.py
+index 3a99850..414ed37 100644
+--- a/tests/test_api.py
++++ b/tests/test_api.py
+@@ -36,3 +36,41 @@ def test_full_refund(client: TestClient, paid_invoice: dict) -> None:  # type: i
+ def test_refund_twice_conflicts(client: TestClient, paid_invoice: dict) -> None:  # type: ignore[type-arg]
+     client.post(f"/invoices/{paid_invoice['id']}/refund")
+     assert client.post(f"/invoices/{paid_invoice['id']}/refund").status_code == 409
++
++
++def _hundred_invoice(client: TestClient) -> dict:  # type: ignore[type-arg]
++    return client.post(
++        "/invoices",
++        json={
++            "customer": "Acme",
++            "currency": "USD",
++            "lines": [{"description": "Plan", "quantity": 1, "unit_cents": 10_000}],
++            "vat_rate_bp": 0,
++        },
++    ).json()
++
++
++def test_installments_split_invoice_total(client: TestClient) -> None:
++    invoice = _hundred_invoice(client)
++    resp = client.get(f"/invoices/{invoice['id']}/installments", params={"count": 3})
++    assert resp.status_code == 200
++    assert resp.json() == {
++        "invoice_id": invoice["id"],
++        "count": 3,
++        "installments": [
++            {"amount_cents": 3_333, "currency": "USD"},
++            {"amount_cents": 3_333, "currency": "USD"},
++            {"amount_cents": 3_334, "currency": "USD"},
++        ],
++    }
++
++
++def test_installments_unknown_invoice_not_found(client: TestClient) -> None:
++    assert client.get("/invoices/999/installments", params={"count": 3}).status_code == 404
++
++
++def test_installments_count_required_and_positive(client: TestClient) -> None:
++    invoice = _hundred_invoice(client)
++    url = f"/invoices/{invoice['id']}/installments"
++    assert client.get(url).status_code == 422
++    assert client.get(url, params={"count": 0}).status_code == 422
+diff --git a/tests/test_installments.py b/tests/test_installments.py
+new file mode 100644
+index 0000000..a708906
+--- /dev/null
++++ b/tests/test_installments.py
+@@ -0,0 +1,39 @@
++import sqlite3
++
++import pytest
++
++from ledgerly.payments.money import Money
++from ledgerly.services import installments as svc_installments
++from ledgerly.services import invoices as svc
++
++
++def _hundred(conn: sqlite3.Connection) -> svc.Invoice:
++    lines = [svc.Line("Widget", 1, Money(10_000, "USD"))]
++    return svc.create_invoice(conn, "Acme", "USD", lines, vat_rate_bp=0)
++
++
++def test_hundred_in_three_splits_last_part_takes_remainder(conn: sqlite3.Connection) -> None:
++    invoice = _hundred(conn)
++    plan = svc_installments.installment_plan(conn, invoice.id, 3)
++    assert plan.installments == (
++        Money(3_333, "USD"),
++        Money(3_333, "USD"),
++        Money(3_334, "USD"),
++    )
++
++
++def test_installments_sum_to_invoice_total(conn: sqlite3.Connection) -> None:
++    invoice = _hundred(conn)
++    plan = svc_installments.installment_plan(conn, invoice.id, 7)
++    assert sum(m.cents for m in plan.installments) == invoice.total.cents
++
++
++def test_installment_count_below_one_rejected(conn: sqlite3.Connection) -> None:
++    invoice = _hundred(conn)
++    with pytest.raises(ValueError, match="at least 1"):
++        svc_installments.installment_plan(conn, invoice.id, 0)
++
++
++def test_installment_plan_unknown_invoice_raises(conn: sqlite3.Connection) -> None:
++    with pytest.raises(KeyError):
++        svc_installments.installment_plan(conn, 999, 3)

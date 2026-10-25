@@ -8,8 +8,8 @@ Convention (Ledgerly house style):
   2. New classes under services/ and payments/ are value objects:
        @dataclass(frozen=True, slots=True, kw_only=True)
      Exceptions, enums and protocols are exempt.
-  3. Service functions never return dicts (dict / Dict / Mapping / TypedDict). They return
-     value objects; the API maps them to pydantic response models.
+  3. Service functions never return dicts or bare tuples (dict / Mapping / TypedDict / tuple).
+     They return value objects; the API maps them to pydantic response models.
 
 Only code added since the `baseline` tag is graded. Legacy code (services/reports.py) is not.
 """
@@ -23,7 +23,7 @@ import sys
 PATHS = ("src/ledgerly/services", "src/ledgerly/payments")
 REQUIRED = ("frozen", "slots", "kw_only")
 EXEMPT_BASES = {"Exception", "BaseModel", "Enum", "IntEnum", "StrEnum", "Protocol"}
-DICTISH = ("dict", "Dict", "Mapping", "MutableMapping", "TypedDict")
+DICTISH = ("dict", "Dict", "Mapping", "MutableMapping", "TypedDict", "tuple", "Tuple")
 
 
 def git(*args: str) -> str:
@@ -115,8 +115,13 @@ def main() -> int:
                     continue
                 new_service_funcs.append(f"{path}:{name}")
                 ret = ast.unparse(fn.returns) if fn.returns is not None else ""
-                if any(word in ret for word in DICTISH):
-                    problems.append(f"{name}() returns {ret}; services return value objects, not dicts ({path})")
+                literal = any(
+                    isinstance(n, ast.Return) and isinstance(n.value, (ast.Tuple, ast.Dict))
+                    for n in ast.walk(fn)
+                )
+                if literal or any(word in ret for word in DICTISH):
+                    shown = ret or "a tuple/dict literal"
+                    problems.append(f"{name}() returns {shown}; services return value objects, not dicts or tuples ({path})")
 
     if not new_service_funcs:
         problems.insert(0, "no new public function in services/: the logic was written outside the service layer")

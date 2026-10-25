@@ -25,6 +25,11 @@ New behaviour has a test. Report which commands you ran and their result.
 ## Money (ADR-0001)
 - Amounts are `Money(cents: int, currency)`; convert with `payments.fx.convert`.
 - `payments/legacy_fx.py` and `services/reports.py` are float legacy. Don't build on them.
+- Splitting an amount (installments): every part is `total // n` cents and the **last** part
+  absorbs the whole remainder. 100.00 / 3 → 33.33, 33.33, 33.34. Finance reconciles on this.
 
-## When a request conflicts with an ADR
-Stop and say so. Don't work around it.
+## How to work
+- A request conflicts with an ADR? Stop and say so. Don't work around it.
+- Unclear ticket? State your assumptions or ask. Don't guess silently.
+- Touch only what the ticket needs. Mention unrelated problems; don't fix them.
+- Turn the ticket into a check first (a failing test), then make it pass.

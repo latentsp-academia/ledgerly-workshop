@@ -1,0 +1,19 @@
+{
+  "title": "LED-107 installments",
+  "checks": [
+    { "id": "tests-pass", "type": "command", "cmd": "uv run pytest -q" },
+    {
+      "id": "split-is-exact",
+      "type": "probe",
+      "script": "probe.py",
+      "why": "Team rule the code can't show: integer cents, no lost cent, the LAST installment absorbs the remainder (100.00 / 3 = 33.33, 33.33, 33.34). Tests were green and the agent said done; only CLAUDE.md can carry this."
+    },
+    {
+      "id": "new-behaviour-tested",
+      "type": "diff_present",
+      "paths": ["tests"],
+      "patterns": ["installments"],
+      "why": "New behaviour without a test."
+    }
+  ]
+}

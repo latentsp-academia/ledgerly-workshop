@@ -45,14 +45,17 @@
         "src"
       ],
       "patterns": [
-        "legacy_fx",
-        "\\bfloat\\b",
-        "revenue_report\\(",
+        "legacy_fx\\.[A-Za-z_]",
+        "import legacy_fx\\b",
+        ":\\s*float\\b",
+        "->\\s*float\\b",
+        "\\bfloat\\(",
+        "(?<!def )\\brevenue_report\\(",
         "/ ?100\\b",
         "\\* ?100\\b",
         "round\\("
       ],
-      "why": "New code reused the float-based legacy report (ADR-0001). Tests can still be green."
+      "why": "New code reused the float-based legacy report or did float math on money (ADR-0001). Tests can still be green. (Code only: comments mentioning 'float' don't count.)"
     },
     {
       "id": "value-object-convention",

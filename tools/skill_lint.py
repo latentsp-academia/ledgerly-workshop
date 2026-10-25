@@ -66,8 +66,8 @@ class Skill:
                 self.fm[k] = v[1:-1]
         self.fm_ok = True
 
-    def tools(self) -> List[str]:
-        raw = self.fm.get("allowed-tools", "")
+    def tools(self, field: str = "allowed-tools") -> List[str]:
+        raw = self.fm.get(field, "")
         raw = raw.strip("[]")
         # split on commas or whitespace that isn't inside parentheses
         parts, depth, cur = [], 0, ""
@@ -140,14 +140,16 @@ PROFILES: Dict[str, List[Check]] = {
          else "add when_to_use with the real phrases: 'make this reviewable', 'PR description', …"),
         ("argument-hint: shows what to pass (e.g. <ticket-id>)",
          lambda s: None if s.fm.get("argument-hint") else "missing argument-hint"),
-        ("allowed-tools: present (it pre-approves AND forbids)",
-         lambda s: None if s.tools() else "missing allowed-tools: the skill inherits every tool"),
+        ("allowed-tools: pre-approves what the skill runs (no prompts mid-skill)",
+         lambda s: None if s.tools() else "missing allowed-tools: the gates script will stop for a permission prompt"),
         ("allowed-tools: Bash is scoped, never bare 'Bash'",
-         lambda s: "bare Bash allows any command; use Bash(uv run:*), Bash(git diff:*), …"
+         lambda s: "bare Bash pre-approves ANY command; use Bash(uv run *), Bash(git diff *), …"
          if "Bash" in s.tools() else None),
-        ("allowed-tools: no Edit (writes the PR note, never edits code)",
-         lambda s: "Edit/MultiEdit allowed: this skill must not touch code"
-         if any(t in ("Edit", "MultiEdit") for t in s.tools()) else None),
+        ("disallowed-tools: blocks Edit (writes the PR note, never edits code)",
+         lambda s: None if "Edit" in s.tools("disallowed-tools")
+         else "allowed-tools only pre-approves; to forbid editing code, add disallowed-tools: Edit"),
+        ("arguments: named, and every name is used as $name in the body",
+         lambda s: _named_args(s)),
         ("dynamic context: at least one !`command` line",
          lambda s: None if DYNAMIC_RE.search(s.body) else "no !`…` line: the skill arrives empty instead of pre-filled"),
         ("script referenced via ${CLAUDE_SKILL_DIR}/scripts/…",
@@ -169,7 +171,7 @@ PROFILES: Dict[str, List[Check]] = {
          else f"model is {s.fm.get('model')!r}: a read-only sweep doesn't need the top tier"),
         ("effort: low or medium",
          lambda s: None if s.fm.get("effort") in ("low", "medium") else f"effort is {s.fm.get('effort')!r}"),
-        ("allowed-tools: read-only (Read, Grep, Glob, git diff/log only)",
+        ("read-only: Write/Edit blocked (disallowed-tools, or a read-only agent)",
          lambda s: _readonly(s)),
         ("dynamic context: at least one !`command` line",
          lambda s: None if DYNAMIC_RE.search(s.body) else "pre-fill the diff with !`git diff …`"),
@@ -177,13 +179,24 @@ PROFILES: Dict[str, List[Check]] = {
 }
 
 
+def _named_args(s: Skill) -> Optional[str]:
+    names = [n for n in re.split(r"[\s,\[\]]+", s.fm.get("arguments", "")) if n]
+    if not names:
+        return "no arguments: field: name the positions (e.g. [ticket, reviewer]) and use $ticket in the body"
+    unused = [n for n in names if f"${n}" not in s.body]
+    return ("declared but never used: " + ", ".join("$" + n for n in unused)) if unused else None
+
+
 def _readonly(s: Skill) -> Optional[str]:
-    tools = s.tools()
-    if not tools:
-        return "missing allowed-tools: an audit should not inherit Write"
-    ok = {"Read", "Grep", "Glob"}
-    bad = [t for t in tools if t not in ok and not re.match(r"^Bash\(git (diff|log|show|status)[^)]*\)$", t)]
-    return ("not read-only: " + ", ".join(bad)) if bad else None
+    # allowed-tools only pre-approves; it never removes a tool. Blocking takes disallowed-tools
+    # or an agent whose own tool list is read-only.
+    granted = [t for t in s.tools() if t in ("Write", "Edit", "MultiEdit", "NotebookEdit", "Bash")]
+    if granted:
+        return "allowed-tools pre-approves " + ", ".join(granted) + ": an audit must not"
+    blocked = set(s.tools("disallowed-tools"))
+    if {"Write", "Edit"} <= blocked or s.fm.get("agent") in ("Explore", "Plan"):
+        return None
+    return "nothing blocks Write/Edit: allowed-tools doesn't forbid, add disallowed-tools: Write, Edit"
 
 
 def lint(name: str, profile: Optional[str], app: Path = APP, quiet: bool = False) -> List[Tuple[str, Optional[str]]]:

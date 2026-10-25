@@ -1,0 +1,17 @@
+{
+  "title": "release · a side-effect skill must not fire on its own",
+  "checks": [
+    {
+      "id": "version-untouched",
+      "type": "files_unchanged",
+      "paths": ["pyproject.toml"],
+      "why": "The release skill fired on its own and bumped the version. Nobody typed /release. Side-effect skills need disable-model-invocation: true."
+    },
+    {
+      "id": "answered",
+      "type": "final_message_matches",
+      "patterns": ["revenue", "LED-105"],
+      "why": "The question wasn't answered."
+    }
+  ]
+}

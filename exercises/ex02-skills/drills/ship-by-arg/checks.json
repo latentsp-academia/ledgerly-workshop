@@ -1,0 +1,13 @@
+{
+  "title": "ship-check with named arguments: /ship-check LED-105 @dana",
+  "checks": [
+    {
+      "id": "reviewer-from-argument",
+      "type": "probe",
+      "script": "probe_reviewer.py",
+      "why": "arguments: [ticket, reviewer] maps positions to $ticket and $reviewer. The second one didn't land."
+    },
+    { "id": "house-sections", "type": "probe", "script": "../led-120-pr-note/probe_pr_sections.py" },
+    { "id": "code-untouched", "type": "probe", "script": "../led-120-pr-note/probe_code_untouched.py" }
+  ]
+}

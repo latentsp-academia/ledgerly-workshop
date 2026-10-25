@@ -1,0 +1,13 @@
+{
+  "title": "paths · the currency skill loads when the work is in payments/",
+  "checks": [
+    { "id": "tests-pass", "type": "command", "cmd": "uv run pytest -q" },
+    {
+      "id": "finance-test-name",
+      "type": "diff_present",
+      "paths": ["tests"],
+      "patterns": ["def test_chf_round_trip\\("],
+      "why": "Finance greps for test_<code>_round_trip. Only the currency-rules skill knows that; it didn't reach the agent."
+    }
+  ]
+}

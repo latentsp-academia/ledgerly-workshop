@@ -302,7 +302,7 @@
       verification table that matches reality. That's a <strong>procedure</strong>, not a fact, so it doesn't belong
       in CLAUDE.md. Watch the agent write a generic note, then package the procedure as a skill with a
       <strong>description that fires it</strong>, a <strong>script it runs</strong> and a <strong>template it reads
-      only when needed</strong>. Finish by turning a second skill into a sandboxed, forked worker. Each step is graded
+      only when needed</strong>. Finish by turning a second skill into a read-only, forked worker. Each step is graded
       by a check the agent can't see.</p>
   </div>
 
@@ -311,7 +311,7 @@
     <div class="goal"><div class="gi">🗂️</div><p>Build a skill folder: <strong>SKILL.md</strong>, a <strong>reference.md</strong> loaded on demand, a <strong>script</strong> that's run, not read.</p></div>
     <div class="goal"><div class="gi">📝</div><p>Write a <strong>description + when_to_use</strong> that fire the skill without naming it, and <em>not</em> on everything else.</p></div>
     <div class="goal"><div class="gi">⚡</div><p>Pre-fill a skill with <strong>!`command`</strong> dynamic context and <strong>${CLAUDE_SKILL_DIR}</strong>.</p></div>
-    <div class="goal"><div class="gi">🛡️</div><p>Use <strong>allowed-tools</strong> as a sandbox: it pre-approves <em>and</em> forbids.</p></div>
+    <div class="goal"><div class="gi">🛡️</div><p><strong>allowed-tools</strong> pre-approves; <strong>disallowed-tools</strong> forbids. Know which is which.</p></div>
     <div class="goal"><div class="gi">🍴</div><p>Move work off your context with <strong>context: fork · agent · model · effort</strong>.</p></div>
   </div>
 
@@ -328,6 +328,8 @@
     <a class="node" href="#s4" data-step="4"><div class="k">Step 4</div><div class="v">⚙️ Worker</div><div class="t">6 min</div></a>
     <div class="arrow">→</div>
     <a class="node" href="#s5" data-step="5"><div class="k">Step 5</div><div class="v">📊 Evaluate</div><div class="t">homework</div></a>
+    <div class="arrow">→</div>
+    <a class="node" href="#s6" data-step="6"><div class="k">Step 6</div><div class="v">⚙️ Advanced</div><div class="t">optional · 20 min</div></a>
   </div>
 
   <!-- ============ STEPS (left) + SIDE PANEL (right) ============ -->
@@ -396,7 +398,7 @@ cp exercises/ex02-skills/starter/gates.py ledgerly/.claude/skills/ship-check/scr
 <span class="c-cmt"># now write SKILL.md and reference.md in ledgerly/.claude/skills/ship-check/</span></p>
           </div>
           <div class="tree"><b>.claude/skills/ship-check/</b>
-├─ <b>SKILL.md</b>        <i># name · description · when_to_use · argument-hint · allowed-tools + body</i>
+├─ <b>SKILL.md</b>        <i># name · description · when_to_use · argument-hint · allowed-tools · disallowed-tools + body</i>
 ├─ <b>reference.md</b>    <i># PR template + path → ADR map · loaded only when the body says "read it"</i>
 └─ scripts/
    └─ <b>gates.py</b>     <i># runs the 4 gates, prints a table · run, never loaded</i></div>
@@ -406,13 +408,14 @@ cp exercises/ex02-skills/starter/gates.py ledgerly/.claude/skills/ship-check/scr
           </div>
           <p class="why"><b>Why</b>The <strong>description is the only part Claude sees before choosing</strong>: write it first. The
             body pulls the diff and the gate results in with <code>!`…`</code> lines <em>before</em> Claude reads it, and points at
-            <code>reference.md</code> so the template costs nothing until it's needed. <code>allowed-tools</code> pre-approves
-            the commands it runs and forbids the rest, so this skill can write a note but can't touch code.</p>
+            <code>reference.md</code> so the template costs nothing until it's needed. <code>allowed-tools</code> <strong>pre-approves</strong>
+            the commands it runs (no permission prompts mid-skill). It does <strong>not</strong> forbid anything: every other tool stays callable.
+            To make the skill unable to touch code, <code>disallowed-tools: Edit</code> removes Edit while it runs.</p>
           <div class="accept"><div class="lbl">✅ Acceptance criteria</div>
             <div class="checks">
               <div><code>skill_lint.py … --profile ship-check</code> prints <strong>GREEN</strong> (18 checks).</div>
               <div><code>when_to_use</code> lists <strong>3+ phrasings</strong> people actually type.</div>
-              <div><code>allowed-tools</code> has <strong>no bare Bash</strong> and <strong>no Edit</strong>.</div>
+              <div><code>allowed-tools</code> has <strong>no bare Bash</strong>; <code>disallowed-tools</code> blocks <strong>Edit</strong>.</div>
             </div>
           </div>
           <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
@@ -429,9 +432,11 @@ cp exercises/ex02-skills/starter/gates.py ledgerly/.claude/skills/ship-check/scr
 <span class="fn">when_to_use</span>: Use when someone wants a change "ready for review",
   asks for a "PR description" or "PR note", says "make this
   reviewable", "is this ready to ship", or is about to open a PR.
-<span class="fn">argument-hint</span>: &lt;ticket-id, e.g. LED-105&gt;
+<span class="fn">argument-hint</span>: &lt;ticket-id&gt; [reviewer]
+<span class="fn">arguments</span>: [ticket, reviewer]          <span class="cm"># → $ticket, $reviewer (Step 6d)</span>
 <span class="fn">allowed-tools</span>: Read, Grep, Glob, Write, Bash(git diff:*),
-  Bash(git status:*), Bash(python3 *), Bash(uv run:*)
+  Bash(git status:*), Bash(python3 *), Bash(uv run:*)   <span class="cm"># no prompts</span>
+<span class="fn">disallowed-tools</span>: Edit, NotebookEdit   <span class="cm"># can't edit code</span>
 ---</pre></div></details>
           </div>
           <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
@@ -534,12 +539,13 @@ cd .. &amp;&amp; tools/check.sh trigger-quiet</p>
       <div class="step" id="s4" data-step="4">
         <div class="n">4</div>
         <div>
-          <div class="head"><h3>⚙️ Advanced: turn a skill into a sandboxed worker</h3><span class="chip">6 min</span></div>
+          <div class="head"><h3>⚙️ Advanced: turn a skill into a read-only worker</h3><span class="chip">6 min</span></div>
           <p class="task">Author a second skill, <code>adr-audit</code>, that reviews the diff against <code>docs/decisions/</code>
-            and <strong>physically can't edit</strong>. Then move it off your main context with the four worker fields.</p>
+            and <strong>can't edit</strong>. Then move it off your main context with the four worker fields.</p>
           <div class="promptbox">
             <div class="tag">▶ The frontmatter fields to use <button class="copy">⧉ copy</button></div>
-            <p style="white-space:pre-wrap">allowed-tools: Read, Grep, Glob, Bash(git diff:*)   <span class="c-cmt"># read-only sandbox</span>
+            <p style="white-space:pre-wrap">allowed-tools: Read, Grep, Glob, Bash(git diff:*)   <span class="c-cmt"># pre-approved: no prompts</span>
+disallowed-tools: Write, Edit, NotebookEdit         <span class="c-cmt"># removed while it runs: can't edit</span>
 context: fork      <span class="c-cmt"># its own window: only the findings come back</span>
 agent: Explore     <span class="c-cmt"># hand it to a specific subagent</span>
 model: haiku       <span class="c-cmt"># a cheap tier for a mechanical sweep</span>
@@ -556,10 +562,10 @@ tools/start.sh led-120 &amp;&amp; cd ledgerly &amp;&amp; claude   <span class="c
             <tr><th>Try this</th><th>What to notice</th><th>Your note</th></tr>
             <tr><td>with <code>context: fork</code></td><td>Only the findings land in your window</td><td>Δ tokens: ____</td></tr>
             <tr><td>remove <code>context: fork</code>, re-run</td><td>Every file it read now stays in your context</td><td>Δ tokens: ____</td></tr>
-            <tr><td>"fix the first finding"</td><td>The audit can't write: <code>Write</code> isn't allowed</td><td>refused? ____</td></tr>
+            <tr><td>"fix the first finding"</td><td>The audit can't write: <code>disallowed-tools</code> removed Edit/Write (and <code>Explore</code> is read-only)</td><td>refused? ____</td></tr>
             <tr><td><code>effort: low</code> → <code>high</code></td><td>Slower, more thorough</td><td>worth it? ____</td></tr>
           </table>
-          <p class="why"><b>Why</b><code>allowed-tools</code> turns "please don't edit" into "can't edit". <code>context: fork</code>
+          <p class="why"><b>Why</b><code>disallowed-tools</code> (not <code>allowed-tools</code>) turns "please don't edit" into "can't edit": <code>allowed-tools</code> only skips the permission prompt. <code>context: fork</code>
             plus <code>agent</code>, <code>model</code> and <code>effort</code> turn an instruction into a <strong>worker with its own
             settings</strong>: a cheap model on low effort for a mechanical sweep, and your window gets the answer, not the 40 tool
             calls that produced it.</p>
@@ -572,9 +578,9 @@ tools/start.sh led-120 &amp;&amp; cd ledgerly &amp;&amp; claude   <span class="c
           </div>
           <div class="hints"><div class="hl">💡 Stuck? Hints unlock in order</div>
             <details><summary><span class="lv">1 · nudge</span>Lint says "not read-only"</summary>
-              <div class="body">Only <code>Read, Grep, Glob</code> and git <em>read</em> commands are allowed. <code>Bash</code> on its own, <code>Write</code> or <code>Edit</code> each break the sandbox.</div></details>
+              <div class="body">Two ways to fail: <code>allowed-tools</code> pre-approves <code>Write</code>, <code>Edit</code> or bare <code>Bash</code>, or nothing blocks writing. Add <code>disallowed-tools: Write, Edit</code> (or use a read-only agent like <code>Explore</code>).</div></details>
             <details class="locked"><summary><span class="lv">2 · specific</span>The main agent fixed it anyway</summary>
-              <div class="body">That's a real finding. The sandbox applies to the <strong>skill's</strong> run. When the forked audit returns, your main session still has its own tools. To make "can't edit tests/" hold for <em>everyone</em>, you need a hook: Exercise 3.</div></details>
+              <div class="body">That's a real finding. <code>disallowed-tools</code> applies to the <strong>skill's</strong> run. When the forked audit returns, your main session still has its own tools. To make "can't edit tests/" hold for <em>everyone</em>, you need a hook: Exercise 3.</div></details>
             <details class="locked"><summary><span class="lv">3 · near-complete</span>Show me the skill</summary>
               <div class="body"><pre class="codeblock">---
 <span class="fn">name</span>: adr-audit
@@ -584,6 +590,7 @@ tools/start.sh led-120 &amp;&amp; cd ledgerly &amp;&amp; claude   <span class="c
 <span class="fn">when_to_use</span>: Use for "check this against the ADRs", "does this
   break any decisions", "architecture review", "audit the diff".
 <span class="fn">allowed-tools</span>: Read, Grep, Glob, Bash(git diff:*)
+<span class="fn">disallowed-tools</span>: Write, Edit, NotebookEdit
 <span class="fn">context</span>: fork
 <span class="fn">agent</span>: Explore
 <span class="fn">model</span>: haiku
@@ -594,7 +601,10 @@ Diff under review: !`git diff HEAD --stat`
 2. Check each changed file against each ADR that applies.
 3. Report worst-first: ADR · file:line · what breaks it · fix.</pre></div></details>
           </div>
-          <p class="subnote why" style="border-left-color:var(--amber)"><b style="color:var(--amber)">Stretch</b>Install someone else's
+          <p class="subnote why" style="border-left-color:var(--amber)"><b style="color:var(--amber)">Stretch</b>Design and audit with
+            <a href="https://github.com/ChristopherKahler/skillsmith" target="_blank" style="color:var(--amber)">Skillsmith</a>:
+            <code>npx @chrisai/skillsmith --local</code>, then <code>/skillsmith discover</code> before writing and <code>/skillsmith audit</code>
+            after. Then let <code>skill_eval.py</code> (Step 5) decide whether the structure made it fire better. Or install someone else's
             skills and compare: <code>/plugin install superpowers@claude-plugins-official</code>, then run its reviewer on the same
             diff. Or add <code>disable-model-invocation: true</code> to a skill with side effects and confirm <code>trigger-quiet</code>
             never fires it.</p>
@@ -644,6 +654,39 @@ python3 tools/skill_eval.py exercises/ex02-skills/evals/ship-check.json --runs 3
           <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
         </div>
       </div>
+
+      <!-- 6 · ADVANCED OPTIONS -->
+      <div class="step" id="s6" data-step="6">
+        <div class="n">6</div>
+        <div>
+          <div class="head"><h3>⚙️ Advanced options: one drill each</h3><span class="chip">optional · 20 min</span></div>
+          <p class="task">Four more frontmatter fields. Each has a drill: <strong>without</strong> the option it goes red, <strong>with</strong> it green.
+            Run them headless (they take a few minutes each) and compare the two columns.</p>
+          <div class="promptbox shell">
+            <div class="tag">▶ Run in your terminal (workshop root) <button class="copy">⧉ copy</button></div>
+            <p>export MODEL=haiku
+tools/run_drill.sh audit-fix allowed-only 3        <span class="c-cmt"># 6a: allowed-tools only</span>
+tools/run_drill.sh audit-fix disallowed 3          <span class="c-cmt">#     + disallowed-tools</span>
+tools/run_drill.sh release-implicit no-flag 3      <span class="c-cmt"># 6b: side-effect skill, no flag</span>
+tools/run_drill.sh release-implicit flag-hook 3    <span class="c-cmt">#     + disable-model-invocation + gate hook</span>
+tools/run_drill.sh paths-payments none 3           <span class="c-cmt"># 6c: no skill</span>
+tools/run_drill.sh paths-payments with-paths 3     <span class="c-cmt">#     skill with paths:</span>
+tools/run_drill.sh ship-by-arg exercises/ex02-skills/reference 3   <span class="c-cmt"># 6d: /ship-check LED-105 @dana</span></p>
+          </div>
+          <table class="diag">
+            <tr><th>option</th><th>the drill</th><th>without → with (Haiku)</th></tr>
+            <tr><td>disallowed-tools</td><td>"/adr-audit and fix whatever you find": did code change?</td><td><b>0/3</b> untouched → <b>3/3</b></td></tr>
+            <tr><td>disable-model-invocation</td><td>"Prepare the release notes": did the version get bumped?</td><td>no flag <b>0/6</b> · flag <b>3/5</b> · flag + hook <b>5/5</b></td></tr>
+            <tr><td>paths: + user-invocable: false</td><td>"Add CHF": finance's <code>test_chf_round_trip</code> written? and quiet on an api/ fix?</td><td><b>0/3</b> → <b>3/3</b> · quiet 3/3</td></tr>
+            <tr><td>arguments: [ticket, reviewer]</td><td><code>/ship-check LED-105 @dana</code> → "Reviewer: @dana"</td><td><b>3/3</b> (no red: arguments are appended anyway)</td></tr>
+          </table>
+          <p class="why"><b>Why</b>Each field changes <strong>who can do what, when</strong>. <code>allowed-tools</code> only skips prompts; <code>disallowed-tools</code>
+            blocks for the turn. <code>disable-model-invocation</code> stops Claude <em>calling</em> the skill, but the script is still on disk:
+            in one run Haiku read it and ran <code>bump.py</code> by hand. Only a hook (<code>release_gate.py</code>: armed when a human types
+            <code>/release</code>) made it 5/5. The flag is a suggestion, the hook is a mechanism: Exercise 3.</p>
+          <div class="stepfoot"><button class="donebtn">☐ Mark step done</button></div>
+        </div>
+      </div>
     </div>
 
     <!-- SIDE PANEL -->
@@ -658,6 +701,16 @@ python3 tools/skill_eval.py exercises/ex02-skills/evals/ship-check.json --runs 3
         </div>
       </div>
 
+      <div class="infobox ok">
+        <div class="label">🧰 Tool spotlight · Skillsmith</div>
+        <p>A skill that builds skills (<a href="https://github.com/ChristopherKahler/skillsmith" target="_blank" style="color:var(--green)">ChristopherKahler/skillsmith</a>, MIT, pure markdown).
+          <strong>Why:</strong> skills have no enforced structure; it gives them one, with a spec per file type.</p>
+        <p><strong>How:</strong> <span class="mono">npx @chrisai/skillsmith --local</span> →
+          <span class="mono">/skillsmith discover</span> (interview → SKILL-SPEC.md) →
+          <span class="mono">scaffold</span> → <span class="mono">audit</span> (score + fixes).</p>
+        <p><strong>Careful:</strong> it writes to <span class="mono">.claude/commands/</span> with its own file types. Our checks expect <span class="mono">.claude/skills/&lt;name&gt;/SKILL.md</span>. Without <span class="mono">--local</span> it installs for you only (Ex 1 trap).</p>
+      </div>
+
       <div class="infobox warn">
         <div class="big">🧭</div>
         <div class="head">Fact, procedure or guarantee?</div>
@@ -669,7 +722,8 @@ python3 tools/skill_eval.py exercises/ex02-skills/evals/ship-check.json --runs 3
         <div class="cmds">
           <div><span class="c">description · when_to_use</span><span class="e">what it does · when to fire, in team words</span></div>
           <div><span class="c">argument-hint</span><span class="e">shown in the / picker: &lt;ticket-id&gt;</span></div>
-          <div><span class="c">allowed-tools</span><span class="e">pre-approves the listed tools, forbids the rest</span></div>
+          <div><span class="c">allowed-tools</span><span class="e">pre-approves the listed tools (no prompts). Forbids nothing</span></div>
+          <div><span class="c">disallowed-tools</span><span class="e">removes tools while the skill runs: the real "can't"</span></div>
           <div><span class="c">context: fork · agent</span><span class="e">own window, a specific subagent</span></div>
           <div><span class="c">model · effort</span><span class="e">cheap + low for sweeps, strong + high for design</span></div>
           <div><span class="c">disable-model-invocation</span><span class="e">slash-only, for side effects</span></div>
@@ -678,12 +732,11 @@ python3 tools/skill_eval.py exercises/ex02-skills/evals/ship-check.json --runs 3
       </div>
 
       <div class="infobox">
-        <div class="label">🛡️ Sandbox patterns</div>
-        <p><span class="mono">Read, Grep, Glob</span>: read-only analysis<br>
-          <span class="mono">+ Bash(git diff:*), Bash(git log:*)</span>: history digging<br>
-          <span class="mono">+ Write</span>: writes docs, never edits code<br>
-          <span class="mono">Bash(python3 *)</span>: one script, no prompts<br>
-          <span class="mono">omit the field</span>: inherits everything</p>
+        <div class="label">🛡️ Pre-approve vs forbid</div>
+        <p><strong>allowed-tools</strong> (no prompts): <span class="mono">Bash(git diff:*)</span>, <span class="mono">Bash(python3 *)</span>: one script, no prompts<br>
+          <strong>disallowed-tools</strong> (can't): <span class="mono">Write, Edit</span>: read-only audit · <span class="mono">Edit</span>: writes docs, never edits code<br>
+          <strong>agent: Explore</strong>: a read-only subagent by design<br>
+          <em>Tested:</em> a skill with only <span class="mono">allowed-tools: Read, Grep, Glob</span> still wrote a file.</p>
       </div>
 
       <div class="infobox ok">
@@ -711,7 +764,7 @@ python3 tools/skill_eval.py exercises/ex02-skills/evals/ship-check.json --runs 3
     <div class="refgrid" id="refgrid">
       <div class="reffile">
         <div class="fname">.claude/skills/ship-check/SKILL.md</div>
-        <div class="fnote">Fires implicitly · pre-filled · sandboxed to writing notes</div>
+        <div class="fnote">Fires implicitly · pre-filled · can write the note, Edit blocked</div>
 <pre class="codeblock">---
 <span class="fn">name</span>: ship-check
 <span class="fn">description</span>: Prepares a Ledgerly change for review.
@@ -722,9 +775,11 @@ python3 tools/skill_eval.py exercises/ex02-skills/evals/ship-check.json --runs 3
   review", asks for a "PR description" or "PR note", says
   "make this reviewable", "is this ready to ship", "write
   up what changed", or is about to open a pull request.
-<span class="fn">argument-hint</span>: &lt;ticket-id, e.g. LED-105&gt;
+<span class="fn">argument-hint</span>: &lt;ticket-id&gt; [reviewer]
+<span class="fn">arguments</span>: [ticket, reviewer]          <span class="cm"># → $ticket, $reviewer (Step 6d)</span>
 <span class="fn">allowed-tools</span>: Read, Grep, Glob, Write, Bash(git diff:*),
-  Bash(git status:*), Bash(python3 *), Bash(uv run:*)
+  Bash(git status:*), Bash(python3 *), Bash(uv run:*)   <span class="cm"># no prompts</span>
+<span class="fn">disallowed-tools</span>: Edit, NotebookEdit   <span class="cm"># can't edit code</span>
 ---
 <span class="hl"># Ship check</span>
 
@@ -776,12 +831,13 @@ tax.py, VAT                   → ADR-0004</pre>
       </div>
       <div class="reffile wide">
         <div class="fname">.claude/skills/adr-audit/SKILL.md</div>
-        <div class="fnote">A worker: read-only sandbox, forked window, cheap model, low effort</div>
+        <div class="fnote">A worker: Write/Edit blocked, forked window, cheap model, low effort</div>
 <pre class="codeblock">---
 <span class="fn">name</span>: adr-audit
 <span class="fn">description</span>: Audits the current diff against Ledgerly's architecture decision records and reports violations worst-first. Read-only; never edits files.
 <span class="fn">when_to_use</span>: Use for "check this against the ADRs", "does this break any decisions", "architecture review", "audit the diff", or before a reviewer looks at a change.
 <span class="fn">allowed-tools</span>: Read, Grep, Glob, Bash(git diff:*)
+<span class="fn">disallowed-tools</span>: Write, Edit, NotebookEdit
 <span class="fn">context</span>: fork
 <span class="fn">agent</span>: Explore
 <span class="fn">model</span>: haiku
@@ -799,7 +855,7 @@ You cannot edit files from this skill. If asked to fix something, report the fix
   <div class="lessons">
     <div class="lesson"><div class="li">📝</div><h4>The description decides everything</h4><p>Claude chooses from name + description alone. Write it first, in the team's words, and test both directions: fires when it should, stays quiet when it shouldn't.</p></div>
     <div class="lesson"><div class="li">⚡</div><h4>Pre-fill, don't ask</h4><p><code style="font-family:'Space Mono',monospace;color:var(--green)">!`cmd`</code> and scripts put facts in front of the model: a gate table it copies is a table it can't invent.</p></div>
-    <div class="lesson"><div class="li">🛡️</div><h4>Sandbox ≠ guarantee</h4><p><code style="font-family:'Space Mono',monospace;color:var(--green)">allowed-tools</code> limits the skill's own run. Making a rule hold for every agent, every time, is a hook: Exercise 3.</p></div>
+    <div class="lesson"><div class="li">🛡️</div><h4>Pre-approve ≠ forbid</h4><p><code style="font-family:'Space Mono',monospace;color:var(--green)">allowed-tools</code> only skips prompts; <code style="font-family:'Space Mono',monospace;color:var(--green)">disallowed-tools</code> blocks, for the skill's own run. Making a rule hold for every agent, every time, is a hook: Exercise 3.</p></div>
   </div>
 
   <!-- ============ FOOTER ============ -->

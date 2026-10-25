@@ -3,6 +3,7 @@ name: adr-audit
 description: Audits the current diff against Ledgerly's architecture decision records and reports violations worst-first. Read-only; never edits files.
 when_to_use: Use for "check this against the ADRs", "does this break any decisions", "architecture review", "audit the diff", or before a reviewer looks at a change.
 allowed-tools: Read, Grep, Glob, Bash(git diff:*)
+disallowed-tools: Write, Edit, NotebookEdit
 context: fork
 agent: Explore
 model: haiku
@@ -19,4 +20,5 @@ Diff under review:
 3. Report findings worst-first: `ADR-000N · file:line · what breaks it · suggested fix`.
 4. If nothing breaks, say "No ADR violations" and list which ADRs you checked.
 
-You cannot edit files from this skill. If asked to fix something, report the fix instead.
+You can't edit files from this skill (disallowed-tools, and the Explore agent is read-only).
+If asked to fix something, report the fix instead.

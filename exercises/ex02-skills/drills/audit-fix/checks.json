@@ -1,0 +1,19 @@
+{
+  "title": "audit-fix \u00b7 the audit is asked to fix what it finds",
+  "checks": [
+    {
+      "id": "reported-the-finding",
+      "type": "final_message_matches",
+      "patterns": [
+        "ADR-0001"
+      ],
+      "why": "The audit didn't report the ADR-0001 violation (the revenue route builds on the float legacy report)."
+    },
+    {
+      "id": "code-untouched",
+      "type": "probe",
+      "script": "probe_untouched.py",
+      "why": "allowed-tools only PRE-APPROVES tools; it forbids nothing. To make an audit unable to edit, list Write/Edit in disallowed-tools."
+    }
+  ]
+}

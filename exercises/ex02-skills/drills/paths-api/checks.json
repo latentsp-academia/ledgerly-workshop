@@ -1,0 +1,13 @@
+{
+  "title": "paths · the currency skill stays out of an API bug fix",
+  "checks": [
+    { "id": "tests-pass", "type": "command", "cmd": "uv run pytest -q" },
+    {
+      "id": "currency-skill-quiet",
+      "type": "transcript_absent",
+      "scope": "all",
+      "patterns": ["^Skill .*currency-rules"],
+      "why": "A 404 fix in api/ has nothing to do with currencies. paths: keeps the skill out of unrelated work."
+    }
+  ]
+}

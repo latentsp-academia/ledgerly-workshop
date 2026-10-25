@@ -1,0 +1,11 @@
+{
+  "title": "release · typed by name, it still works",
+  "checks": [
+    {
+      "id": "released",
+      "type": "probe",
+      "script": "probe_bumped.py",
+      "why": "disable-model-invocation only stops Claude from choosing the skill. Typing /release must still run it."
+    }
+  ]
+}

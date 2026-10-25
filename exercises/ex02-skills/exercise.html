@@ -601,10 +601,7 @@ Diff under review: !`git diff HEAD --stat`
 2. Check each changed file against each ADR that applies.
 3. Report worst-first: ADR · file:line · what breaks it · fix.</pre></div></details>
           </div>
-          <p class="subnote why" style="border-left-color:var(--amber)"><b style="color:var(--amber)">Stretch</b>Design and audit with
-            <a href="https://github.com/ChristopherKahler/skillsmith" target="_blank" style="color:var(--amber)">Skillsmith</a>:
-            <code>npx @chrisai/skillsmith --local</code>, then <code>/skillsmith discover</code> before writing and <code>/skillsmith audit</code>
-            after. Then let <code>skill_eval.py</code> (Step 5) decide whether the structure made it fire better. Or install someone else's
+          <p class="subnote why" style="border-left-color:var(--amber)"><b style="color:var(--amber)">Stretch</b>Install someone else's
             skills and compare: <code>/plugin install superpowers@claude-plugins-official</code>, then run its reviewer on the same
             diff. Or add <code>disable-model-invocation: true</code> to a skill with side effects and confirm <code>trigger-quiet</code>
             never fires it.</p>
@@ -702,13 +699,9 @@ tools/run_drill.sh ship-by-arg exercises/ex02-skills/reference 3   <span class="
       </div>
 
       <div class="infobox ok">
-        <div class="label">🧰 Tool spotlight · Skillsmith</div>
-        <p>A skill that builds skills (<a href="https://github.com/ChristopherKahler/skillsmith" target="_blank" style="color:var(--green)">ChristopherKahler/skillsmith</a>, MIT, pure markdown).
-          <strong>Why:</strong> skills have no enforced structure; it gives them one, with a spec per file type.</p>
-        <p><strong>How:</strong> <span class="mono">npx @chrisai/skillsmith --local</span> →
-          <span class="mono">/skillsmith discover</span> (interview → SKILL-SPEC.md) →
-          <span class="mono">scaffold</span> → <span class="mono">audit</span> (score + fixes).</p>
-        <p><strong>Careful:</strong> it writes to <span class="mono">.claude/commands/</span> with its own file types. Our checks expect <span class="mono">.claude/skills/&lt;name&gt;/SKILL.md</span>. Without <span class="mono">--local</span> it installs for you only (Ex 1 trap).</p>
+        <div class="label">➕ Finished? Try Skillsmith</div>
+        <p>A skill that audits skills. Optional, <strong>after Step 6</strong>, in a copy of the project.
+          Read its findings, not its score. <a href="#going-further" style="color:var(--green)">How, and what to know ↓</a></p>
       </div>
 
       <div class="infobox warn">
@@ -849,6 +842,26 @@ Diff under review: !`git diff HEAD --stat`
 You cannot edit files from this skill. If asked to fix something, report the fix instead.</pre>
       </div>
     </div>
+  </div>
+
+  <!-- ============ GOING FURTHER ============ -->
+  <div class="infobox" id="going-further" style="margin-top:3vmin">
+    <div class="label">➕ Going further: Skillsmith (optional, after Step 6)</div>
+    <p><a href="https://github.com/ChristopherKahler/skillsmith" target="_blank" style="color:var(--green)">Skillsmith</a> designs and audits skills:
+      an interview, a scaffold, and a scored audit. Try it once you have a working skill <em>and</em> an eval, so the eval tells you whether its advice helped.</p>
+    <div class="promptbox shell">
+      <div class="tag">▶ How <button class="copy">⧉ copy</button></div>
+      <p>cp -R ledgerly ~/skillsmith-sandbox &amp;&amp; cd ~/skillsmith-sandbox   <span class="c-cmt"># 1. a copy, away from exercises/</span>
+npx @chrisai/skillsmith --local                                  <span class="c-cmt"># 2. install (markdown only)</span>
+claude --model haiku                                             <span class="c-cmt"># 3. /skillsmith:tasks:audit .claude/skills/ship-check</span></p>
+    </div>
+    <p><strong>4. Bring changes back</strong> in Claude Code's layout: <span class="mono">.claude/skills/&lt;name&gt;/SKILL.md</span> (Skillsmith writes
+      <span class="mono">&lt;name&gt;/&lt;name&gt;.md</span>), then lint it. <strong>The experiment:</strong> apply only the findings you agree with, re-run
+      <span class="mono">skill_eval.py</span>, and keep a change only if recall or quality went up.</p>
+    <p><strong>Know this:</strong> it has its <strong>own folder structure</strong> (persona and greeting sections, <span class="mono">tasks/</span>), so its audit flags a correct
+      <span class="mono">SKILL.md</span>. Its score measures style: it gave our reference <strong>25%</strong>, the skill Step 5 calls <strong>ship it</strong>. Use the namespaced
+      commands (<span class="mono">/skillsmith:tasks:audit</span>; plain <span class="mono">/skillsmith audit</span> doesn't resolve). It pre-approves bare Bash for itself.
+      Run inside the workshop, it found the answer key in <span class="mono">exercises/</span>, so use a copy, and only after you're done.</p>
   </div>
 
   <!-- ============ LESSONS ============ -->

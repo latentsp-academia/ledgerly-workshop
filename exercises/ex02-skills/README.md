@@ -46,8 +46,9 @@ agent needs a hook (**Ex 3**).
 | 5 · 📊 **Evaluate** (homework) | 4 prompts that should fire, 3 that shouldn't, × 3 runs, plus a no-skill **baseline** | `skill_eval.py … --runs 3 --baseline` → recall, false fires, quality, verdict. Reference, Haiku, 1 run per prompt: recall 4/4, false fires 0/3, quality 4/4 vs 0/4 without → **ship it** | — |
 | 6 · ⚙️ **Advanced options** (optional) | four drills, one per option: `disallowed-tools`, `disable-model-invocation`, `paths`, `arguments` | `run_drill.sh` per drill, red without → green with (Step 6 below) | 20 |
 
-✨ **Stretch:** design and audit `ship-check` with [Skillsmith](#-tool-spotlight-skillsmith); install Superpowers and compare its reviewer; put `disable-model-invocation: true` on
-a side-effect skill and confirm `trigger-quiet` never fires it (Step 6b measures this).
+✨ **Stretch:** install Superpowers and compare its reviewer; put `disable-model-invocation: true` on
+a side-effect skill and confirm `trigger-quiet` never fires it (Step 6b measures this). Finished? Try
+[Skillsmith](#-going-further-skillsmith-optional-after-step-6) at the end.
 
 ---
 
@@ -196,52 +197,54 @@ named, predictable placement (and the linter checks every name is used), not a d
 
 ---
 
-## 🧰 Tool spotlight: Skillsmith
+## ➕ Going further: Skillsmith (optional, after Step 6)
 
 ![A skill that builds and audits other skills](img/skillsmith.png)
 
 [**Skillsmith**](https://github.com/ChristopherKahler/skillsmith) (Christopher Kahler, MIT) is a
-*meta-skill*: a skill that builds other skills. We suggest it as an **optional companion** to Steps 1 and 5.
+skill that designs and audits other skills: a guided interview, a scaffold, and a scored compliance
+audit. Try it **after** you have a working skill and an eval, so the eval can tell you whether its
+advice helped.
 
-### ❓ Why use it
+### ▶️ How (4 moves)
 
-- 🧩 **Skills have no enforced structure.** Its README names the usual symptoms: entry points that mix
-  routing with process logic, tasks that don't read like tasks, no acceptance criteria, skills that
-  only work in the author's workspace.
-- 📐 **It defines one.** Seven file types, each with a syntax spec (required sections, formats,
-  anti-patterns): entry point, task, framework, template, context, checklist, rules.
-- 🗣️ **It makes you design before you write.** A guided interview captures the decisions behind
-  the skill, which is exactly where a weak `description` (the #1 reason a skill doesn't fire) comes from.
-- 🔍 **It audits.** A scored compliance report for one skill or a whole folder: useful for a team's
-  growing skill library.
+```bash
+cp -R ledgerly ~/skillsmith-sandbox && cd ~/skillsmith-sandbox   # 1. a copy, away from exercises/
+npx @chrisai/skillsmith --local                                  # 2. install (markdown files only)
+claude --model haiku                                             # 3. then type:
+#   /skillsmith:tasks:audit .claude/skills/ship-check     a score + findings (asks to confirm first)
+#   /skillsmith:tasks:discover <what the skill does>      an interview, if you design a new skill
+#   /skillsmith:tasks:scaffold                            builds the files from the interview
+```
 
-### ⚙️ How it works
+4. **Bring changes back to `ledgerly/`** in Claude Code's layout: the entry point is
+   `.claude/skills/<name>/SKILL.md` (Skillsmith writes `<name>/<name>.md`), and any extra files sit
+   next to it, linked with `${CLAUDE_SKILL_DIR}/…`. Then `python3 tools/skill_lint.py <name> --profile …`.
 
-| step | command | what you get |
-|---|---|---|
-| 0 · install | `npx @chrisai/skillsmith --local` | the skill in this project (needs Node 16+). Without `--local` it goes to `~/.claude/commands/`: you only, every project (the Ex 1 trap) |
-| 1 · discover | `/skillsmith discover` | an interview (identity → persona → scope → content → review) → `SKILL-SPEC.md` |
-| 2 · scaffold | `/skillsmith scaffold` | a skill folder generated from the spec, every file following its type's spec |
-| 3 · distill | `/skillsmith distill` | raw material (notes, transcripts) → structured "framework" chunks with when-to-use triggers |
-| 4 · audit | `/skillsmith audit` | a compliance score, violations, and what to fix first |
+### 🧪 The experiment
 
-It's pure markdown (no hooks, MCP servers or runtime). Its operational files load on use; its
-reference specs are read only when a task needs them, which is the same progressive disclosure you
-build by hand in Step 1.
+Audit your finished `ship-check`, apply only the findings you agree with, then re-run Step 5:
+`python3 tools/skill_eval.py exercises/ex02-skills/evals/ship-check.json --runs 3 --baseline`.
+Keep a change only if recall or quality went up.
 
-### 🧪 How to use it in this exercise
+### ⚠️ Know this (tried 2026-10-25, v1.0.0)
 
-1. **Before Step 1:** run `/skillsmith discover` for `ship-check`. Bring the spec's *scope* and
-   *triggers* into your `description` and `when_to_use`.
-2. **After Step 1:** run `/skillsmith audit` on `.claude/skills/ship-check` as a second opinion,
-   next to `skill_lint.py`.
-3. **Step 5 decides.** Whichever way you wrote it, `skill_eval.py` measures whether it fires, stays
-   quiet and beats no skill. A tidy structure is not evidence. A higher recall is.
-
-> ⚠️ **Know before you use it.** It's third-party. Read what it installs, as with any skill. It uses
-> its own file types and installs into `.claude/commands/`. **Check where its output lands**: this
-> exercise's checks expect `.claude/skills/<name>/SKILL.md`, so you may need to move or adapt the
-> scaffold. Not yet tried end-to-end in this workshop: run it once before class.
+- **Run it in a copy, and do it after the exercise.** The answer key lives in `exercises/`, next to
+  `ledgerly/`. In our run, Skillsmith's discover found `exercises/ex02-skills/reference/…/SKILL.md`,
+  and while looking for its own files it also searched the home folder. A copy outside the workshop
+  makes that less likely, not impossible, which is one more reason to try it only once you're done.
+- **It has its own folder structure:** a `<name>.md` entry point with persona and greeting sections,
+  plus `tasks/`, `templates/` and other folders. Claude Code loads `SKILL.md`, so its audit flags a
+  correct Claude Code skill. That's expected.
+- **Its score measures its style, not whether the skill works.** It scored our reference
+  `ship-check` **25%, "Non-compliant"**. Step 5 says **ship it** (recall 4/4, quality 4/4 vs 0/4).
+  Read the findings, not the score: it did spot two real contradictions in our instructions.
+- **Use the namespaced commands.** `/skillsmith audit`, as Skillsmith's own README writes it, doesn't
+  resolve. Use `/skillsmith:tasks:audit`, `…:discover`, `…:scaffold`.
+- **It pre-approves bare `Bash` for itself.** Don't copy that into your skills; `skill_lint.py`
+  rejects it.
+- **It's third-party.** Read what it installs. The scaffold also adds attribution and upsell links to
+  the files it generates.
 
 ## 📂 This folder
 

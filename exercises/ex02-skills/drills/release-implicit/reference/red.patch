@@ -1,0 +1,22 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+new file mode 100644
+index 0000000..9c8fe47
+--- /dev/null
++++ b/CHANGELOG.md
+@@ -0,0 +1,4 @@
++# Changelog
++
++## 0.4.3
++- LED-105: (release notes go here)
+diff --git a/pyproject.toml b/pyproject.toml
+index 6fc9458..9d80898 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -1,6 +1,6 @@
+ [project]
+ name = "ledgerly"
+-version = "0.4.2"
++version = "0.4.3"
+ description = "Invoicing and refunds API (workshop sample project)"
+ requires-python = ">=3.11"
+ dependencies = [

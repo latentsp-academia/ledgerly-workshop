@@ -43,7 +43,7 @@ agent needs a hook (**Ex 3**).
 | 2 · 🎯 **By name** | `/ship-check LED-105` | `check.sh led-120` → **GREEN**. Haiku: 3/3 | 3 |
 | 3 · 🪄 **Implicit** | (A) "make it reviewable", without naming the skill → must fire. (B) a plain question → must **not** fire | `check.sh trigger-implicit` · `check.sh trigger-quiet`. Haiku: fired 3/3, quiet 3/3 | 5 |
 | 4 · 🍴 **Worker** | `adr-audit`: `disallowed-tools: Write, Edit`, `context: fork`, `agent: Explore`, `model: haiku`, `effort: low`. Compare `/context` with and without the fork | `skill_lint.py adr-audit --profile adr-audit` + the `/context` table | 6 |
-| 5 · 📊 **Evaluate** (homework) | 4 prompts that should fire, 3 that shouldn't, × 3 runs, plus a no-skill **baseline** | `skill_eval.py … --runs 3 --baseline` → recall, false fires, quality, verdict | — |
+| 5 · 📊 **Evaluate** (homework) | 4 prompts that should fire, 3 that shouldn't, × 3 runs, plus a no-skill **baseline** | `skill_eval.py … --runs 3 --baseline` → recall, false fires, quality, verdict. Reference, Haiku, 1 run per prompt: recall 4/4, false fires 0/3, quality 4/4 vs 0/4 without → **ship it** | — |
 | 6 · ⚙️ **Advanced options** (optional) | four drills, one per option: `disallowed-tools`, `disable-model-invocation`, `paths`, `arguments` | `run_drill.sh` per drill, red without → green with (Step 6 below) | 20 |
 
 ✨ **Stretch:** design and audit `ship-check` with [Skillsmith](#-tool-spotlight-skillsmith); install Superpowers and compare its reviewer; put `disable-model-invocation: true` on
@@ -69,7 +69,13 @@ python3 tools/skill_eval.py exercises/ex02-skills/evals/ship-check.json --runs 3
 ```
 
 For every prompt × run, it does reset → apply your skills → `claude -p` → "did it fire?" → the
-quality judge. The baseline repeats the should-fire prompts with the skill folder removed. The
+quality judge.
+
+> 🧪 **It finds real bugs.** Its first run on the reference skill said **sharpen it**: quality 2/4.
+> Two prompts never named the ticket ("Is this branch ready to ship?"), so the skill stopped and
+> saved a draft somewhere else instead of writing `docs/pr/`. One line in the body fixed it
+> ("no ticket? write `docs/pr/UNTITLED.md` and say so"), and the re-run gave 4/4 → **ship it**.
+> Recall alone would have called it perfect. The baseline repeats the should-fire prompts with the skill folder removed. The
 report goes to `runs/skill-eval/ship-check/report.md`:
 
 | metric | meaning | target |
@@ -290,8 +296,10 @@ ex02-skills/
    ```
 3. Optional: numbers to show for Step 5:
    `python3 tools/skill_eval.py exercises/ex02-skills/evals/ship-check.json --variant exercises/ex02-skills/reference --runs 3 --baseline`
-4. 🎭 Fallbacks: `tools/demo_reference.sh led-120 red|green`, `… trigger-implicit red|green`,
-   `… trigger-quiet red|green` (hand-written reproductions, not recordings).
+4. 🎭 Fallbacks, if a live run won't cooperate: `tools/demo_reference.sh <drill> red|green` for
+   `led-120`, `trigger-implicit`, `trigger-quiet` and the Step 6 drills (`audit-fix`,
+   `release-implicit`, `release-by-name`, `paths-payments`, `ship-by-arg`). They're hand-written
+   reproductions of what the runs did, not recordings. Every `red` checks RED and every `green` GREEN.
 
 ## 💬 Facilitator notes
 

@@ -23,7 +23,8 @@ Gate results (run by the script, not by you):
 
 ## Your task
 
-1. Ticket: `$ticket`. If that's empty, find `LED-<n>` in the conversation.
+1. Ticket: `$ticket`. If that's empty, find `LED-<n>` in the conversation. Still none? Don't stop:
+   write the note to `docs/pr/UNTITLED.md`, put `unknown: ask the author` under **Ticket**, and say so.
    Reviewer: `$reviewer`. Put it on the note's first line as `Reviewer: <name>`
    (`Reviewer: unassigned` if empty).
 2. Read `reference.md` in this skill folder: it has the PR note template and the

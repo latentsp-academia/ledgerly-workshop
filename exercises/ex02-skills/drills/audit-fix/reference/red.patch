@@ -1,0 +1,13 @@
+diff --git a/src/ledgerly/api/routes_reports.py b/src/ledgerly/api/routes_reports.py
+index 6c55014..1593e9d 100644
+--- a/src/ledgerly/api/routes_reports.py
++++ b/src/ledgerly/api/routes_reports.py
+@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends
+ 
+ from ledgerly.api.deps import get_conn
+ from ledgerly.services.invoices import list_invoices
+-from ledgerly.services.reports import revenue_report
++from ledgerly.services.reports import revenue_report  # TODO(ADR-0001): move off the float report
+ 
+ router = APIRouter(prefix="/reports", tags=["reports"])
+ Conn = Annotated[sqlite3.Connection, Depends(get_conn)]

@@ -1,4 +1,4 @@
-"""Shared helpers for the LED-120 probes: find and parse docs/pr/LED-105.md."""
+"""Shared helpers for the LED-120 probes: find and parse the PR note in docs/pr/."""
 
 from __future__ import annotations
 
@@ -8,6 +8,11 @@ import subprocess
 from pathlib import Path
 
 NOTE = Path("docs/pr/LED-105.md")
+if not NOTE.exists():
+    # a prompt that never names the ticket (Step 5 evals) may still produce exactly one note
+    _notes = sorted(Path("docs/pr").glob("*.md")) if Path("docs/pr").is_dir() else []
+    if len(_notes) == 1:
+        NOTE = _notes[0]
 
 # house headings, in order (Ex 2 reference.md)
 SECTIONS = [

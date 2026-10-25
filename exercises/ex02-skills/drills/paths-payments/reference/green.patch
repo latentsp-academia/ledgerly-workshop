@@ -1,0 +1,38 @@
+diff --git a/src/ledgerly/payments/fx.py b/src/ledgerly/payments/fx.py
+index 7699e6e..0bf388c 100644
+--- a/src/ledgerly/payments/fx.py
++++ b/src/ledgerly/payments/fx.py
+@@ -17,6 +17,7 @@ DEFAULT_RATES_BP: Mapping[str, int] = {
+     "EUR": 9_200,
+     "ILS": 37_100,
+     "GBP": 7_900,
++    "CHF": 8_800,
+ }
+ 
+ 
+diff --git a/src/ledgerly/payments/money.py b/src/ledgerly/payments/money.py
+index ed5e2c1..9350cf5 100644
+--- a/src/ledgerly/payments/money.py
++++ b/src/ledgerly/payments/money.py
+@@ -4,7 +4,7 @@ from __future__ import annotations
+ 
+ from dataclasses import dataclass
+ 
+-SUPPORTED_CURRENCIES = frozenset({"USD", "EUR", "ILS", "GBP"})
++SUPPORTED_CURRENCIES = frozenset({"USD", "EUR", "ILS", "GBP", "CHF"})
+ 
+ 
+ class CurrencyMismatchError(ValueError):
+diff --git a/tests/test_money.py b/tests/test_money.py
+index 0ef70e8..c7626f0 100644
+--- a/tests/test_money.py
++++ b/tests/test_money.py
+@@ -30,3 +30,8 @@ def test_fx_convert_rounds_half_even() -> None:
+ def test_fx_same_currency_is_identity() -> None:
+     m = Money(123, "ILS")
+     assert convert(m, "ILS") is m
++
++
++def test_chf_round_trip() -> None:
++    back = convert(convert(Money(10_000, "USD"), "CHF"), "USD")
++    assert abs(back.cents - 10_000) <= 1

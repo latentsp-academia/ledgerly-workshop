@@ -148,7 +148,7 @@ PROFILES: Dict[str, List[Check]] = {
         ("disallowed-tools: blocks Edit (writes the PR note, never edits code)",
          lambda s: None if "Edit" in s.tools("disallowed-tools")
          else "allowed-tools only pre-approves; to forbid editing code, add disallowed-tools: Edit"),
-        ("arguments: named, and every name is used as $name in the body",
+        ("arguments: if declared, every name is used as $name in the body (Step 6d)",
          lambda s: _named_args(s)),
         ("dynamic context: at least one !`command` line",
          lambda s: None if DYNAMIC_RE.search(s.body) else "no !`…` line: the skill arrives empty instead of pre-filled"),
@@ -182,7 +182,7 @@ PROFILES: Dict[str, List[Check]] = {
 def _named_args(s: Skill) -> Optional[str]:
     names = [n for n in re.split(r"[\s,\[\]]+", s.fm.get("arguments", "")) if n]
     if not names:
-        return "no arguments: field: name the positions (e.g. [ticket, reviewer]) and use $ticket in the body"
+        return None  # optional: the field is Step 6d; without it, Claude Code appends ARGUMENTS anyway
     unused = [n for n in names if f"${n}" not in s.body]
     return ("declared but never used: " + ", ".join("$" + n for n in unused)) if unused else None
 

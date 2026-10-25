@@ -39,7 +39,7 @@ agent needs a hook (**Ex 3**).
 | step | what happens | checked by | ⏱️ |
 |---|---|---|---|
 | 0 · 🔴 **No skill** | LED-120: "write the PR note for LED-105". A plausible, generic note | `tools/check.sh led-120` → **RED ×3** (house sections, ADRs touched, honest verification). Haiku: RED 3/3 | 4 |
-| 1 · ✍️ **Author** | `ship-check`: SKILL.md + `reference.md` (template, path → ADR map) + `scripts/gates.py` | `skill_lint.py ship-check --profile ship-check` (18 static checks) | 7 |
+| 1 · ✍️ **Author** | `ship-check`: SKILL.md + `reference.md` (template, path → ADR map) + `scripts/gates.py` | `skill_lint.py ship-check --profile ship-check` (19 static checks) | 7 |
 | 2 · 🎯 **By name** | `/ship-check LED-105` | `check.sh led-120` → **GREEN**. Haiku: 3/3 | 3 |
 | 3 · 🪄 **Implicit** | (A) "make it reviewable", without naming the skill → must fire. (B) a plain question → must **not** fire | `check.sh trigger-implicit` · `check.sh trigger-quiet`. Haiku: fired 3/3, quiet 3/3 | 5 |
 | 4 · 🍴 **Worker** | `adr-audit`: `disallowed-tools: Write, Edit`, `context: fork`, `agent: Explore`, `model: haiku`, `effort: low`. Compare `/context` with and without the fork | `skill_lint.py adr-audit --profile adr-audit` + the `/context` table | 6 |
@@ -266,11 +266,27 @@ ex02-skills/
 ## 🧑‍🏫 Before class
 
 1. `tools/doctor.sh`.
-2. Record rates (implicit firing especially is probabilistic):
+2. Record rates with Haiku (implicit firing especially is probabilistic). About 15 min:
    ```bash
+   export MODEL=haiku
    tools/run_drill.sh led-120 none 3
+   tools/run_drill.sh led-120 exercises/ex02-skills/reference 3
    tools/run_drill.sh trigger-implicit exercises/ex02-skills/reference 3
    tools/run_drill.sh trigger-quiet exercises/ex02-skills/reference 3
+   ```
+   Step 6 (optional, about 40 min more, run it in the background):
+   ```bash
+   export MODEL=haiku
+   tools/run_drill.sh audit-fix allowed-only 3
+   tools/run_drill.sh audit-fix disallowed 3
+   tools/run_drill.sh release-implicit no-flag 3
+   tools/run_drill.sh release-implicit flag 3
+   tools/run_drill.sh release-implicit flag-hook 3
+   tools/run_drill.sh release-by-name exercises/ex02-skills/drills/release-implicit/variants/flag-hook 3
+   tools/run_drill.sh paths-payments none 3
+   tools/run_drill.sh paths-payments with-paths 3
+   tools/run_drill.sh paths-api exercises/ex02-skills/drills/paths-payments/variants/with-paths 3
+   tools/run_drill.sh ship-by-arg exercises/ex02-skills/reference 3
    ```
 3. Optional: numbers to show for Step 5:
    `python3 tools/skill_eval.py exercises/ex02-skills/evals/ship-check.json --variant exercises/ex02-skills/reference --runs 3 --baseline`
